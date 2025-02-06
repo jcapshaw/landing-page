@@ -10,6 +10,10 @@ const nextConfig = {
     return config;
   },
   output: 'standalone',
+  // Enable CSS support
+  cssModules: true,
+  // Configure CSS handling
+  webpack5: true,
 };
 
 export default nextConfig;

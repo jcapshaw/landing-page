@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import * as React from 'react';
+import type { FC } from 'react';
+const { useEffect, useState } = React;
 
 interface Prospect {
   id: string;
@@ -10,7 +12,7 @@ interface Prospect {
   nextFollowUp: string;
 }
 
-export default function HotProspects() {
+const HotProspects: FC = () => {
   const [prospects, setProspects] = useState<Prospect[]>([]);
 
   // TODO: Fetch real data from API
@@ -67,10 +69,12 @@ export default function HotProspects() {
         <div className="flex justify-between items-center">
           <span className="text-gray-600">Total Potential Value:</span>
           <span className="text-xl font-bold">
-            ${prospects.reduce((sum, p) => sum + p.potentialValue, 0).toLocaleString()}
+            ${prospects.reduce((sum: number, p: Prospect) => sum + p.potentialValue, 0).toLocaleString()}
           </span>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default HotProspects;
