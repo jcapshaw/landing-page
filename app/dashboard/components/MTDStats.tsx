@@ -19,8 +19,8 @@ export default function MTDStats() {
   useEffect(() => {
     // Simulated data for now
     setStats({
-      totalSales: 125000,
-      totalLeads: 45,
+      totalSales: 23,
+      totalLeads: 185,
       conversionRate: 15.5,
     });
   }, []);
@@ -30,8 +30,8 @@ export default function MTDStats() {
       <h2 className="text-xl font-semibold mb-4">Month to Date Stats</h2>
       <div className="space-y-4">
         <div>
-          <p className="text-gray-600">Total Sales</p>
-          <p className="text-2xl font-bold">${stats.totalSales.toLocaleString()}</p>
+          <p className="text-gray-600">Total Sold</p>
+          <p className="text-2xl font-bold">{stats.totalSales.toLocaleString()}</p>
         </div>
         <div>
           <p className="text-gray-600">Total Leads</p>

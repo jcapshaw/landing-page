@@ -1,78 +1,76 @@
 'use client';
 
 import * as React from 'react';
+import { useState, useEffect } from 'react';
 import type { FC } from 'react';
-const { useEffect, useState } = React;
-
-interface Prospect {
-  id: string;
-  name: string;
-  potentialValue: number;
-  probability: number;
-  nextFollowUp: string;
-}
+import { ProspectsTable } from '@/app/components/ProspectsTable';
+import { getActiveProspects, updateProspect, addNote, type Prospect } from '@/lib/prospects';
+import { Timestamp } from 'firebase/firestore';
 
 const HotProspects: FC = () => {
   const [prospects, setProspects] = useState<Prospect[]>([]);
+  const [currentUser, setCurrentUser] = useState<string>("Unknown User");
 
-  // TODO: Fetch real data from API
   useEffect(() => {
-    // Simulated data for now
-    setProspects([
-      {
-        id: '1',
-        name: 'ABC Corporation',
-        potentialValue: 75000,
-        probability: 80,
-        nextFollowUp: '2024-02-10',
-      },
-      {
-        id: '2',
-        name: 'XYZ Industries',
-        potentialValue: 120000,
-        probability: 65,
-        nextFollowUp: '2024-02-08',
-      },
-      {
-        id: '3',
-        name: 'Global Enterprises',
-        potentialValue: 95000,
-        probability: 75,
-        nextFollowUp: '2024-02-12',
-      },
-    ]);
+    const fetchProspects = async () => {
+      try {
+        const allProspects = await getActiveProspects();
+        // Sort by date (newest first) and take top 5
+        const sortedProspects = allProspects
+          .sort((a, b) => b.date.toMillis() - a.date.toMillis())
+          .slice(0, 5);
+        setProspects(sortedProspects);
+      } catch (error) {
+        console.error('Error fetching prospects:', error);
+      }
+    };
+
+    fetchProspects();
   }, []);
+
+  const handleEditClick = (prospect: Prospect) => {
+    // This is a placeholder for edit functionality
+    console.log('Edit clicked for prospect:', prospect);
+  };
+
+  const handleDispositionChange = async (id: string, disposition: string) => {
+    try {
+      await updateProspect(id, { disposition });
+      // Refresh prospects after update
+      const allProspects = await getActiveProspects();
+      const sortedProspects = allProspects
+        .sort((a, b) => b.date.toMillis() - a.date.toMillis())
+        .slice(0, 5);
+      setProspects(sortedProspects);
+    } catch (error) {
+      console.error('Error updating disposition:', error);
+    }
+  };
+
+  const handleAddNote = async (id: string, note: string) => {
+    try {
+      await addNote(id, note, currentUser);
+      // Refresh prospects after adding note
+      const allProspects = await getActiveProspects();
+      const sortedProspects = allProspects
+        .sort((a, b) => b.date.toMillis() - a.date.toMillis())
+        .slice(0, 5);
+      setProspects(sortedProspects);
+    } catch (error) {
+      console.error('Error adding note:', error);
+    }
+  };
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-4">Hot Prospects</h2>
-      <div className="space-y-4">
-        {prospects.map((prospect) => (
-          <div
-            key={prospect.id}
-            className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <div className="flex justify-between items-start mb-2">
-              <h3 className="font-semibold">{prospect.name}</h3>
-              <span className="text-green-600 font-medium">
-                ${prospect.potentialValue.toLocaleString()}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm text-gray-600">
-              <span>Probability: {prospect.probability}%</span>
-              <span>Follow-up: {new Date(prospect.nextFollowUp).toLocaleDateString()}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="mt-4 pt-4 border-t border-gray-200">
-        <div className="flex justify-between items-center">
-          <span className="text-gray-600">Total Potential Value:</span>
-          <span className="text-xl font-bold">
-            ${prospects.reduce((sum: number, p: Prospect) => sum + p.potentialValue, 0).toLocaleString()}
-          </span>
-        </div>
-      </div>
+      <h2 className="text-xl font-semibold mb-4">Recently Added Hot Prospects</h2>
+      <ProspectsTable
+        prospects={prospects}
+        onEditClick={handleEditClick}
+        onDispositionChange={handleDispositionChange}
+        onAddNote={handleAddNote}
+        currentUser={currentUser}
+      />
     </div>
   );
 };

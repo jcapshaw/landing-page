@@ -42,6 +42,7 @@ const vehicleSchema = z.object({
   hasPaintMatch: z.boolean().default(false),
   hasLeather: z.boolean().default(false),
   hasOther: z.boolean().default(false),
+  needsSmog: z.boolean().default(false),
   liftDescription: z.string().optional(),
   liftPrice: z.number().optional(),
   description: z.string().optional(),
@@ -113,6 +114,7 @@ export function AddVehicleForm({ onSubmit, onCancel }: AddVehicleFormProps) {
       hasPaintMatch: false,
       hasLeather: false,
       hasOther: false,
+      needsSmog: false,
       fuelType: "Gasoline",
       transmission: "Automatic",
       liftDescription: "",
@@ -286,20 +288,6 @@ export function AddVehicleForm({ onSubmit, onCancel }: AddVehicleFormProps) {
           {/* Basic Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Basic Information</h3>
-            
-            <FormField
-              control={form.control}
-              name="location"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Location</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter location" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <FormField
               control={form.control}
@@ -389,7 +377,56 @@ export function AddVehicleForm({ onSubmit, onCancel }: AddVehicleFormProps) {
           {/* Vehicle Details */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Vehicle Details</h3>
-            
+
+            <FormField
+              control={form.control}
+              name="vin"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>VIN</FormLabel>
+                  <div className="flex space-x-2">
+                    <FormControl>
+                      <Input
+                        placeholder="Enter 17-character VIN"
+                        maxLength={17}
+                        {...field}
+                      />
+                    </FormControl>
+                    <Button
+                      type="button"
+                      variant="default"
+                      onClick={handleDecodeVin}
+                      disabled={isDecoding}
+                      className="hover:bg-orange-500 hover:border-orange-500 transition-colors flex gap-2 items-center"
+                    >
+                      {isDecoding ? (
+                        <>
+                          <Truck className="h-4 w-4 animate-bounce" />
+                        </>
+                      ) : (
+                        "Decode"
+                      )}
+                    </Button>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Location</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter location" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="totalPrice"
@@ -423,41 +460,6 @@ export function AddVehicleForm({ onSubmit, onCancel }: AddVehicleFormProps) {
                       onChange={e => field.onChange(Number(e.target.value))}
                     />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="vin"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>VIN</FormLabel>
-                  <div className="flex space-x-2">
-                    <FormControl>
-                      <Input
-                        placeholder="Enter 17-character VIN"
-                        maxLength={17}
-                        {...field}
-                      />
-                    </FormControl>
-                    <Button
-                      type="button"
-                      variant="default"
-                      onClick={handleDecodeVin}
-                      disabled={isDecoding}
-                      className="hover:bg-orange-500 hover:border-orange-500 transition-colors flex gap-2 items-center"
-                    >
-                      {isDecoding ? (
-                        <>
-                          <Truck className="h-4 w-4 animate-bounce" />
-                        </>
-                      ) : (
-                        "Decode"
-                      )}
-                    </Button>
-                  </div>
                   <FormMessage />
                 </FormItem>
               )}
@@ -565,6 +567,29 @@ export function AddVehicleForm({ onSubmit, onCancel }: AddVehicleFormProps) {
                     </FormLabel>
                     <FormDescription>
                       Check if the vehicle has any dealer installed equipment.
+                    </FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="needsSmog"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>
+                      Needs SMOG
+                    </FormLabel>
+                    <FormDescription>
+                      Check if the vehicle needs SMOG certification.
                     </FormDescription>
                   </div>
                 </FormItem>

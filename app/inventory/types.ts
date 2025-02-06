@@ -38,6 +38,7 @@ export interface Vehicle {
       salesManagerName: string
       salespersonName: string
       dealNumber: string
+      dateSold: string
     }
   }
 
@@ -110,6 +111,9 @@ export interface Vehicle {
   // UI Date Fields
   dateAdded: string // Maps to metadata.createdAt
   lastStatusUpdate: string // Maps to statusData.updatedAt
+
+  // Vehicle Compliance
+  needsSmog?: boolean // Indicates if the vehicle needs smog certification
 }
 
 export interface User {

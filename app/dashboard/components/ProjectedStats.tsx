@@ -24,8 +24,8 @@ export default function ProjectedStats() {
     const daysRemaining = lastDay.getDate() - today.getDate();
     
     // Simulated data based on MTD performance
-    const mtdSales = 125000; // This should come from actual data
-    const mtdLeads = 45; // This should come from actual data
+    const mtdSales = 23; // This should come from actual data
+    const mtdLeads = 185; // This should come from actual data
     const daysPassed = today.getDate();
     
     const dailyAverage = mtdSales / daysPassed;
@@ -46,7 +46,7 @@ export default function ProjectedStats() {
       <div className="space-y-4">
         <div>
           <p className="text-gray-600">Projected Sales</p>
-          <p className="text-2xl font-bold">${Math.round(stats.projectedSales).toLocaleString()}</p>
+          <p className="text-2xl font-bold">{Math.round(stats.projectedSales).toLocaleString()}</p>
         </div>
         <div>
           <p className="text-gray-600">Projected Leads</p>
@@ -58,7 +58,7 @@ export default function ProjectedStats() {
         </div>
         <div>
           <p className="text-gray-600">Daily Average</p>
-          <p className="text-2xl font-bold">${Math.round(stats.dailyAverage).toLocaleString()}</p>
+          <p className="text-2xl font-bold">{Math.round(stats.dailyAverage).toLocaleString()}</p>
         </div>
       </div>
     </div>

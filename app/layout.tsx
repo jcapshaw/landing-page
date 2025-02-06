@@ -3,6 +3,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import type { PropsWithChildren } from "react";
 import NavbarWrapper from "./components/NavbarWrapper";
+import { AuthProvider } from "./components/AuthProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -15,8 +16,10 @@ export default function RootLayout({ children }: PropsWithChildren): React.React
   return (
     <html lang="en">
       <body className={inter.className}>
-        <NavbarWrapper />
-        {children}
+        <AuthProvider>
+          <NavbarWrapper />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

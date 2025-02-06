@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
@@ -14,8 +14,11 @@ import { LiftDetailsModal } from "./components/LiftDetailsModal"
 import { AddVehicleForm } from "./components/AddVehicleForm"
 import { InventoryTable } from "./components/InventoryTable"
 import { Vehicle } from "./types"
+import { addVehicle, updateVehicle, getAllVehicles } from "@/lib/vehicles"
+import { useAuth } from "../components/AuthProvider"
 
 export default function InventoryPage() {
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("")
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [showLiftModal, setShowLiftModal] = useState(false)
@@ -23,6 +26,22 @@ export default function InventoryPage() {
   const [showNewVehicleForm, setShowNewVehicleForm] = useState(false)
   const [selectedStatus, setSelectedStatus] = useState<Vehicle["status"] | "ALL">("ALL")
   const [selectedLocation, setSelectedLocation] = useState("ALL")
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const loadVehicles = async () => {
+      try {
+        const fetchedVehicles = await getAllVehicles();
+        setVehicles(fetchedVehicles);
+      } catch (error) {
+        console.error('Error loading vehicles:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadVehicles();
+  }, []);
 
   const locations = Array.from(new Set(vehicles.map(v => v.location))).sort()
 
@@ -40,7 +59,7 @@ export default function InventoryPage() {
     return matchesSearch && matchesStatus && matchesLocation
   })
 
-  const handleLiftDetailsSave = (vehicleId: string, data: {
+  const handleLiftDetailsSave = async (vehicleId: string, data: {
     liftDescription: string
     liftPrice: number
     hasLift: boolean
@@ -50,119 +69,147 @@ export default function InventoryPage() {
     hasLeather: boolean
     hasOther: boolean
   }) => {
-    const updatedVehicles = vehicles.map(vehicle =>
-      vehicle.id === vehicleId
-        ? {
-            ...vehicle,
-            additions: {
-              ...vehicle.additions,
-              lift: data.hasLift ? {
-                description: data.liftDescription,
-                price: data.liftPrice,
-                installed: true
-              } : undefined,
-              wheels: data.hasWheels ? {
-                description: "",
-                price: 0,
-                installed: false
-              } : undefined,
-              tires: data.hasTires ? {
-                description: "",
-                price: 0,
-                installed: false
-              } : undefined,
-              paintMatch: data.hasPaintMatch ? {
-                description: "",
-                price: 0,
-                completed: false
-              } : undefined,
-              leather: data.hasLeather ? {
-                description: "",
-                price: 0,
-                installed: false
-              } : undefined,
-              totalPrice: data.hasLift ? data.liftPrice : 0
-            }
-          }
-        : vehicle
-    );
-    setVehicles(updatedVehicles);
-    setShowLiftModal(false)
-    setSelectedVehicle(null)
+    if (!user) return;
+
+    try {
+      const vehicle = vehicles.find(v => v.id === vehicleId);
+      if (!vehicle) return;
+
+      const updatedVehicle = {
+        ...vehicle,
+        additions: {
+          ...vehicle.additions,
+          lift: data.hasLift ? {
+            description: data.liftDescription,
+            price: data.liftPrice,
+            installed: true
+          } : undefined,
+          wheels: data.hasWheels ? {
+            description: "",
+            price: 0,
+            installed: false
+          } : undefined,
+          tires: data.hasTires ? {
+            description: "",
+            price: 0,
+            installed: false
+          } : undefined,
+          paintMatch: data.hasPaintMatch ? {
+            description: "",
+            price: 0,
+            completed: false
+          } : undefined,
+          leather: data.hasLeather ? {
+            description: "",
+            price: 0,
+            installed: false
+          } : undefined,
+          totalPrice: data.hasLift ? data.liftPrice : 0
+        },
+        metadata: {
+          ...vehicle.metadata,
+          lastUpdated: new Date().toISOString(),
+          lastUpdatedBy: { uid: user.uid, name: user.displayName || 'Unknown' }
+        }
+      };
+
+      await updateVehicle(vehicleId, updatedVehicle);
+      const updatedVehicles = await getAllVehicles();
+      setVehicles(updatedVehicles);
+      setShowLiftModal(false);
+      setSelectedVehicle(null);
+    } catch (error) {
+      console.error('Error updating vehicle lift details:', error);
+      // You might want to show an error message to the user here
+    }
+  }
+
+  if (isLoading) {
+    return <div>Loading...</div>;
   }
 
   type VehicleFormData = Omit<Vehicle, 'id' | 'dateAdded' | 'lastStatusUpdate' | 'status' | 'statusData' | 'metadata' | 'searchIndex' | 'additions'>
   
-  const handleNewVehicleSubmit = (formData: VehicleFormData) => {
-    const now = new Date().toISOString()
-    const mockUser = { uid: "mock-user", name: "Mock User" } // Replace with actual user data
+  const handleNewVehicleSubmit = async (formData: VehicleFormData) => {
+    if (!user) return;
 
-    const vehicle: Vehicle = {
-      ...formData,
-      id: Date.now().toString(),
-      stock: "", // Initialize with empty stock number
-      totalPrice: formData.totalPrice || 0,
-      status: "AVAILABLE",
-      statusData: {
-        current: "Available",
-        updatedAt: now,
-        updatedBy: mockUser
-      },
-      additions: {
-        totalPrice: 0,
-        lift: undefined,
-        wheels: undefined,
-        tires: undefined,
-        paintMatch: undefined,
-        leather: undefined,
-        other: undefined
-      },
-      metadata: {
-        createdAt: now,
-        createdBy: mockUser,
-        lastUpdated: now,
-        lastUpdatedBy: mockUser
-      },
-      searchIndex: {
-        makeModel: `${formData.make} ${formData.model}`,
-        yearMakeModel: `${formData.year} ${formData.make} ${formData.model}`,
-        priceRange: getPriceRange(formData.totalPrice || 0)
-      },
-      dateAdded: now,
-      lastStatusUpdate: now,
-      hasLift: false,
-      hasWheels: false,
-      hasTires: false,
-      hasPaintMatch: false,
-      hasLeather: false,
-      hasOther: false
+    try {
+      const vehicle: Omit<Vehicle, 'id'> = {
+        ...formData,
+        stock: "", // Initialize with empty stock number
+        totalPrice: formData.totalPrice || 0,
+        status: "AVAILABLE",
+        statusData: {
+          current: "Available",
+          updatedAt: new Date().toISOString(),
+          updatedBy: { uid: user.uid, name: user.displayName || 'Unknown' }
+        },
+        additions: {
+          totalPrice: 0,
+          lift: undefined,
+          wheels: undefined,
+          tires: undefined,
+          paintMatch: undefined,
+          leather: undefined,
+          other: undefined
+        },
+        metadata: {
+          createdAt: new Date().toISOString(),
+          createdBy: { uid: user.uid, name: user.displayName || 'Unknown' },
+          lastUpdated: new Date().toISOString(),
+          lastUpdatedBy: { uid: user.uid, name: user.displayName || 'Unknown' }
+        },
+        searchIndex: {
+          makeModel: `${formData.make} ${formData.model}`,
+          yearMakeModel: `${formData.year} ${formData.make} ${formData.model}`,
+          priceRange: getPriceRange(formData.totalPrice || 0)
+        },
+        dateAdded: new Date().toISOString(),
+        lastStatusUpdate: new Date().toISOString(),
+        hasLift: false,
+        hasWheels: false,
+        hasTires: false,
+        hasPaintMatch: false,
+        hasLeather: false,
+        hasOther: false
+      }
+
+      await addVehicle(vehicle);
+      const updatedVehicles = await getAllVehicles();
+      setVehicles(updatedVehicles);
+      setShowNewVehicleForm(false);
+    } catch (error) {
+      console.error('Error adding vehicle:', error);
+      // You might want to show an error message to the user here
     }
-    setVehicles([...vehicles, vehicle])
-    setShowNewVehicleForm(false)
   }
 
-  const handleVehicleUpdate = (updatedVehicle: Vehicle) => {
-    const now = new Date().toISOString()
-    const mockUser = { uid: "mock-user", name: "Mock User" } // Replace with actual user data
+  const handleVehicleUpdate = async (updatedVehicle: Vehicle) => {
+    if (!user) return;
 
-    const vehicle: Vehicle = {
-      ...updatedVehicle,
-      statusData: {
-        ...updatedVehicle.statusData,
-        updatedAt: now,
-        updatedBy: mockUser
-      },
-      metadata: {
-        ...updatedVehicle.metadata,
-        lastUpdated: now,
-        lastUpdatedBy: mockUser
-      },
-      lastStatusUpdate: now
+    try {
+      const vehicle: Vehicle = {
+        ...updatedVehicle,
+        statusData: {
+          ...updatedVehicle.statusData,
+          updatedAt: new Date().toISOString(),
+          updatedBy: { uid: user.uid, name: user.displayName || 'Unknown' }
+        },
+        metadata: {
+          ...updatedVehicle.metadata,
+          lastUpdated: new Date().toISOString(),
+          lastUpdatedBy: { uid: user.uid, name: user.displayName || 'Unknown' }
+        },
+        lastStatusUpdate: new Date().toISOString()
+      }
+
+      await updateVehicle(vehicle.id, vehicle);
+      const updatedVehicles = await getAllVehicles();
+      setVehicles(updatedVehicles);
+    } catch (error) {
+      console.error('Error updating vehicle:', error);
+      // You might want to show an error message to the user here
     }
-
-    setVehicles(vehicles.map(v =>
-      v.id === vehicle.id ? vehicle : v
-    ))
   }
 
   // Helper function to determine price range bucket

@@ -32,6 +32,7 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
     salesManagerName: string
     salespersonName: string
     dealNumber: string
+    dateSold: string
   }) => {
     if (selectedVehicle) {
       const now = new Date().toISOString()
@@ -106,6 +107,7 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
         <thead className="bg-gray-50">
           <tr>
             <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Location</th>
+            <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Stock</th>
             <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Vehicle</th>
             <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Specs</th>
             <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Color</th>
@@ -113,17 +115,20 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
             <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Adds?</th>
             <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Status</th>
             <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Dates</th>
-            <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {vehicles.map((vehicle) => (
             <tr
               key={vehicle.id}
-              className={vehicle.status === "DEPOSIT" ? "bg-yellow-50" : ""}
+              className={`${vehicle.status === "DEPOSIT" ? "bg-yellow-200" : ""} hover:bg-gray-50 transition-colors cursor-pointer`}
+              onClick={() => handleEdit(vehicle)}
             >
               <td className="px-4 py-2 whitespace-nowrap text-xs text-center">
                 {vehicle.location}
+              </td>
+              <td className="px-4 py-2 whitespace-nowrap text-xs text-center">
+                {vehicle.stock}
               </td>
               <td className="px-4 py-2 whitespace-nowrap text-center">
                 <div className="text-xs">
@@ -150,9 +155,9 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
                   <div>{vehicle.mileage.toLocaleString()} miles</div>
                 </div>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-6 py-4 whitespace-nowrap text-center">
                 <div className="text-sm">
-                  <div>{vehicle.additions?.lift ? "ADDS" : "No"}</div>
+                  <div>{vehicle.additions?.lift ? "YES" : "No"}</div>
                   {vehicle.additions?.lift && (
                     <>
                       <div className="text-xs text-gray-600">
@@ -168,7 +173,7 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
                   )}
                 </div>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-6 py-4 whitespace-nowrap text-center">
                 <Select
                   value={vehicle.status}
                   onValueChange={(value: Vehicle["status"]) => {
@@ -207,31 +212,11 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
                 </Select>
               </td>
               <td className="px-6 py-4">
-                <div className="text-sm">
-                  <div>Added: {new Date(vehicle.dateAdded).toLocaleDateString()}</div>
+                <div className="text-sm text-center">
+                  <div>Added: {new Date(vehicle.dateAdded).toLocaleDateString('en-US', {month: '2-digit', day: '2-digit', year: '2-digit'})}</div>
                   <div className="text-gray-500">
-                    Last Update: {new Date(vehicle.lastStatusUpdate).toLocaleDateString()}
+                    Last Update: {new Date(vehicle.lastStatusUpdate).toLocaleDateString('en-US', {month: '2-digit', day: '2-digit', year: '2-digit'})}
                   </div>
-                </div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className="flex gap-2">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className="text-xs h-7 px-2"
-                    onClick={() => handleEdit(vehicle)}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-xs h-7 px-2"
-                    onClick={() => onLiftEdit(vehicle)}
-                  >
-                    {vehicle.hasLift ? "Edit Adds" : "Add"}
-                  </Button>
                 </div>
               </td>
             </tr>
@@ -262,6 +247,7 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
         }}
         vehicle={selectedVehicle}
         onSubmit={onVehicleUpdate}
+        onLiftEdit={onLiftEdit}
       />
     </div>
   )

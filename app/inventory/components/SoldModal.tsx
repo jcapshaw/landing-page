@@ -27,15 +27,15 @@ interface SoldModalProps {
     salesManagerName: string
     salespersonName: string
     dealNumber: string
+    dateSold: string
   }) => void
 }
 
-// Mock data for dropdowns - replace with actual data from your backend
 const deskManagers = [
+  "Michael Johnson",
+  "Sarah Williams",
   "John Smith",
-  "Jane Doe",
-  "Mike Johnson",
-  "Sarah Williams"
+  "Jessica Brown"
 ]
 
 const salesManagers = [
@@ -59,6 +59,7 @@ export function SoldModal({ isOpen, onClose, onConfirm }: SoldModalProps) {
     salesManagerName: "",
     salespersonName: "",
     dealNumber: "",
+    dateSold: "",
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -79,6 +80,9 @@ export function SoldModal({ isOpen, onClose, onConfirm }: SoldModalProps) {
     }
     if (!formData.dealNumber.trim()) {
       newErrors.dealNumber = "Deal Number is required"
+    }
+    if (!formData.dateSold) {
+      newErrors.dateSold = "Date Sold is required"
     }
 
     setErrors(newErrors)
@@ -109,6 +113,19 @@ export function SoldModal({ isOpen, onClose, onConfirm }: SoldModalProps) {
             />
             {errors.locationSold && (
               <span className="text-xs text-red-500">{errors.locationSold}</span>
+            )}
+          </div>
+          <div className="grid gap-2">
+            <Input
+              type="date"
+              value={formData.dateSold}
+              onChange={(e) =>
+                setFormData({ ...formData, dateSold: e.target.value })
+              }
+              className={errors.dateSold ? "border-red-500" : ""}
+            />
+            {errors.dateSold && (
+              <span className="text-xs text-red-500">{errors.dateSold}</span>
             )}
           </div>
           <div className="grid gap-2">
@@ -201,7 +218,12 @@ export function SoldModal({ isOpen, onClose, onConfirm }: SoldModalProps) {
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit}>Confirm Sale</Button>
+          <Button 
+            onClick={handleSubmit}
+            className="bg-green-600 hover:bg-green-500 text-white"
+          >
+            Confirm Sale
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

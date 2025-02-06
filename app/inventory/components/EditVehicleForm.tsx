@@ -43,6 +43,7 @@ const vehicleSchema = z.object({
   hasPaintMatch: z.boolean().default(false),
   hasLeather: z.boolean().default(false),
   hasOther: z.boolean().default(false),
+  needsSmog: z.boolean().default(false),
   liftDescription: z.string().optional(),
   liftPrice: z.number().optional(),
   description: z.string().optional(),
@@ -89,9 +90,10 @@ interface EditVehicleFormProps {
   vehicle: Vehicle
   onSubmit: (data: VehicleFormData) => void
   onCancel: () => void
+  onLiftEdit: () => void
 }
 
-export function EditVehicleForm({ vehicle, onSubmit, onCancel }: EditVehicleFormProps) {
+export function EditVehicleForm({ vehicle, onSubmit, onCancel, onLiftEdit }: EditVehicleFormProps) {
   const [isDecoding, setIsDecoding] = useState(false)
   const [isLiftModalOpen, setIsLiftModalOpen] = useState(false)
   const [liftDetails, setLiftDetails] = useState({
@@ -128,6 +130,7 @@ export function EditVehicleForm({ vehicle, onSubmit, onCancel }: EditVehicleForm
       hasPaintMatch: vehicle.hasPaintMatch,
       hasLeather: vehicle.hasLeather,
       hasOther: vehicle.hasOther,
+      needsSmog: vehicle.needsSmog || false,
       liftDescription: vehicle.liftDescription,
       liftPrice: vehicle.liftPrice,
       additions: vehicle.additions
@@ -298,20 +301,6 @@ export function EditVehicleForm({ vehicle, onSubmit, onCancel }: EditVehicleForm
             
             <FormField
               control={form.control}
-              name="location"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Location</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter location" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="stock"
               render={({ field }) => (
                 <FormItem>
@@ -398,7 +387,56 @@ export function EditVehicleForm({ vehicle, onSubmit, onCancel }: EditVehicleForm
           {/* Vehicle Details */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Vehicle Details</h3>
-            
+
+            <FormField
+              control={form.control}
+              name="vin"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>VIN</FormLabel>
+                  <div className="flex space-x-2">
+                    <FormControl>
+                      <Input
+                        placeholder="Enter 17-character VIN"
+                        maxLength={17}
+                        {...field}
+                      />
+                    </FormControl>
+                    <Button
+                      type="button"
+                      variant="default"
+                      onClick={handleDecodeVin}
+                      disabled={isDecoding}
+                      className="hover:bg-orange-500 hover:border-orange-500 transition-colors flex gap-2 items-center"
+                    >
+                      {isDecoding ? (
+                        <>
+                          <Truck className="h-4 w-4 animate-bounce" />
+                        </>
+                      ) : (
+                        "Decode"
+                      )}
+                    </Button>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Location</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter location" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="totalPrice"
@@ -432,41 +470,6 @@ export function EditVehicleForm({ vehicle, onSubmit, onCancel }: EditVehicleForm
                       onChange={e => field.onChange(Number(e.target.value))}
                     />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="vin"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>VIN</FormLabel>
-                  <div className="flex space-x-2">
-                    <FormControl>
-                      <Input
-                        placeholder="Enter 17-character VIN"
-                        maxLength={17}
-                        {...field}
-                      />
-                    </FormControl>
-                    <Button
-                      type="button"
-                      variant="default"
-                      onClick={handleDecodeVin}
-                      disabled={isDecoding}
-                      className="hover:bg-orange-500 hover:border-orange-500 transition-colors flex gap-2 items-center"
-                    >
-                      {isDecoding ? (
-                        <>
-                          <Truck className="h-4 w-4 animate-bounce" />
-                        </>
-                      ) : (
-                        "Decode"
-                      )}
-                    </Button>
-                  </div>
                   <FormMessage />
                 </FormItem>
               )}
@@ -561,22 +564,32 @@ export function EditVehicleForm({ vehicle, onSubmit, onCancel }: EditVehicleForm
               control={form.control}
               name="hasLift"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={handleHasLiftChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>
-                      Addendum
-                    </FormLabel>
-                    <FormDescription>
-                      Check if the vehicle has any dealer installed equipment.
-                    </FormDescription>
-                  </div>
-                </FormItem>
+                <div className="flex items-start gap-4">
+                  <FormItem className="flex-1 flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={handleHasLiftChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        Addendum
+                      </FormLabel>
+                      <FormDescription>
+                        Check if the vehicle has any dealer installed equipment.
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={onLiftEdit}
+                    className="mt-4"
+                  >
+                    {vehicle.hasLift ? "Edit Adds" : "Add Equipment"}
+                  </Button>
+                </div>
               )}
             />
           </div>
