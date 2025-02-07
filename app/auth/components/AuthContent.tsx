@@ -13,7 +13,7 @@ export default function AuthContent() {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         // If user is authenticated, redirect to daily-log
-        router.push('/daily-log');
+        router.push("/dashboard");
       } else {
         setLoading(false);
       }
@@ -23,7 +23,11 @@ export default function AuthContent() {
   }, [router]);
 
   if (loading) {
-    return <div className="h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
   }
 
   return (
