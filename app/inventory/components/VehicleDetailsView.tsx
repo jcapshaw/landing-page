@@ -4,15 +4,43 @@ import { Vehicle } from "../types"
 
 interface VehicleDetailsViewProps {
   vehicle: Vehicle
+  depositDetails?: {
+    locationSold: string
+    deskManagerName: string
+    dealNumber: string
+    depositAmount: number
+  }
 }
 
-export function VehicleDetailsView({ vehicle }: VehicleDetailsViewProps) {
+export function VehicleDetailsView({ vehicle, depositDetails }: VehicleDetailsViewProps) {
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {depositDetails && (
+        <div className="border rounded-lg p-4 mb-4 bg-white shadow-sm">
+          <h3 className="text-lg font-semibold mb-3">Deposit Information</h3>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="font-medium">Location Sold:</span>
+              <p className="text-gray-600">{depositDetails.locationSold}</p>
+            </div>
+            <div>
+              <span className="font-medium">Desk Manager:</span>
+              <p className="text-gray-600">{depositDetails.deskManagerName}</p>
+            </div>
+            <div>
+              <span className="font-medium">Deal Number:</span>
+              <p className="text-gray-600">{depositDetails.dealNumber}</p>
+            </div>
+            <div>
+              <span className="font-medium">Deposit Amount:</span>
+              <p className="text-gray-600">${depositDetails.depositAmount.toLocaleString()}</p>
+            </div>
+          </div>
+        </div>
+      )}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
         {/* Basic Information */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Basic Information</h3>
           <div className="space-y-2">
             <div>
               <span className="font-medium">Stock Number:</span>
@@ -43,7 +71,6 @@ export function VehicleDetailsView({ vehicle }: VehicleDetailsViewProps) {
 
         {/* Vehicle Details */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Vehicle Details</h3>
           <div className="space-y-2">
             <div>
               <span className="font-medium">VIN:</span>
@@ -76,9 +103,55 @@ export function VehicleDetailsView({ vehicle }: VehicleDetailsViewProps) {
           </div>
         </div>
 
+        {/* Dates */}
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <div>
+              <span className="font-medium">Date Added:</span>
+              <p className="text-gray-600">
+                {(() => {
+                  try {
+                    const date = new Date(vehicle.dateAdded);
+                    return date.toLocaleString('en-US', {
+                      year: '2-digit',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false
+                    });
+                  } catch (error) {
+                    return 'Invalid Date';
+                  }
+                })()}
+              </p>
+            </div>
+            <div>
+              <span className="font-medium">Last Status Update:</span>
+              <p className="text-gray-600">
+                {(() => {
+                  try {
+                    const date = new Date(vehicle.lastStatusUpdate);
+                    return date.toLocaleString('en-US', {
+                      year: '2-digit',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false
+                    });
+                  } catch (error) {
+                    return 'Invalid Date';
+                  }
+                })()}
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Additional Details */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Additional Details</h3>
+          <h3 className="text-base font-semibold">Additional Details</h3>
           <div className="space-y-2">
             <div>
               <span className="font-medium">Description:</span>
@@ -86,18 +159,20 @@ export function VehicleDetailsView({ vehicle }: VehicleDetailsViewProps) {
             </div>
             <div>
               <span className="font-medium">Addendum:</span>
-              <p className="text-gray-600">{vehicle.hasLift ? "Yes" : "No"}</p>
-              {vehicle.hasLift && (
+              <p className="text-gray-600">{vehicle.hasLift || vehicle.hasWheels || vehicle.hasTires || vehicle.hasPaintMatch || vehicle.hasLeather || vehicle.hasOther ? "Yes" : "No"}</p>
+              {(vehicle.hasLift || vehicle.hasWheels || vehicle.hasTires || vehicle.hasPaintMatch || vehicle.hasLeather || vehicle.hasOther) && (
                 <div className="pl-4 space-y-1 text-sm text-gray-600">
-                  {vehicle.additions?.lift && (
-                    <p>Lift: {vehicle.additions.lift.description}</p>
+                  {/* Display lift description if available */}
+                  {vehicle.liftDescription && (
+                    <p>Lift: {vehicle.liftDescription}</p>
                   )}
-                  {vehicle.additions?.wheels && <p>• Wheels</p>}
-                  {vehicle.additions?.tires && <p>• Tires</p>}
-                  {vehicle.additions?.paintMatch && <p>• Paint Match</p>}
-                  {vehicle.additions?.leather && <p>• Leather</p>}
-                  {vehicle.additions?.other && vehicle.additions.other.length > 0 && <p>• Other</p>}
-                  <p className="font-medium">Total Addendum: ${vehicle.additions?.totalPrice.toLocaleString()}</p>
+                  {/* Display other additions based on boolean flags */}
+                  {vehicle.hasWheels && <p>• Wheels</p>}
+                  {vehicle.hasTires && <p>• Tires</p>}
+                  {vehicle.hasPaintMatch && <p>• Paint Match</p>}
+                  {vehicle.hasLeather && <p>• Leather</p>}
+                  {vehicle.hasOther && <p>• Other</p>}
+                  <p className="font-medium">Total Addendum: ${(vehicle.additions?.totalPrice || vehicle.addsPrice || 0).toLocaleString()}</p>
                 </div>
               )}
             </div>

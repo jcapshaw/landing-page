@@ -1,9 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
-import { 
+import { Vehicle } from "@/app/inventory/types"
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -17,23 +17,89 @@ interface LiftDetailsModalProps {
   onClose: () => void
   onSave: (data: {
     liftDescription: string
-    liftPrice: number
     hasLift: boolean
     hasWheels: boolean
     hasTires: boolean
     hasPaintMatch: boolean
     hasLeather: boolean
     hasOther: boolean
+    addsPrice: number
+    additions: {
+      lift?: {
+        description: string
+        price: number
+        installed: boolean
+      }
+      wheels?: {
+        description: string
+        price: number
+        installed: boolean
+      }
+      tires?: {
+        description: string
+        price: number
+        installed: boolean
+      }
+      paintMatch?: {
+        description: string
+        price: number
+        completed: boolean
+      }
+      leather?: {
+        description: string
+        price: number
+        installed: boolean
+      }
+      other?: Array<{
+        description: string
+        price: number
+        completed: boolean
+      }>
+      totalPrice: number
+    }
   }) => void
   initialData?: {
     liftDescription?: string
-    liftPrice?: number
     hasLift?: boolean
     hasWheels?: boolean
     hasTires?: boolean
     hasPaintMatch?: boolean
     hasLeather?: boolean
     hasOther?: boolean
+    addsPrice?: number
+    additions?: {
+      lift?: {
+        description: string
+        price: number
+        installed: boolean
+      }
+      wheels?: {
+        description: string
+        price: number
+        installed: boolean
+      }
+      tires?: {
+        description: string
+        price: number
+        installed: boolean
+      }
+      paintMatch?: {
+        description: string
+        price: number
+        completed: boolean
+      }
+      leather?: {
+        description: string
+        price: number
+        installed: boolean
+      }
+      other?: Array<{
+        description: string
+        price: number
+        completed: boolean
+      }>
+      totalPrice: number
+    }
   }
 }
 
@@ -43,37 +109,51 @@ export function LiftDetailsModal({
   onSave,
   initialData
 }: LiftDetailsModalProps) {
-  const [liftDescription, setLiftDescription] = useState("")
-  const [liftPrice, setLiftPrice] = useState(0)
-  const [hasLift, setHasLift] = useState(false)
-  const [hasWheels, setHasWheels] = useState(false)
-  const [hasTires, setHasTires] = useState(false)
-  const [hasPaintMatch, setHasPaintMatch] = useState(false)
-  const [hasLeather, setHasLeather] = useState(false)
-  const [hasOther, setHasOther] = useState(false)
+  const [liftDescription, setLiftDescription] = useState<string>("")
+  const [hasLift, setHasLift] = useState<boolean>(false)
+  const [hasWheels, setHasWheels] = useState<boolean>(false)
+  const [hasTires, setHasTires] = useState<boolean>(false)
+  const [hasPaintMatch, setHasPaintMatch] = useState<boolean>(false)
+  const [hasLeather, setHasLeather] = useState<boolean>(false)
+  const [hasOther, setHasOther] = useState<boolean>(false)
+  const [addsPrice, setAddsPrice] = useState<number>(0)
 
   useEffect(() => {
     if (initialData) {
-      setLiftDescription(initialData.liftDescription || "")
-      setLiftPrice(initialData.liftPrice || 0)
-      setHasLift(initialData.hasLift || false)
-      setHasWheels(initialData.hasWheels || false)
-      setHasTires(initialData.hasTires || false)
-      setHasPaintMatch(initialData.hasPaintMatch || false)
-      setHasLeather(initialData.hasLeather || false)
-      setHasOther(initialData.hasOther || false)
+      // Initialize from additions structure if available
+      if (initialData.additions) {
+        const { additions } = initialData
+        setLiftDescription(additions.lift?.description || "")
+        setHasLift(!!additions.lift)
+        setHasWheels(!!additions.wheels)
+        setHasTires(!!additions.tires)
+        setHasPaintMatch(!!additions.paintMatch)
+        setHasLeather(!!additions.leather)
+        setHasOther(!!additions.other)
+        setAddsPrice(additions.totalPrice || 0)
+      } else {
+        // Fallback to legacy structure
+        setLiftDescription(initialData.liftDescription || "")
+        setHasLift(initialData.hasLift || false)
+        setHasWheels(initialData.hasWheels || false)
+        setHasTires(initialData.hasTires || false)
+        setHasPaintMatch(initialData.hasPaintMatch || false)
+        setHasLeather(initialData.hasLeather || false)
+        setHasOther(initialData.hasOther || false)
+        setAddsPrice(initialData.addsPrice || 0)
+      }
     }
   }, [initialData])
 
   const resetForm = () => {
     setLiftDescription("")
-    setLiftPrice(0)
     setHasLift(false)
     setHasWheels(false)
     setHasTires(false)
     setHasPaintMatch(false)
     setHasLeather(false)
     setHasOther(false)
+    setAddsPrice(0)
   }
 
   useEffect(() => {
@@ -83,15 +163,66 @@ export function LiftDetailsModal({
   }, [isOpen])
 
   const handleSave = () => {
+    // Calculate total price from all additions
+    const totalPrice = addsPrice || 0
+
+    // Create the additions data structure with clean data (no undefined values)
+    const additionsData: Vehicle['additions'] = {
+      totalPrice,
+      ...(hasLift && {
+        lift: {
+          description: liftDescription,
+          price: addsPrice,
+          installed: true
+        }
+      }),
+      ...(hasWheels && {
+        wheels: {
+          description: "Custom Wheels",
+          price: addsPrice / (hasLift ? 2 : 1),
+          installed: true
+        }
+      }),
+      ...(hasTires && {
+        tires: {
+          description: "Custom Tires",
+          price: addsPrice / (hasLift ? 2 : 1),
+          installed: true
+        }
+      }),
+      ...(hasPaintMatch && {
+        paintMatch: {
+          description: "Paint Match",
+          price: addsPrice / (hasLift ? 2 : 1),
+          completed: true
+        }
+      }),
+      ...(hasLeather && {
+        leather: {
+          description: "Leather Interior",
+          price: addsPrice / (hasLift ? 2 : 1),
+          installed: true
+        }
+      }),
+      ...(hasOther && {
+        other: [{
+          description: "Other Modifications",
+          price: addsPrice / (hasLift ? 2 : 1),
+          completed: true
+        }]
+      })
+    }
+
     onSave({
       liftDescription,
-      liftPrice,
       hasLift,
       hasWheels,
       hasTires,
       hasPaintMatch,
       hasLeather,
-      hasOther
+      hasOther,
+      addsPrice: totalPrice,
+      additions: additionsData
     })
     onClose()
   }
@@ -108,42 +239,46 @@ export function LiftDetailsModal({
               <Checkbox
                 id="hasLift"
                 checked={hasLift}
-                onCheckedChange={(checked) => setHasLift(checked as boolean)}
+                onCheckedChange={(checked: boolean) => setHasLift(checked)}
               />
               <label htmlFor="hasLift" className="text-sm font-medium">
                 Lift
               </label>
             </div>
+
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="hasWheels"
                 checked={hasWheels}
-                onCheckedChange={(checked) => setHasWheels(checked as boolean)}
+                onCheckedChange={(checked: boolean) => setHasWheels(checked)}
               />
               <label htmlFor="hasWheels" className="text-sm font-medium">
                 Wheels
               </label>
             </div>
+
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="hasTires"
                 checked={hasTires}
-                onCheckedChange={(checked) => setHasTires(checked as boolean)}
+                onCheckedChange={(checked: boolean) => setHasTires(checked)}
               />
               <label htmlFor="hasTires" className="text-sm font-medium">
                 Tires
               </label>
             </div>
+
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="hasPaintMatch"
                 checked={hasPaintMatch}
-                onCheckedChange={(checked) => setHasPaintMatch(checked as boolean)}
+                onCheckedChange={(checked: boolean) => setHasPaintMatch(checked)}
               />
               <label htmlFor="hasPaintMatch" className="text-sm font-medium">
                 Paint Match
               </label>
             </div>
+
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="hasLeather"
@@ -154,6 +289,7 @@ export function LiftDetailsModal({
                 Leather
               </label>
             </div>
+
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="hasOther"
@@ -178,14 +314,17 @@ export function LiftDetailsModal({
             />
           </div>
           <div className="grid gap-2">
-            <label htmlFor="liftPrice" className="text-sm font-medium">
-              Price
+            <label htmlFor="addsPrice" className="text-sm font-medium">
+              Adds Price
             </label>
-            <Input
-              id="liftPrice"
+            <input
               type="number"
-              value={liftPrice}
-              onChange={(e) => setLiftPrice(Number(e.target.value))}
+              id="addsPrice"
+              className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm"
+              value={addsPrice}
+              onChange={(e) => setAddsPrice(Number(e.target.value))}
+              min="0"
+              step="0.01"
               placeholder="Enter price..."
             />
           </div>

@@ -21,13 +21,13 @@ export function AddVehicleForm({ onSubmit, onCancel }: AddVehicleFormProps) {
   const [isLiftModalOpen, setIsLiftModalOpen] = useState(false)
   const [liftDetails, setLiftDetails] = useState({
     liftDescription: "",
-    liftPrice: 0,
     hasLift: false,
     hasWheels: false,
     hasTires: false,
     hasPaintMatch: false,
     hasLeather: false,
-    hasOther: false
+    hasOther: false,
+    addsPrice: 0
   })
 
   const form = useForm<VehicleFormData>({
@@ -54,7 +54,6 @@ export function AddVehicleForm({ onSubmit, onCancel }: AddVehicleFormProps) {
       hasOther: false,
       needsSmog: false,
       liftDescription: "",
-      liftPrice: 0,
       description: "",
       additions: {
         totalPrice: 0
@@ -64,19 +63,18 @@ export function AddVehicleForm({ onSubmit, onCancel }: AddVehicleFormProps) {
 
   const handleLiftDetailsSubmit = (data: {
     liftDescription: string
-    liftPrice: number
     hasLift: boolean
     hasWheels: boolean
     hasTires: boolean
     hasPaintMatch: boolean
     hasLeather: boolean
     hasOther: boolean
+    addsPrice: number
   }) => {
     setLiftDetails(data)
     
     // Set the basic lift fields
     form.setValue("liftDescription", data.liftDescription)
-    form.setValue("liftPrice", data.liftPrice)
     form.setValue("hasLift", data.hasLift)
     form.setValue("hasWheels", data.hasWheels)
     form.setValue("hasTires", data.hasTires)
@@ -84,15 +82,15 @@ export function AddVehicleForm({ onSubmit, onCancel }: AddVehicleFormProps) {
     form.setValue("hasLeather", data.hasLeather)
     form.setValue("hasOther", data.hasOther)
 
-    // Set up the additions object with only selected addendums
+    // Set up the additions object with the total price
     const additions: any = {
-      totalPrice: data.liftPrice // Currently only including lift price
+      totalPrice: data.addsPrice
     }
     
+    // Add selected modifications with their descriptions
     if (data.hasLift) {
       additions.lift = {
         description: data.liftDescription,
-        price: data.liftPrice,
         installed: true
       }
     }
@@ -100,7 +98,6 @@ export function AddVehicleForm({ onSubmit, onCancel }: AddVehicleFormProps) {
     if (data.hasWheels) {
       additions.wheels = {
         description: "Custom Wheels",
-        price: 0,
         installed: true
       }
     }
@@ -108,7 +105,6 @@ export function AddVehicleForm({ onSubmit, onCancel }: AddVehicleFormProps) {
     if (data.hasTires) {
       additions.tires = {
         description: "Custom Tires",
-        price: 0,
         installed: true
       }
     }
@@ -116,7 +112,6 @@ export function AddVehicleForm({ onSubmit, onCancel }: AddVehicleFormProps) {
     if (data.hasPaintMatch) {
       additions.paintMatch = {
         description: "Paint Match",
-        price: 0,
         completed: true
       }
     }
@@ -124,7 +119,6 @@ export function AddVehicleForm({ onSubmit, onCancel }: AddVehicleFormProps) {
     if (data.hasLeather) {
       additions.leather = {
         description: "Leather Interior",
-        price: 0,
         installed: true
       }
     }
@@ -132,7 +126,6 @@ export function AddVehicleForm({ onSubmit, onCancel }: AddVehicleFormProps) {
     if (data.hasOther) {
       additions.other = [{
         description: "Other Modifications",
-        price: 0,
         completed: true
       }]
     }
@@ -146,7 +139,6 @@ export function AddVehicleForm({ onSubmit, onCancel }: AddVehicleFormProps) {
     } else {
       // Reset all addendum-related fields
       form.setValue("liftDescription", "")
-      form.setValue("liftPrice", 0)
       form.setValue("hasWheels", false)
       form.setValue("hasTires", false)
       form.setValue("hasPaintMatch", false)
@@ -166,13 +158,13 @@ export function AddVehicleForm({ onSubmit, onCancel }: AddVehicleFormProps) {
       
       setLiftDetails({
         liftDescription: "",
-        liftPrice: 0,
         hasLift: false,
         hasWheels: false,
         hasTires: false,
         hasPaintMatch: false,
         hasLeather: false,
-        hasOther: false
+        hasOther: false,
+        addsPrice: 0
       })
     }
   }

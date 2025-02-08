@@ -86,6 +86,7 @@ export interface Vehicle {
   hasOther: boolean
   liftDescription?: string
   liftPrice?: number
+  addsPrice?: number
 
   // Metadata
   metadata: {

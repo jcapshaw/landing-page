@@ -82,7 +82,8 @@ export function EditVehicleModal({
           <EditVehicleForm
             vehicle={vehicle}
             onSubmit={(data) => {
-              onSubmit({
+              // Clean up the data structure
+              const cleanData = {
                 ...vehicle,
                 ...data,
                 id: vehicle.id,
@@ -90,7 +91,24 @@ export function EditVehicleModal({
                 searchIndex: vehicle.searchIndex,
                 dateAdded: vehicle.dateAdded,
                 lastStatusUpdate: vehicle.lastStatusUpdate,
-              })
+              }
+
+              // Clean up additions object to remove undefined values
+              if (cleanData.additions) {
+                const additions = {
+                  totalPrice: cleanData.additions.totalPrice || 0,
+                  lift: cleanData.hasLift && cleanData.additions.lift ? cleanData.additions.lift : undefined,
+                  wheels: cleanData.hasWheels && cleanData.additions.wheels ? cleanData.additions.wheels : undefined,
+                  tires: cleanData.hasTires && cleanData.additions.tires ? cleanData.additions.tires : undefined,
+                  paintMatch: cleanData.hasPaintMatch && cleanData.additions.paintMatch ? cleanData.additions.paintMatch : undefined,
+                  leather: cleanData.hasLeather && cleanData.additions.leather ? cleanData.additions.leather : undefined,
+                  other: cleanData.hasOther && cleanData.additions.other ? cleanData.additions.other : undefined
+                }
+
+                cleanData.additions = additions
+              }
+
+              onSubmit(cleanData)
               handleClose()
             }}
             onCancel={handleClose}
@@ -98,7 +116,10 @@ export function EditVehicleModal({
           />
         ) : (
           <>
-            <VehicleDetailsView vehicle={vehicle} />
+            <VehicleDetailsView
+              vehicle={vehicle}
+              depositDetails={vehicle.status === "DEPOSIT" ? vehicle.statusData?.depositDetails : undefined}
+            />
             <DialogFooter className="mt-6">
               <Button variant="outline" onClick={handleClose}>
                 Close

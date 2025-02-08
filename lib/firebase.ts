@@ -1,6 +1,13 @@
-import { initializeApp, getApps, FirebaseApp } from "firebase/app";
-import { getAuth, setPersistence, browserLocalPersistence, Auth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, Firestore } from "firebase/firestore";
+import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
+import {
+  getAuth,
+  setPersistence,
+  browserLocalPersistence,
+  Auth,
+  onAuthStateChanged,
+  User
+} from 'firebase/auth';
+import { getFirestore, Firestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDkDSF9Dq50j8LnxENgYyjeXv6edfTtwu0",
@@ -36,11 +43,11 @@ if (typeof window !== 'undefined') {
         console.log('Firebase persistence set to local');
         // Set up auth state listener for debugging
         if (auth) {
-          onAuthStateChanged(auth, (user) => {
+          onAuthStateChanged(auth, (user: User | null) => {
             console.log('Auth state changed:', user ? `User logged in: ${user.email}` : 'No user');
             if (user) {
               // Get and set the session token
-              user.getIdToken().then((token) => {
+              user.getIdToken().then((token: string) => {
                 document.cookie = `session=${token}; path=/; max-age=${60 * 60 * 24 * 5}`; // 5 days
               });
             } else {

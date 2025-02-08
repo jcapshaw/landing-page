@@ -22,37 +22,36 @@ export const vehicleSchema = z.object({
   hasOther: z.boolean().default(false),
   needsSmog: z.boolean().default(false),
   liftDescription: z.string().optional(),
-  liftPrice: z.number().optional(),
   description: z.string().optional(),
   additions: z.object({
     lift: z.object({
       description: z.string(),
-      price: z.number(),
+      price: z.number().min(0),
       installed: z.boolean()
     }).optional(),
     wheels: z.object({
       description: z.string(),
-      price: z.number(),
+      price: z.number().min(0),
       installed: z.boolean()
     }).optional(),
     tires: z.object({
       description: z.string(),
-      price: z.number(),
+      price: z.number().min(0),
       installed: z.boolean()
     }).optional(),
     paintMatch: z.object({
       description: z.string(),
-      price: z.number(),
+      price: z.number().min(0),
       completed: z.boolean()
     }).optional(),
     leather: z.object({
       description: z.string(),
-      price: z.number(),
+      price: z.number().min(0),
       installed: z.boolean()
     }).optional(),
     other: z.array(z.object({
       description: z.string(),
-      price: z.number(),
+      price: z.number().min(0),
       completed: z.boolean()
     })).optional(),
     totalPrice: z.number()

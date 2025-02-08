@@ -114,7 +114,6 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
             <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Price/Mileage</th>
             <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Adds?</th>
             <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Status</th>
-            <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Dates</th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
@@ -157,19 +156,29 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-center">
                 <div className="text-sm">
-                  <div>{vehicle.additions?.lift ? "YES" : "No"}</div>
-                  {vehicle.additions?.lift && (
+                  <div>{vehicle.hasLift || vehicle.hasWheels || vehicle.hasTires || vehicle.hasPaintMatch || vehicle.hasLeather || vehicle.hasOther ? "YES" : "NO"}</div>
+                  {(vehicle.hasLift || vehicle.hasWheels || vehicle.hasTires || vehicle.hasPaintMatch || vehicle.hasLeather || vehicle.hasOther) && (
                     <>
                       <div className="text-xs text-gray-600">
-                        {vehicle.additions.lift && "Lift"}
-                        {vehicle.additions.wheels && " • Wheels"}
-                        {vehicle.additions.tires && " • Tires"}
-                        {vehicle.additions.paintMatch && " • Paint"}
-                        {vehicle.additions.leather && " • Leather"}
-                        {vehicle.additions.other && vehicle.additions.other.length > 0 && " • Other"}
+                        {vehicle.hasLift && "Lift"}
+                        {vehicle.hasWheels && " • Wheels"}
+                        {vehicle.hasTires && " • Tires"}
+                        {vehicle.hasPaintMatch && " • Paint"}
+                        {vehicle.hasLeather && " • Leather"}
+                        {vehicle.hasOther && " • Other"}
                       </div>
-                      <div className="text-center text-gray-500">+${vehicle.additions.totalPrice.toLocaleString()}</div>
+                      <div className="text-center text-gray-500">+${(vehicle.additions?.totalPrice || vehicle.addsPrice || 0).toLocaleString()}</div>
                     </>
+                  )}
+                  {vehicle.description && (
+                    <div className="text-xs text-gray-500 mt-1">
+                      Note: {vehicle.description}
+                    </div>
+                  )}
+                  {vehicle.needsSmog && (
+                    <div className="text-xs text-gray-500 mt-1">
+                      Emissions: ✓
+                    </div>
                   )}
                 </div>
               </td>
@@ -210,14 +219,6 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
                     <SelectItem value="PENDING_RECON" className="text-xs">Pending Recon</SelectItem>
                   </SelectContent>
                 </Select>
-              </td>
-              <td className="px-6 py-4">
-                <div className="text-sm text-center">
-                  <div>Added: {new Date(vehicle.dateAdded).toLocaleDateString('en-US', {month: '2-digit', day: '2-digit', year: '2-digit'})}</div>
-                  <div className="text-gray-500">
-                    Last Update: {new Date(vehicle.lastStatusUpdate).toLocaleDateString('en-US', {month: '2-digit', day: '2-digit', year: '2-digit'})}
-                  </div>
-                </div>
               </td>
             </tr>
           ))}

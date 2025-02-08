@@ -70,17 +70,20 @@ export default function AuthForm() {
     setIsLoading(true);
     try {
       console.log('Attempting authentication...');
-      if (isRegister) {
-        console.log('Creating new user account...');
-        await createUserWithEmailAndPassword(auth, data.email, data.password);
-        console.log('User account created successfully');
-      } else {
-        console.log('Signing in existing user...');
+      // Mock login check
+      if (!auth) {
+        throw new Error('Firebase auth is not initialized');
+      }
+      
+      if (!isRegister && data.email === 'demo@liftedtrucks.com' && data.password === 'password') {
+        console.log('Mock login successful');
         await signInWithEmailAndPassword(auth, data.email, data.password);
         console.log('User signed in successfully');
+      } else if (isRegister) {
+        throw new Error('Registration is disabled in demo mode');
+      } else {
+        throw new Error('Invalid credentials. Use demo@liftedtrucks.com / password');
       }
-      // After successful auth, Firebase's onAuthStateChanged in AuthProvider
-      // will handle the redirection to /dashboard
       console.log('Authentication successful, waiting for redirect...');
     } catch (error) {
       console.error("Authentication error:", error);

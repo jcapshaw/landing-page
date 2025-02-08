@@ -97,14 +97,16 @@ export function EditVehicleForm({ vehicle, onSubmit, onCancel, onLiftEdit }: Edi
   const [isDecoding, setIsDecoding] = useState(false)
   const [isLiftModalOpen, setIsLiftModalOpen] = useState(false)
   const [liftDetails, setLiftDetails] = useState({
-    liftDescription: vehicle.liftDescription || "",
-    liftPrice: vehicle.liftPrice || 0,
-    hasLift: vehicle.hasLift || false,
-    hasWheels: vehicle.hasWheels || false,
-    hasTires: vehicle.hasTires || false,
-    hasPaintMatch: vehicle.hasPaintMatch || false,
-    hasLeather: vehicle.hasLeather || false,
-    hasOther: vehicle.hasOther || false
+    liftDescription: vehicle.liftDescription || vehicle.additions?.lift?.description || "",
+    liftPrice: vehicle.liftPrice || vehicle.additions?.lift?.price || 0,
+    hasLift: vehicle.hasLift || !!vehicle.additions?.lift || false,
+    hasWheels: vehicle.hasWheels || !!vehicle.additions?.wheels || false,
+    hasTires: vehicle.hasTires || !!vehicle.additions?.tires || false,
+    hasPaintMatch: vehicle.hasPaintMatch || !!vehicle.additions?.paintMatch || false,
+    hasLeather: vehicle.hasLeather || !!vehicle.additions?.leather || false,
+    hasOther: vehicle.hasOther || !!vehicle.additions?.other || false,
+    addsPrice: vehicle.addsPrice || vehicle.additions?.totalPrice || 0,
+    additions: vehicle.additions
   })
 
   const form = useForm<VehicleFormData>({
@@ -139,61 +141,64 @@ export function EditVehicleForm({ vehicle, onSubmit, onCancel, onLiftEdit }: Edi
 
   const handleLiftDetailsSubmit = (data: {
     liftDescription: string
-    liftPrice: number
     hasLift: boolean
     hasWheels: boolean
     hasTires: boolean
     hasPaintMatch: boolean
     hasLeather: boolean
     hasOther: boolean
+    addsPrice: number
+    additions: {
+      lift?: {
+        description: string
+        price: number
+        installed: boolean
+      }
+      wheels?: {
+        description: string
+        price: number
+        installed: boolean
+      }
+      tires?: {
+        description: string
+        price: number
+        installed: boolean
+      }
+      paintMatch?: {
+        description: string
+        price: number
+        completed: boolean
+      }
+      leather?: {
+        description: string
+        price: number
+        installed: boolean
+      }
+      other?: Array<{
+        description: string
+        price: number
+        completed: boolean
+      }>
+      totalPrice: number
+    }
   }) => {
-    setLiftDetails(data)
+    // Update state with new data
+    setLiftDetails({
+      ...data,
+      liftPrice: data.addsPrice
+    })
     
-    // Set the basic lift fields
+    // Set both legacy fields and new additions structure
     form.setValue("liftDescription", data.liftDescription)
-    form.setValue("liftPrice", data.liftPrice)
+    form.setValue("liftPrice", data.addsPrice)
     form.setValue("hasLift", data.hasLift)
     form.setValue("hasWheels", data.hasWheels)
     form.setValue("hasTires", data.hasTires)
     form.setValue("hasPaintMatch", data.hasPaintMatch)
     form.setValue("hasLeather", data.hasLeather)
     form.setValue("hasOther", data.hasOther)
-
-    // Set up the additions object with all selected addendums
-    const additions = {
-      lift: data.hasLift ? {
-        description: data.liftDescription,
-        price: data.liftPrice,
-        installed: true
-      } : undefined,
-      wheels: data.hasWheels ? {
-        description: "Custom Wheels",
-        price: 0,
-        installed: true
-      } : undefined,
-      tires: data.hasTires ? {
-        description: "Custom Tires",
-        price: 0,
-        installed: true
-      } : undefined,
-      paintMatch: data.hasPaintMatch ? {
-        description: "Paint Match",
-        price: 0,
-        completed: true
-      } : undefined,
-      leather: data.hasLeather ? {
-        description: "Leather Interior",
-        price: 0,
-        installed: true
-      } : undefined,
-      other: data.hasOther ? [{
-        description: "Other Modifications",
-        price: 0,
-        completed: true
-      }] : undefined,
-      totalPrice: data.liftPrice
-    }
-    form.setValue("additions", additions)
+    form.setValue("additions.totalPrice", data.addsPrice)
+    form.setValue("additions", data.additions)
   }
 
   const handleHasLiftChange = (checked: boolean) => {
@@ -204,6 +209,7 @@ export function EditVehicleForm({ vehicle, onSubmit, onCancel, onLiftEdit }: Edi
       // Reset all addendum-related fields
       form.setValue("liftDescription", "")
       form.setValue("liftPrice", 0)
+      form.setValue("additions.totalPrice", 0)
       form.setValue("hasWheels", false)
       form.setValue("hasTires", false)
       form.setValue("hasPaintMatch", false)
@@ -224,12 +230,16 @@ export function EditVehicleForm({ vehicle, onSubmit, onCancel, onLiftEdit }: Edi
       setLiftDetails({
         liftDescription: "",
         liftPrice: 0,
+        addsPrice: 0,
         hasLift: false,
         hasWheels: false,
         hasTires: false,
         hasPaintMatch: false,
         hasLeather: false,
-        hasOther: false
+        hasOther: false,
+        additions: {
+          totalPrice: 0
+        }
       })
     }
   }

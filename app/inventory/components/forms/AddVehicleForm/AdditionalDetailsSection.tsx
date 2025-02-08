@@ -53,7 +53,7 @@ export function AdditionalDetailsSection({
             </FormControl>
             <div className="space-y-1 leading-none">
               <FormLabel>
-                Addendum
+                Lift, Wheels, Tires...?
               </FormLabel>
               <FormDescription>
                 Check if the vehicle has any dealer installed equipment.
@@ -76,11 +76,8 @@ export function AdditionalDetailsSection({
             </FormControl>
             <div className="space-y-1 leading-none">
               <FormLabel>
-                Needs SMOG
+                Emissions
               </FormLabel>
-              <FormDescription>
-                Check if the vehicle needs SMOG certification.
-              </FormDescription>
             </div>
           </FormItem>
         )}

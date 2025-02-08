@@ -18,7 +18,7 @@ interface BasicInfoSectionProps {
 export function BasicInfoSection({ form }: BasicInfoSectionProps) {
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Basic Information</h3>
+      <h3 className="text-lg font-semibold">Decode the VIN First</h3>
 
       <FormField
         control={form.control}

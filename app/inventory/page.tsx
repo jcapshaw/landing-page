@@ -1,20 +1,20 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import { Input } from "../../components/ui/input"
+import { Button } from "../../components/ui/button"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "../../components/ui/select"
 import { AddVehicleForm } from "./components/forms/AddVehicleForm"
 import { LiftDetailsModal } from "./components/forms/AddendumForm/LiftDetailsModal"
 import { InventoryTable } from "./components/InventoryTable"
 import { Vehicle } from "./types"
-import { addVehicle, updateVehicle, getAllVehicles } from "@/lib/vehicles"
+import { addVehicle, updateVehicle, getAllVehicles } from "../../lib/vehicles"
 import { useAuth } from "../components/AuthProvider"
 
 export default function InventoryPage() {
@@ -265,7 +265,7 @@ export default function InventoryPage() {
             type="text"
             placeholder="Search inventory..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
             className="max-w-md"
           />
           <Select value={selectedStatus} onValueChange={(value: Vehicle["status"] | "ALL") => setSelectedStatus(value)}>
@@ -313,7 +313,7 @@ export default function InventoryPage() {
       <InventoryTable
         vehicles={filteredVehicles}
         onVehicleUpdate={handleVehicleUpdate}
-        onLiftEdit={(vehicle) => {
+        onLiftEdit={(vehicle: Vehicle) => {
           setSelectedVehicle(vehicle)
           setShowLiftModal(true)
         }}
@@ -326,7 +326,16 @@ export default function InventoryPage() {
             setShowLiftModal(false)
             setSelectedVehicle(null)
           }}
-          onSave={(data) => {
+          onSave={(data: {
+            liftDescription: string;
+            liftPrice: number;
+            hasLift: boolean;
+            hasWheels: boolean;
+            hasTires: boolean;
+            hasPaintMatch: boolean;
+            hasLeather: boolean;
+            hasOther: boolean;
+          }) => {
             handleLiftDetailsSave(selectedVehicle.id, data)
           }}
           initialData={{
