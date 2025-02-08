@@ -6,7 +6,18 @@ const COLLECTION_NAME = 'vehicles';
 
 export async function addVehicle(vehicleData: Omit<Vehicle, 'id'>) {
   try {
-    const docRef = await addDoc(collection(db, COLLECTION_NAME), {
+    console.log('Adding vehicle with data:', JSON.stringify(vehicleData, null, 2));
+    
+    // Validate required fields
+    const requiredFields = ['location', 'year', 'make', 'model', 'totalPrice', 'mileage', 'vin', 'exteriorColor'];
+    const missingFields = requiredFields.filter(field => !vehicleData[field as keyof typeof vehicleData]);
+    
+    if (missingFields.length > 0) {
+      console.error('Missing required fields:', missingFields);
+      throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+    }
+
+    const docData = {
       ...vehicleData,
       dateAdded: serverTimestamp(),
       lastStatusUpdate: serverTimestamp(),
@@ -15,10 +26,19 @@ export async function addVehicle(vehicleData: Omit<Vehicle, 'id'>) {
         createdAt: serverTimestamp(),
         lastUpdated: serverTimestamp(),
       }
-    });
+    };
+
+    console.log('Attempting to add document with data:', JSON.stringify(docData, null, 2));
+    
+    const docRef = await addDoc(collection(db, COLLECTION_NAME), docData);
+    console.log('Vehicle added successfully with ID:', docRef.id);
     return docRef.id;
   } catch (error) {
     console.error('Error adding vehicle:', error);
+    if (error instanceof Error) {
+      console.error('Error details:', error.message);
+      console.error('Error stack:', error.stack);
+    }
     throw error;
   }
 }

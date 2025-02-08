@@ -69,13 +69,19 @@ export default function AuthForm() {
   async function onSubmit(data: FormData) {
     setIsLoading(true);
     try {
+      console.log('Attempting authentication...');
       if (isRegister) {
+        console.log('Creating new user account...');
         await createUserWithEmailAndPassword(auth, data.email, data.password);
+        console.log('User account created successfully');
       } else {
+        console.log('Signing in existing user...');
         await signInWithEmailAndPassword(auth, data.email, data.password);
+        console.log('User signed in successfully');
       }
-      // After successful auth, Firebase's onAuthStateChanged in the parent components
-      // will handle the redirection to /daily-log
+      // After successful auth, Firebase's onAuthStateChanged in AuthProvider
+      // will handle the redirection to /dashboard
+      console.log('Authentication successful, waiting for redirect...');
     } catch (error) {
       console.error("Authentication error:", error);
       let errorMessage = "Authentication failed. Please check your credentials.";
@@ -263,7 +269,7 @@ export default function AuthForm() {
             variant="link"
             onClick={() => {
               setIsRegister(!isRegister);
-              router.push(!isRegister ? "/auth" : "/auth?register=true", { scroll: false });
+              router.push(!isRegister ? "/auth?register=true" : "/auth", { scroll: false });
             }}
             className="text-primary"
           >

@@ -10,8 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { LiftDetailsModal } from "./components/LiftDetailsModal"
-import { AddVehicleForm } from "./components/AddVehicleForm"
+import { AddVehicleForm } from "./components/forms/AddVehicleForm"
+import { LiftDetailsModal } from "./components/forms/AddendumForm/LiftDetailsModal"
 import { InventoryTable } from "./components/InventoryTable"
 import { Vehicle } from "./types"
 import { addVehicle, updateVehicle, getAllVehicles } from "@/lib/vehicles"
@@ -120,7 +120,6 @@ export default function InventoryPage() {
       setSelectedVehicle(null);
     } catch (error) {
       console.error('Error updating vehicle lift details:', error);
-      // You might want to show an error message to the user here
     }
   }
 
@@ -131,56 +130,94 @@ export default function InventoryPage() {
   type VehicleFormData = Omit<Vehicle, 'id' | 'dateAdded' | 'lastStatusUpdate' | 'status' | 'statusData' | 'metadata' | 'searchIndex' | 'additions'>
   
   const handleNewVehicleSubmit = async (formData: VehicleFormData) => {
-    if (!user) return;
+    if (!user) {
+      alert('You must be logged in to add vehicles');
+      return;
+    }
+
+    // Skip email verification in development
+    if (process.env.NODE_ENV === 'production' && !user.emailVerified) {
+      alert('Your email must be verified before adding vehicles');
+      return;
+    }
 
     try {
-      const vehicle: Omit<Vehicle, 'id'> = {
-        ...formData,
-        stock: "", // Initialize with empty stock number
-        totalPrice: formData.totalPrice || 0,
-        status: "AVAILABLE",
+      console.log('Starting vehicle submission process...');
+      console.log('Form data received:', JSON.stringify(formData, null, 2));
+
+      // Create the vehicle object with all required fields
+      const totalPrice = Number(formData.totalPrice) || 0;
+      const now = new Date().toISOString();
+      const userInfo = { uid: user.uid, name: user.displayName || 'Unknown' };
+      
+      // Create a clean vehicle object
+      const vehicle = {
+        stock: formData.stock || "",
+        location: formData.location,
+        year: formData.year,
+        make: formData.make,
+        model: formData.model,
+        trim: formData.trim,
+        totalPrice: totalPrice,
+        mileage: Number(formData.mileage) || 0,
+        vin: formData.vin,
+        exteriorColor: formData.exteriorColor,
+        engineSize: formData.engineSize,
+        transmission: formData.transmission,
+        fuelType: formData.fuelType,
+        description: formData.description,
+        status: "AVAILABLE" as const,
         statusData: {
-          current: "Available",
-          updatedAt: new Date().toISOString(),
-          updatedBy: { uid: user.uid, name: user.displayName || 'Unknown' }
+          current: "Available" as const,
+          updatedAt: now,
+          updatedBy: userInfo
         },
         additions: {
-          totalPrice: 0,
-          lift: undefined,
-          wheels: undefined,
-          tires: undefined,
-          paintMatch: undefined,
-          leather: undefined,
-          other: undefined
+          totalPrice: 0
         },
         metadata: {
-          createdAt: new Date().toISOString(),
-          createdBy: { uid: user.uid, name: user.displayName || 'Unknown' },
-          lastUpdated: new Date().toISOString(),
-          lastUpdatedBy: { uid: user.uid, name: user.displayName || 'Unknown' }
+          createdAt: now,
+          createdBy: userInfo,
+          lastUpdated: now,
+          lastUpdatedBy: userInfo
         },
         searchIndex: {
-          makeModel: `${formData.make} ${formData.model}`,
-          yearMakeModel: `${formData.year} ${formData.make} ${formData.model}`,
-          priceRange: getPriceRange(formData.totalPrice || 0)
+          makeModel: `${formData.make} ${formData.model}`.trim(),
+          yearMakeModel: `${formData.year} ${formData.make} ${formData.model}`.trim(),
+          priceRange: getPriceRange(totalPrice)
         },
-        dateAdded: new Date().toISOString(),
-        lastStatusUpdate: new Date().toISOString(),
-        hasLift: false,
-        hasWheels: false,
-        hasTires: false,
-        hasPaintMatch: false,
-        hasLeather: false,
-        hasOther: false
-      }
+        dateAdded: now,
+        lastStatusUpdate: now,
+        hasLift: formData.hasLift || false,
+        hasWheels: formData.hasWheels || false,
+        hasTires: formData.hasTires || false,
+        hasPaintMatch: formData.hasPaintMatch || false,
+        hasLeather: formData.hasLeather || false,
+        hasOther: formData.hasOther || false,
+        needsSmog: formData.needsSmog || false
+      };
 
-      await addVehicle(vehicle);
+      console.log('Submitting vehicle data:', vehicle);
+      const newVehicleId = await addVehicle(vehicle);
+      console.log('Vehicle added successfully with ID:', newVehicleId);
+      
+      console.log('Fetching updated vehicle list...');
       const updatedVehicles = await getAllVehicles();
+      console.log('Updated vehicles list:', updatedVehicles.length, 'vehicles');
+      
+      console.log('Updating state and closing form...');
       setVehicles(updatedVehicles);
       setShowNewVehicleForm(false);
+      alert('Vehicle added successfully!');
     } catch (error) {
-      console.error('Error adding vehicle:', error);
-      // You might want to show an error message to the user here
+      console.error('Error in handleNewVehicleSubmit:', error);
+      if (error instanceof Error) {
+        console.error('Error details:', error.message);
+        console.error('Error stack:', error.stack);
+        alert(`Error adding vehicle: ${error.message}`);
+      } else {
+        alert('An unknown error occurred while adding the vehicle');
+      }
     }
   }
 
@@ -208,7 +245,6 @@ export default function InventoryPage() {
       setVehicles(updatedVehicles);
     } catch (error) {
       console.error('Error updating vehicle:', error);
-      // You might want to show an error message to the user here
     }
   }
 

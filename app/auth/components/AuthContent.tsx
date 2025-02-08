@@ -2,30 +2,36 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { auth } from "@/lib/firebase";
+import { useAuth } from "@/app/components/AuthProvider";
 import AuthForm from "./AuthForm";
 
 export default function AuthContent() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const { user, loading: authLoading } = useAuth();
+  const [pageLoading, setPageLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    console.log('AuthContent: Auth state changed', { user, authLoading });
+    
+    // Only handle navigation after auth state is determined
+    if (!authLoading) {
       if (user) {
-        // If user is authenticated, redirect to daily-log
+        console.log('AuthContent: User authenticated, redirecting to dashboard');
         router.push("/dashboard");
       } else {
-        setLoading(false);
+        console.log('AuthContent: No user, showing auth form');
+        setPageLoading(false);
       }
-    });
+    }
+  }, [user, authLoading, router]);
 
-    return () => unsubscribe();
-  }, [router]);
-
-  if (loading) {
+  // Show loading state while auth is being determined
+  if (authLoading || pageLoading) {
     return (
       <div className="h-screen flex items-center justify-center">
-        Loading...
+        <div className="text-center">
+          <div className="mb-4">Loading authentication...</div>
+        </div>
       </div>
     );
   }

@@ -6,7 +6,7 @@ import { useState } from "react"
 import { Truck } from "lucide-react"
 import * as z from "zod"
 import { Button } from "@/components/ui/button"
-import { LiftDetailsModal } from "./LiftDetailsModal"
+import { LiftDetailsModal } from "../components/forms/AddendumForm/LiftDetailsModal"
 import {
   Form,
   FormControl,
