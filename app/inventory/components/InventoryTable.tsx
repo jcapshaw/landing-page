@@ -155,31 +155,8 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-center">
-                <div className="text-sm">
-                  <div>{vehicle.hasLift || vehicle.hasWheels || vehicle.hasTires || vehicle.hasPaintMatch || vehicle.hasLeather || vehicle.hasOther ? "YES" : "NO"}</div>
-                  {(vehicle.hasLift || vehicle.hasWheels || vehicle.hasTires || vehicle.hasPaintMatch || vehicle.hasLeather || vehicle.hasOther) && (
-                    <>
-                      <div className="text-xs text-gray-600">
-                        {vehicle.hasLift && "Lift"}
-                        {vehicle.hasWheels && " • Wheels"}
-                        {vehicle.hasTires && " • Tires"}
-                        {vehicle.hasPaintMatch && " • Paint"}
-                        {vehicle.hasLeather && " • Leather"}
-                        {vehicle.hasOther && " • Other"}
-                      </div>
-                      <div className="text-center text-gray-500">+${(vehicle.additions?.totalPrice || vehicle.addsPrice || 0).toLocaleString()}</div>
-                    </>
-                  )}
-                  {vehicle.description && (
-                    <div className="text-xs text-gray-500 mt-1">
-                      Note: {vehicle.description}
-                    </div>
-                  )}
-                  {vehicle.needsSmog && (
-                    <div className="text-xs text-gray-500 mt-1">
-                      Emissions: ✓
-                    </div>
-                  )}
+                <div className="text-sm font-medium">
+                  {vehicle.hasLift || vehicle.hasWheels || vehicle.hasTires || vehicle.hasPaintMatch || vehicle.hasLeather || vehicle.hasOther ? "YES" : "NO"}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-center">

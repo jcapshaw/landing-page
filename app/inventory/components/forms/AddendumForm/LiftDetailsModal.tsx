@@ -166,6 +166,18 @@ export function LiftDetailsModal({
     // Calculate total price from all additions
     const totalPrice = addsPrice || 0
 
+    // Get current timestamp
+    const now = new Date().toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true,
+      timeZoneName: 'short'
+    })
+
     // Create the additions data structure with clean data (no undefined values)
     const additionsData: Vehicle['additions'] = {
       totalPrice,

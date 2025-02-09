@@ -111,16 +111,32 @@ export function VehicleDetailsView({ vehicle, depositDetails }: VehicleDetailsVi
               <p className="text-gray-600">
                 {(() => {
                   try {
-                    const date = new Date(vehicle.dateAdded);
-                    return date.toLocaleString('en-US', {
-                      year: '2-digit',
-                      month: '2-digit',
-                      day: '2-digit',
-                      hour: '2-digit',
+                    // Parse the date string and handle timezone offset
+                    const match = vehicle.dateAdded.match(
+                      /^([A-Za-z]+ \d+, \d+) at (\d+:\d+:\d+ [AP]M) UTC([+-]\d+)$/
+                    );
+                    if (!match) return 'Invalid Date';
+
+                    const [_, datePart, timePart, tzOffset] = match;
+                    const dateStr = `${datePart} ${timePart} GMT${tzOffset}`;
+                    const timestamp = new Date(dateStr);
+
+                    if (isNaN(timestamp.getTime())) {
+                      return 'Invalid Date';
+                    }
+
+                    return timestamp.toLocaleString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: 'numeric',
                       minute: '2-digit',
-                      hour12: false
+                      second: '2-digit',
+                      hour12: true,
+                      timeZoneName: 'short'
                     });
                   } catch (error) {
+                    console.error('Date parsing error:', error);
                     return 'Invalid Date';
                   }
                 })()}
@@ -131,16 +147,32 @@ export function VehicleDetailsView({ vehicle, depositDetails }: VehicleDetailsVi
               <p className="text-gray-600">
                 {(() => {
                   try {
-                    const date = new Date(vehicle.lastStatusUpdate);
-                    return date.toLocaleString('en-US', {
-                      year: '2-digit',
-                      month: '2-digit',
-                      day: '2-digit',
-                      hour: '2-digit',
+                    // Parse the date string and handle timezone offset
+                    const match = vehicle.lastStatusUpdate.match(
+                      /^([A-Za-z]+ \d+, \d+) at (\d+:\d+:\d+ [AP]M) UTC([+-]\d+)$/
+                    );
+                    if (!match) return 'Invalid Date';
+
+                    const [_, datePart, timePart, tzOffset] = match;
+                    const dateStr = `${datePart} ${timePart} GMT${tzOffset}`;
+                    const timestamp = new Date(dateStr);
+
+                    if (isNaN(timestamp.getTime())) {
+                      return 'Invalid Date';
+                    }
+
+                    return timestamp.toLocaleString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: 'numeric',
                       minute: '2-digit',
-                      hour12: false
+                      second: '2-digit',
+                      hour12: true,
+                      timeZoneName: 'short'
                     });
                   } catch (error) {
+                    console.error('Date parsing error:', error);
                     return 'Invalid Date';
                   }
                 })()}
@@ -159,7 +191,30 @@ export function VehicleDetailsView({ vehicle, depositDetails }: VehicleDetailsVi
             </div>
             <div>
               <span className="font-medium">Addendum:</span>
-              <p className="text-gray-600">{vehicle.hasLift || vehicle.hasWheels || vehicle.hasTires || vehicle.hasPaintMatch || vehicle.hasLeather || vehicle.hasOther ? "Yes" : "No"}</p>
+              <p className="text-gray-600">
+                {vehicle.hasLift || vehicle.hasWheels || vehicle.hasTires || vehicle.hasPaintMatch || vehicle.hasLeather || vehicle.hasOther ? (
+                  <>
+                    Yes - Last Updated: {(() => {
+                      try {
+                        const timestamp = new Date(vehicle.metadata.lastUpdated);
+                        return timestamp.toLocaleString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit',
+                          second: '2-digit',
+                          hour12: true,
+                          timeZoneName: 'short'
+                        });
+                      } catch (error) {
+                        console.error('Date parsing error:', error);
+                        return 'Invalid Date';
+                      }
+                    })()}
+                  </>
+                ) : "No"}
+              </p>
               {(vehicle.hasLift || vehicle.hasWheels || vehicle.hasTires || vehicle.hasPaintMatch || vehicle.hasLeather || vehicle.hasOther) && (
                 <div className="pl-4 space-y-1 text-sm text-gray-600">
                   {/* Display lift description if available */}
