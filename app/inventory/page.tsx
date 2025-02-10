@@ -48,10 +48,15 @@ export default function InventoryPage() {
   const filteredVehicles = vehicles.filter((vehicle) => {
     const searchLower = searchTerm.toLowerCase()
     const matchesSearch =
-      vehicle.year.toLowerCase().includes(searchLower) ||
+      (vehicle.stock?.toLowerCase() || '').includes(searchLower) ||
+      (vehicle.vin?.toLowerCase() || '').includes(searchLower) ||
       vehicle.make.toLowerCase().includes(searchLower) ||
       vehicle.model.toLowerCase().includes(searchLower) ||
-      (vehicle.trim?.toLowerCase() || '').includes(searchLower)
+      (vehicle.exteriorColor?.toLowerCase() || '').includes(searchLower) ||
+      (vehicle.engineSize?.toLowerCase() || '').includes(searchLower) ||
+      (vehicle.transmission?.toLowerCase() || '').includes(searchLower) ||
+      (vehicle.fuelType?.toLowerCase() || '').includes(searchLower) ||
+      (vehicle.description?.toLowerCase() || '').includes(searchLower)
     
     const matchesStatus = selectedStatus === "ALL" || vehicle.status === selectedStatus
     const matchesLocation = selectedLocation === "ALL" || vehicle.location === selectedLocation
@@ -61,13 +66,21 @@ export default function InventoryPage() {
 
   const handleLiftDetailsSave = async (vehicleId: string, data: {
     liftDescription: string
-    liftPrice: number
     hasLift: boolean
     hasWheels: boolean
     hasTires: boolean
     hasPaintMatch: boolean
     hasLeather: boolean
     hasOther: boolean
+    addsPrice: number
+    additions: {
+      lift?: { description: string; price: number; installed: boolean }
+      wheels?: { description: string; price: number; installed: boolean }
+      tires?: { description: string; price: number; installed: boolean }
+      paintMatch?: { description: string; price: number; completed: boolean }
+      leather?: { description: string; price: number; installed: boolean }
+      totalPrice: number
+    }
   }) => {
     if (!user) return;
 
@@ -77,35 +90,15 @@ export default function InventoryPage() {
 
       const updatedVehicle = {
         ...vehicle,
-        additions: {
-          ...vehicle.additions,
-          lift: data.hasLift ? {
-            description: data.liftDescription,
-            price: data.liftPrice,
-            installed: true
-          } : undefined,
-          wheels: data.hasWheels ? {
-            description: "",
-            price: 0,
-            installed: false
-          } : undefined,
-          tires: data.hasTires ? {
-            description: "",
-            price: 0,
-            installed: false
-          } : undefined,
-          paintMatch: data.hasPaintMatch ? {
-            description: "",
-            price: 0,
-            completed: false
-          } : undefined,
-          leather: data.hasLeather ? {
-            description: "",
-            price: 0,
-            installed: false
-          } : undefined,
-          totalPrice: data.hasLift ? data.liftPrice : 0
-        },
+        liftDescription: data.liftDescription,
+        addsPrice: data.addsPrice,
+        hasLift: data.hasLift,
+        hasWheels: data.hasWheels,
+        hasTires: data.hasTires,
+        hasPaintMatch: data.hasPaintMatch,
+        hasLeather: data.hasLeather,
+        hasOther: data.hasOther,
+        additions: data.additions,
         metadata: {
           ...vehicle.metadata,
           lastUpdated: new Date().toISOString(),
@@ -277,6 +270,7 @@ export default function InventoryPage() {
               <SelectItem value="AVAILABLE">Available</SelectItem>
               <SelectItem value="DEPOSIT">Deposit</SelectItem>
               <SelectItem value="SOLD">Sold</SelectItem>
+              <SelectItem value="PENDING_RECON">Pending Recon</SelectItem>
               <SelectItem value="OTHER">Other</SelectItem>
             </SelectContent>
           </Select>
@@ -328,25 +322,34 @@ export default function InventoryPage() {
           }}
           onSave={(data: {
             liftDescription: string;
-            liftPrice: number;
             hasLift: boolean;
             hasWheels: boolean;
             hasTires: boolean;
             hasPaintMatch: boolean;
             hasLeather: boolean;
             hasOther: boolean;
+            addsPrice: number;
+            additions: {
+              lift?: { description: string; price: number; installed: boolean };
+              wheels?: { description: string; price: number; installed: boolean };
+              tires?: { description: string; price: number; installed: boolean };
+              paintMatch?: { description: string; price: number; completed: boolean };
+              leather?: { description: string; price: number; installed: boolean };
+              totalPrice: number;
+            };
           }) => {
             handleLiftDetailsSave(selectedVehicle.id, data)
           }}
           initialData={{
             liftDescription: selectedVehicle.liftDescription || "",
-            liftPrice: selectedVehicle.liftPrice || 0,
+            addsPrice: selectedVehicle.addsPrice || 0,
             hasLift: selectedVehicle.hasLift,
             hasWheels: selectedVehicle.hasWheels,
             hasTires: selectedVehicle.hasTires,
             hasPaintMatch: selectedVehicle.hasPaintMatch,
             hasLeather: selectedVehicle.hasLeather,
-            hasOther: selectedVehicle.hasOther
+            hasOther: selectedVehicle.hasOther,
+            additions: selectedVehicle.additions
           }}
         />
       )}

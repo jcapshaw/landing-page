@@ -13,6 +13,38 @@ interface VehicleDetailsViewProps {
 }
 
 export function VehicleDetailsView({ vehicle, depositDetails }: VehicleDetailsViewProps) {
+  const formatDate = (date: { seconds: number; nanoseconds: number } | string) => {
+    try {
+      let timestamp: Date;
+      
+      if (typeof date === 'string') {
+        timestamp = new Date(date);
+      } else if (date && 'seconds' in date) {
+        timestamp = new Date(date.seconds * 1000);
+      } else {
+        throw new Error('Invalid date format');
+      }
+
+      if (isNaN(timestamp.getTime())) {
+        throw new Error('Invalid timestamp');
+      }
+
+      return timestamp.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+        timeZoneName: 'short'
+      });
+    } catch (error) {
+      console.error('Date parsing error:', error);
+      return 'Invalid Date';
+    }
+  };
+
   return (
     <div className="space-y-6">
       {depositDetails && (
@@ -108,75 +140,11 @@ export function VehicleDetailsView({ vehicle, depositDetails }: VehicleDetailsVi
           <div className="space-y-2">
             <div>
               <span className="font-medium">Date Added:</span>
-              <p className="text-gray-600">
-                {(() => {
-                  try {
-                    // Parse the date string and handle timezone offset
-                    const match = vehicle.dateAdded.match(
-                      /^([A-Za-z]+ \d+, \d+) at (\d+:\d+:\d+ [AP]M) UTC([+-]\d+)$/
-                    );
-                    if (!match) return 'Invalid Date';
-
-                    const [_, datePart, timePart, tzOffset] = match;
-                    const dateStr = `${datePart} ${timePart} GMT${tzOffset}`;
-                    const timestamp = new Date(dateStr);
-
-                    if (isNaN(timestamp.getTime())) {
-                      return 'Invalid Date';
-                    }
-
-                    return timestamp.toLocaleString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: 'numeric',
-                      minute: '2-digit',
-                      second: '2-digit',
-                      hour12: true,
-                      timeZoneName: 'short'
-                    });
-                  } catch (error) {
-                    console.error('Date parsing error:', error);
-                    return 'Invalid Date';
-                  }
-                })()}
-              </p>
+              <p className="text-gray-600">{formatDate(vehicle.dateAdded)}</p>
             </div>
             <div>
               <span className="font-medium">Last Status Update:</span>
-              <p className="text-gray-600">
-                {(() => {
-                  try {
-                    // Parse the date string and handle timezone offset
-                    const match = vehicle.lastStatusUpdate.match(
-                      /^([A-Za-z]+ \d+, \d+) at (\d+:\d+:\d+ [AP]M) UTC([+-]\d+)$/
-                    );
-                    if (!match) return 'Invalid Date';
-
-                    const [_, datePart, timePart, tzOffset] = match;
-                    const dateStr = `${datePart} ${timePart} GMT${tzOffset}`;
-                    const timestamp = new Date(dateStr);
-
-                    if (isNaN(timestamp.getTime())) {
-                      return 'Invalid Date';
-                    }
-
-                    return timestamp.toLocaleString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: 'numeric',
-                      minute: '2-digit',
-                      second: '2-digit',
-                      hour12: true,
-                      timeZoneName: 'short'
-                    });
-                  } catch (error) {
-                    console.error('Date parsing error:', error);
-                    return 'Invalid Date';
-                  }
-                })()}
-              </p>
+              <p className="text-gray-600">{formatDate(vehicle.lastStatusUpdate)}</p>
             </div>
           </div>
         </div>
@@ -194,24 +162,7 @@ export function VehicleDetailsView({ vehicle, depositDetails }: VehicleDetailsVi
               <p className="text-gray-600">
                 {vehicle.hasLift || vehicle.hasWheels || vehicle.hasTires || vehicle.hasPaintMatch || vehicle.hasLeather || vehicle.hasOther ? (
                   <>
-                    Yes - Last Updated: {(() => {
-                      try {
-                        const timestamp = new Date(vehicle.metadata.lastUpdated);
-                        return timestamp.toLocaleString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
-                          hour: 'numeric',
-                          minute: '2-digit',
-                          second: '2-digit',
-                          hour12: true,
-                          timeZoneName: 'short'
-                        });
-                      } catch (error) {
-                        console.error('Date parsing error:', error);
-                        return 'Invalid Date';
-                      }
-                    })()}
+                    Yes
                   </>
                 ) : "No"}
               </p>

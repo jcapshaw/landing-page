@@ -1,8 +1,24 @@
 import { db } from './firebase';
-import { collection, addDoc, updateDoc, doc, deleteDoc, getDocs, query, orderBy, serverTimestamp } from 'firebase/firestore';
+import { 
+  collection, 
+  addDoc, 
+  updateDoc, 
+  doc, 
+  deleteDoc, 
+  getDocs, 
+  query, 
+  orderBy, 
+  serverTimestamp,
+  Firestore
+} from 'firebase/firestore';
 import { Vehicle } from '@/app/inventory/types';
 
 const COLLECTION_NAME = 'vehicles';
+
+function getDb(): Firestore {
+  if (!db) throw new Error('Firestore instance not initialized');
+  return db;
+}
 
 export async function addVehicle(vehicleData: Omit<Vehicle, 'id'>) {
   try {
@@ -30,7 +46,7 @@ export async function addVehicle(vehicleData: Omit<Vehicle, 'id'>) {
 
     console.log('Attempting to add document with data:', JSON.stringify(docData, null, 2));
     
-    const docRef = await addDoc(collection(db, COLLECTION_NAME), docData);
+    const docRef = await addDoc(collection(getDb(), COLLECTION_NAME), docData);
     console.log('Vehicle added successfully with ID:', docRef.id);
     return docRef.id;
   } catch (error) {
@@ -45,11 +61,36 @@ export async function addVehicle(vehicleData: Omit<Vehicle, 'id'>) {
 
 export async function updateVehicle(id: string, vehicleData: Partial<Vehicle>) {
   try {
-    const vehicleRef = doc(db, COLLECTION_NAME, id);
-    await updateDoc(vehicleRef, {
-      ...vehicleData,
-      'metadata.lastUpdated': serverTimestamp(),
+    const vehicleRef = doc(getDb(), COLLECTION_NAME, id);
+    
+    // Create update object with proper field paths
+    const updateData: Record<string, any> = {};
+    
+    // Handle basic fields
+    Object.entries(vehicleData).forEach(([key, value]) => {
+      if (key !== 'statusData' && key !== 'metadata') {
+        updateData[key] = value;
+      }
     });
+
+    // Handle metadata updates
+    updateData['metadata.lastUpdated'] = serverTimestamp();
+    
+    // Handle status data updates
+    if (vehicleData.statusData) {
+      Object.entries(vehicleData.statusData).forEach(([key, value]) => {
+        updateData[`statusData.${key}`] = value;
+      });
+      // Override timestamp fields with server timestamps
+      updateData['statusData.updatedAt'] = serverTimestamp();
+    }
+
+    // Always update lastStatusUpdate with server timestamp if it's being modified
+    if ('lastStatusUpdate' in vehicleData) {
+      updateData.lastStatusUpdate = serverTimestamp();
+    }
+
+    await updateDoc(vehicleRef, updateData);
   } catch (error) {
     console.error('Error updating vehicle:', error);
     throw error;
@@ -58,7 +99,7 @@ export async function updateVehicle(id: string, vehicleData: Partial<Vehicle>) {
 
 export async function deleteVehicle(id: string) {
   try {
-    const vehicleRef = doc(db, COLLECTION_NAME, id);
+    const vehicleRef = doc(getDb(), COLLECTION_NAME, id);
     await deleteDoc(vehicleRef);
   } catch (error) {
     console.error('Error deleting vehicle:', error);
@@ -69,7 +110,7 @@ export async function deleteVehicle(id: string) {
 export async function getAllVehicles(): Promise<Vehicle[]> {
   try {
     const vehiclesQuery = query(
-      collection(db, COLLECTION_NAME),
+      collection(getDb(), COLLECTION_NAME),
       orderBy('dateAdded', 'desc')
     );
     

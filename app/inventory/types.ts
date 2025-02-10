@@ -21,7 +21,7 @@ export interface Vehicle {
   status: "AVAILABLE" | "DEPOSIT" | "SOLD" | "PENDING_RECON" // UI enum
   statusData: {
     current: "Available" | "Pending Recon" | "Deposit" | "Sold" // Firebase enum
-    updatedAt: string
+    updatedAt: { seconds: number; nanoseconds: number } | string
     updatedBy: {
       uid: string
       name: string
@@ -110,8 +110,8 @@ export interface Vehicle {
   }
 
   // UI Date Fields
-  dateAdded: string // Maps to metadata.createdAt
-  lastStatusUpdate: string // Maps to statusData.updatedAt
+  dateAdded: { seconds: number; nanoseconds: number } | string // Maps to metadata.createdAt
+  lastStatusUpdate: { seconds: number; nanoseconds: number } | string // Maps to statusData.updatedAt
 
   // Vehicle Compliance
   needsSmog?: boolean // Indicates if the vehicle needs smog certification

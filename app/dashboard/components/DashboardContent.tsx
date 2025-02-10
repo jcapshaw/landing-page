@@ -6,6 +6,7 @@ import ProjectedStats from './ProjectedStats';
 import HotProspects from './HotProspects';
 import MonthYearSelect from './MonthYearSelect';
 import SalesTable from './SalesTable';
+import InventorySummary from './InventorySummary';
 
 export default function DashboardContent() {
   const currentDate = new Date();
@@ -21,7 +22,7 @@ export default function DashboardContent() {
         onYearChange={setSelectedYear}
       />
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="p-6 bg-white rounded-lg shadow-md">
           <MTDStats />
         </div>
@@ -30,6 +31,9 @@ export default function DashboardContent() {
         </div>
         <div className="p-6 bg-white rounded-lg shadow-md">
           <HotProspects />
+        </div>
+        <div className="p-6 bg-white rounded-lg shadow-md">
+          <InventorySummary />
         </div>
       </div>
 

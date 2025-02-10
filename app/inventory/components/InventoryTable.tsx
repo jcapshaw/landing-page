@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import {
   Select,
@@ -35,18 +36,17 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
     dateSold: string
   }) => {
     if (selectedVehicle) {
-      const now = new Date().toISOString()
       const mockUser = { uid: "mock-user", name: "Mock User" } // Replace with actual user data
       const updatedVehicle: Vehicle = {
         ...selectedVehicle,
         status: "SOLD",
         statusData: {
           current: "Sold",
-          updatedAt: now,
+          updatedAt: new Date().toISOString(),
           updatedBy: mockUser,
           soldDetails
         },
-        lastStatusUpdate: now
+        lastStatusUpdate: new Date().toISOString()
       }
       onVehicleUpdate(updatedVehicle)
       setShowSoldModal(false)
@@ -61,18 +61,17 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
     depositAmount: number
   }) => {
     if (selectedVehicle) {
-      const now = new Date().toISOString()
       const mockUser = { uid: "mock-user", name: "Mock User" } // Replace with actual user data
       const updatedVehicle: Vehicle = {
         ...selectedVehicle,
         status: "DEPOSIT",
         statusData: {
           current: "Deposit",
-          updatedAt: now,
+          updatedAt: new Date().toISOString(),
           updatedBy: mockUser,
           depositDetails
         },
-        lastStatusUpdate: now
+        lastStatusUpdate: new Date().toISOString()
       }
       onVehicleUpdate(updatedVehicle)
       setShowDepositModal(false)
@@ -143,8 +142,9 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
                   {vehicle.engineSize && ` - ${vehicle.engineSize}`}
                 </div>
               </td>
-              <td className="px-6 py-4">
-                <div className="text-sm">
+              <td className="px-6 py-4 whitespace-nowrap text-center">
+                <div className="flex flex-col items-center text-xs gap-1">
+                  <div className="w-4 h-4 border border-gray-300 rounded" style={{ backgroundColor: vehicle.exteriorColor }}></div>
                   <div>{vehicle.exteriorColor}</div>
                 </div>
               </td>
@@ -155,8 +155,12 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-center">
-                <div className="text-sm font-medium">
-                  {vehicle.hasLift || vehicle.hasWheels || vehicle.hasTires || vehicle.hasPaintMatch || vehicle.hasLeather || vehicle.hasOther ? "YES" : "NO"}
+                <div className="flex justify-center">
+                  {vehicle.hasLift || vehicle.hasWheels || vehicle.hasTires || vehicle.hasPaintMatch || vehicle.hasLeather || vehicle.hasOther ? (
+                    <Image src="/liftedtruck.svg" alt="Has adds" width={24} height={24} />
+                  ) : (
+                    <Image src="/noadds.svg" alt="No adds" width={24} height={24} />
+                  )}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-center">
@@ -170,17 +174,16 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
                       setSelectedVehicle(vehicle)
                       setShowSoldModal(true)
                     } else {
-                      const now = new Date().toISOString()
                       const mockUser = { uid: "mock-user", name: "Mock User" } // Replace with actual user data
                       const updatedVehicle: Vehicle = {
                         ...vehicle,
                         status: value,
                         statusData: {
                           current: mapStatusToFirebase(value),
-                          updatedAt: now,
+                          updatedAt: new Date().toISOString(),
                           updatedBy: mockUser
                         },
-                        lastStatusUpdate: now
+                        lastStatusUpdate: new Date().toISOString()
                       }
                       onVehicleUpdate(updatedVehicle)
                     }
