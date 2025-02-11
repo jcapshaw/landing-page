@@ -10,6 +10,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Lifted Trucks Employee Portal",
   description: "Internal portal for Lifted Trucks employees",
+  icons: {
+    icon: '/treadicon.svg'
+  }
 };
 
 export default function RootLayout({ children }: PropsWithChildren): React.ReactNode {
