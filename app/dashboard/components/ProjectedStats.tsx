@@ -17,9 +17,9 @@ interface Benchmarks {
 }
 
 const BENCHMARKS: Benchmarks = {
-  sales: 95,
-  leads: 800,
-  appts: 175
+  sales: 85,
+  leads: 750,
+  appts: 165
 };
 
 export default function ProjectedStats() {
@@ -38,9 +38,9 @@ export default function ProjectedStats() {
     const daysRemaining = lastDay.getDate() - today.getDate();
     
     // Simulated data based on MTD performance
-    const mtdSales = 13; // This should come from actual data
-    const mtdLeads = 105; // This should come from actual data
-    const mtdAppts = 35; // This should come from actual data
+    const mtdSales = 29; // This should come from actual data
+    const mtdLeads = 175; // This should come from actual data
+    const mtdAppts = 45; // This should come from actual data
     const daysPassed = today.getDate();
     
     const dailyAverage = mtdSales / daysPassed;

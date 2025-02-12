@@ -19,9 +19,9 @@ export default function MTDStats() {
   useEffect(() => {
     // Simulated data for now
     setStats({
-      totalSales: 13,
-      totalLeads: 105,
-      conversionRate: 13.7,
+      totalSales: 24,
+      totalLeads: 175,
+      conversionRate: 11.9,
     });
   }, []);
 

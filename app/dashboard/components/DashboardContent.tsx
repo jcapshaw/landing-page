@@ -15,14 +15,16 @@ export default function DashboardContent() {
 
   return (
     <div className="flex flex-col gap-6">
-      <MonthYearSelect
-        selectedMonth={selectedMonth}
-        selectedYear={selectedYear}
-        onMonthChange={setSelectedMonth}
-        onYearChange={setSelectedYear}
-      />
+      <div className="w-1/2">
+        <MonthYearSelect
+          selectedMonth={selectedMonth}
+          selectedYear={selectedYear}
+          onMonthChange={setSelectedMonth}
+          onYearChange={setSelectedYear}
+        />
+      </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="p-6 bg-white rounded-lg shadow-md">
           <MTDStats />
         </div>
