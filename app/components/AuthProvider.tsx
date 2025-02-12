@@ -27,11 +27,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let unsubscribe: (() => void) | undefined;
     
     const setupAuth = async () => {
+      // Wait for auth to be available
+      let retries = 0;
+      const maxRetries = 3;
+      
+      while (!auth && retries < maxRetries) {
+        console.log(`Waiting for auth to initialize... (attempt ${retries + 1}/${maxRetries})`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        retries++;
+      }
+
       if (!auth) {
-        console.error('Auth not initialized yet');
+        console.error('Auth failed to initialize after retries');
         const authError: AuthError = {
           code: 'auth/invalid-auth-instance',
-          message: 'Authentication not properly initialized',
+          message: 'Authentication failed to initialize after multiple attempts',
           customData: { appName: 'default' },
           name: 'AuthError'
         };
@@ -46,10 +56,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           try {
             if (firebaseUser) {
               console.log('User authenticated:', firebaseUser.email);
-              // Get the user's token and set it as a cookie
-              const token = await firebaseUser.getIdToken();
-              document.cookie = `session=${token}; path=/; max-age=${60 * 60 * 24 * 5}`; // 5 days
+              
+              // Get fresh token and set cookie
+              const token = await firebaseUser.getIdToken(true); // Force refresh
+              const cookieValue = `session=${token}; path=/; max-age=${60 * 60 * 24 * 5}; SameSite=Strict; Secure`;
+              document.cookie = cookieValue;
+              console.log('Session cookie set successfully');
 
+              // Get user role and update state
               const tokenResult = await getIdTokenResult(firebaseUser);
               const userWithRole = {
                 ...firebaseUser,
@@ -57,18 +71,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               };
               setUser(userWithRole);
             } else {
-              console.log('No user authenticated');
-              // Clear the session cookie
-              document.cookie = 'session=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+              console.log('No user authenticated, clearing session');
+              document.cookie = 'session=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Strict; Secure';
               setUser(null);
             }
           } catch (err) {
             console.error("Error in auth state change:", err);
             const authError: AuthError = {
               code: 'auth/internal-error',
-              message: err instanceof Error ? err.message : 'Authentication error',
+              message: `Authentication error: ${err instanceof Error ? err.message : 'Unknown error'}`,
               customData: {
-                appName: auth!.app.name,
+                appName: auth?.app?.name || 'default',
               },
               name: 'AuthError'
             };
@@ -81,9 +94,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.error("Auth state change error:", error);
           const authError: AuthError = {
             code: 'auth/internal-error',
-            message: error.message,
+            message: `Auth state change error: ${error.message}`,
             customData: {
-              appName: auth!.app.name,
+              appName: auth?.app?.name || 'default',
             },
             name: 'AuthError'
           };

@@ -13,7 +13,7 @@ const Navbar = () => {
 
   const handleSignOut = async () => {
     try {
-      await signOut(auth!);
+      await signOut(auth);
       router.push("/auth");
     } catch (error) {
       console.error("Error signing out:", error);
