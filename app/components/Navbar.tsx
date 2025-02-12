@@ -50,6 +50,12 @@ const Navbar = () => {
               Hot Prospects
             </Link>
             <Link
+              href="/sales-stats"
+              className="text-sm font-medium text-white hover:text-orange-400"
+            >
+              Sales Stats
+            </Link>
+            <Link
               href="/resources"
               className="text-sm font-medium text-white hover:text-orange-400"
             >
