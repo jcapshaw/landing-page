@@ -13,6 +13,9 @@ const Navbar = () => {
 
   const handleSignOut = async () => {
     try {
+      if (!auth) {
+        throw new Error("Auth instance not initialized");
+      }
       await signOut(auth);
       router.push("/auth");
     } catch (error) {

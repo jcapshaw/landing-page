@@ -13,11 +13,25 @@ import {
   FieldValue,
   arrayUnion,
 } from 'firebase/firestore';
-import firebase_app from './firebase';
-import { auth } from './firebase';
+import firebase_app, { auth } from './firebase';
+
+if (!firebase_app) {
+  throw new Error('Firebase app not initialized');
+}
 
 const db = getFirestore(firebase_app);
 const PROSPECTS_COLLECTION = 'prospects';
+
+// Helper function to check auth
+function checkAuth() {
+  if (!auth) {
+    throw new Error('Auth instance not initialized');
+  }
+  if (!auth.currentUser) {
+    throw new Error('User must be authenticated');
+  }
+  return auth.currentUser;
+}
 
 export interface Note {
   text: string;
@@ -49,11 +63,7 @@ export interface Prospect extends Omit<ProspectData, 'updatedAt' | 'archivedAt'>
 
 export async function addProspect(prospectData: Omit<ProspectData, 'status' | 'updatedAt' | 'archivedAt'>) {
   try {
-    const currentUser = auth.currentUser;
-    if (!currentUser) {
-      throw new Error('User must be authenticated to add prospects');
-    }
-
+    checkAuth();
     const docRef = await addDoc(collection(db, PROSPECTS_COLLECTION), {
       ...prospectData,
       date: prospectData.date,
@@ -69,11 +79,7 @@ export async function addProspect(prospectData: Omit<ProspectData, 'status' | 'u
 
 export async function addNote(id: string, text: string, userName: string) {
   try {
-    const currentUser = auth.currentUser;
-    if (!currentUser) {
-      throw new Error('User must be authenticated to add notes');
-    }
-
+    checkAuth();
     const docRef = doc(db, PROSPECTS_COLLECTION, id);
     const note: Note = {
       text,
@@ -93,11 +99,7 @@ export async function addNote(id: string, text: string, userName: string) {
 
 export async function updateProspect(id: string, prospectData: Partial<ProspectData>) {
   try {
-    const currentUser = auth.currentUser;
-    if (!currentUser) {
-      throw new Error('User must be authenticated to update prospects');
-    }
-
+    checkAuth();
     const docRef = doc(db, PROSPECTS_COLLECTION, id);
     const updateData: Partial<ProspectData> & { updatedAt: FieldValue } = {
       ...prospectData,
@@ -123,11 +125,7 @@ export async function updateProspect(id: string, prospectData: Partial<ProspectD
 
 export async function getActiveProspects(): Promise<Prospect[]> {
   try {
-    const currentUser = auth.currentUser;
-    if (!currentUser) {
-      throw new Error('User must be authenticated to get prospects');
-    }
-
+    checkAuth();
     const q = query(
       collection(db, PROSPECTS_COLLECTION),
       where('status', '==', 'active')

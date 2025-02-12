@@ -25,6 +25,12 @@ export default function HotProspectsPage() {
 
   // Check authentication
   useEffect(() => {
+    if (!auth) {
+      console.error("Auth instance not initialized");
+      router.push('/auth');
+      return;
+    }
+
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (!user) {
         router.push('/auth');
@@ -107,6 +113,9 @@ export default function HotProspectsPage() {
 
   const handleAddNote = async (id: string, text: string) => {
     try {
+      if (!auth) {
+        throw new Error('Auth instance not initialized');
+      }
       const user = auth.currentUser;
       if (!user) {
         throw new Error('User must be authenticated to add notes');
@@ -144,7 +153,7 @@ export default function HotProspectsPage() {
             onEditClick={handleEditClick}
             onDispositionChange={handleDispositionChange}
             onAddNote={handleAddNote}
-            currentUser={auth.currentUser?.displayName || auth.currentUser?.email || 'Unknown User'}
+            currentUser={auth?.currentUser?.displayName || auth?.currentUser?.email || 'Unknown User'}
           />
         </div>
       </div>
