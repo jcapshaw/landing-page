@@ -67,6 +67,12 @@ const Navbar = () => {
             >
               Daily Log
             </Link>
+            <Link
+              href="/service-request"
+              className="text-sm font-medium text-white hover:text-orange-400"
+            >
+              Service Request
+            </Link>
           </>
         )}
         {user ? (
