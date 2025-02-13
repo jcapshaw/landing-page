@@ -89,7 +89,7 @@ export default function SalesStatsContent() {
 
       {selectedPerson && (
         <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4">{selectedPerson.name}'s Performance</h2>
+          <h2 className="text-xl font-semibold mb-4">{selectedPerson.name}&apos;s Performance</h2>
           <div className="h-[400px]">
             <SalesChart data={selectedPerson} />
           </div>
