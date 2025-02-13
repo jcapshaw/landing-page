@@ -11,6 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import SalesChart from './SalesChart'
+import MTDSalesChart from './MTDSalesChart'
 
 interface SalesPerson {
   id: string
@@ -19,6 +20,7 @@ interface SalesPerson {
   mtdAppointments: number
   mtdOpportunities: number
   mtdOutboundCalls: number
+  mtdTracking: number
 }
 
 // Sample data - replace with actual data fetching
@@ -30,6 +32,7 @@ const salesData: SalesPerson[] = [
     mtdAppointments: 15,
     mtdOpportunities: 25,
     mtdOutboundCalls: 120,
+    mtdTracking: Math.round(25 * 0.75), // 75% of opportunities
   },
   {
     id: '2',
@@ -38,6 +41,7 @@ const salesData: SalesPerson[] = [
     mtdAppointments: 20,
     mtdOpportunities: 30,
     mtdOutboundCalls: 150,
+    mtdTracking: Math.round(30 * 0.75), // 75% of opportunities
   },
   // Add more sample data as needed
 ]
@@ -48,14 +52,20 @@ export default function SalesStatsContent() {
   return (
     <div className="space-y-6">
       <Card className="p-6">
+        <div className="h-[300px] mb-6">
+          <MTDSalesChart salesData={salesData} />
+        </div>
+      </Card>
+      <Card className="p-6">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Salesperson</TableHead>
-              <TableHead className="text-right">MTD Sold</TableHead>
-              <TableHead className="text-right">MTD Appt Set</TableHead>
-              <TableHead className="text-right">MTD Opportunities</TableHead>
-              <TableHead className="text-right">MTD Outbound Calls</TableHead>
+              <TableHead className="text-center">Salesperson</TableHead>
+              <TableHead className="text-center">MTD Sold</TableHead>
+              <TableHead className="text-center">MTD Appt Set</TableHead>
+              <TableHead className="text-center">MTD Opportunities</TableHead>
+              <TableHead className="text-center">MTD Tracking</TableHead>
+              <TableHead className="text-center">MTD Outbound Calls</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -65,11 +75,12 @@ export default function SalesStatsContent() {
                 className="cursor-pointer hover:bg-muted/50"
                 onClick={() => setSelectedPerson(person)}
               >
-                <TableCell className="font-medium">{person.name}</TableCell>
-                <TableCell className="text-right">{person.mtdSold}</TableCell>
-                <TableCell className="text-right">{person.mtdAppointments}</TableCell>
-                <TableCell className="text-right">{person.mtdOpportunities}</TableCell>
-                <TableCell className="text-right">{person.mtdOutboundCalls}</TableCell>
+                <TableCell className="font-medium text-center">{person.name}</TableCell>
+                <TableCell className="text-center">{person.mtdSold}</TableCell>
+                <TableCell className="text-center">{person.mtdAppointments}</TableCell>
+                <TableCell className="text-center">{person.mtdOpportunities}</TableCell>
+                <TableCell className="text-center">{person.mtdTracking}</TableCell>
+                <TableCell className="text-center">{person.mtdOutboundCalls}</TableCell>
               </TableRow>
             ))}
           </TableBody>

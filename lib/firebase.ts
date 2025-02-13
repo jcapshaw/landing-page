@@ -19,31 +19,31 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-let firebaseApp: FirebaseApp | undefined;
-let auth: Auth | undefined;
-let db: Firestore | undefined;
-
-// Initialize Firebase only once
-if (!getApps().length) {
-  console.log('Initializing new Firebase app');
-  firebaseApp = initializeApp(firebaseConfig);
-} else {
+const getFirebaseApp = () => {
+  if (!getApps().length) {
+    console.log('Initializing new Firebase app');
+    return initializeApp(firebaseConfig);
+  }
   console.log('Using existing Firebase app');
-  firebaseApp = getApps()[0];
-}
+  return getApps()[0];
+};
 
-auth = getAuth(firebaseApp);
-db = getFirestore(firebaseApp);
+const firebaseApp = getFirebaseApp();
+const auth = getAuth(firebaseApp);
+const db = getFirestore(firebaseApp);
 
-// Set persistence to local (5 days)
+// Set persistence to local (5 days) only on client side
 if (typeof window !== 'undefined') {
-  setPersistence(auth, browserLocalPersistence)
-    .then(() => {
+  // Wrap in try-catch for better error handling
+  (async () => {
+    try {
+      await setPersistence(auth, browserLocalPersistence);
       console.log('Firebase persistence set to local');
-    })
-    .catch((error: Error) => {
+    } catch (error) {
       console.error("Auth persistence error:", error);
-    });
+    }
+  })();
 }
 
-export { auth, db, firebaseApp as default };
+export { auth, db };
+export default firebaseApp;
