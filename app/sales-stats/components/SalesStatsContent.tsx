@@ -64,7 +64,7 @@ export default function SalesStatsContent() {
               <TableHead className="text-center">MTD Sold</TableHead>
               <TableHead className="text-center">MTD Appt Set</TableHead>
               <TableHead className="text-center">MTD Opportunities</TableHead>
-              <TableHead className="text-center">MTD Tracking</TableHead>
+              <TableHead className="text-center">MTD Sold Tracking</TableHead>
               <TableHead className="text-center">MTD Outbound Calls</TableHead>
             </TableRow>
           </TableHeader>
