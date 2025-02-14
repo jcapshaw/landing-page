@@ -8,6 +8,7 @@ import {
   User
 } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDkDSF9Dq50j8LnxENgYyjeXv6edfTtwu0",
@@ -27,11 +28,12 @@ const getFirebaseApp = () => {
   console.log('Using existing Firebase app');
   return getApps()[0];
 };
-
 const firebaseApp = getFirebaseApp();
 const auth = getAuth(firebaseApp);
 const db = getFirestore(firebaseApp);
+const storage = getStorage(firebaseApp);
 
+// Set persistence to local (5 days) only on client side
 // Set persistence to local (5 days) only on client side
 if (typeof window !== 'undefined') {
   // Wrap in try-catch for better error handling
@@ -45,5 +47,5 @@ if (typeof window !== 'undefined') {
   })();
 }
 
-export { auth, db };
+export { auth, db, storage };
 export default firebaseApp;
