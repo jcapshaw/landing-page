@@ -23,27 +23,12 @@ interface SoldModalProps {
   onClose: () => void
   onConfirm: (soldDetails: {
     locationSold: string
-    deskManagerName: string
     salesManagerName: string
     salespersonName: string
     dealNumber: string
     dateSold: string
   }) => void
 }
-
-const deskManagers = [
-  "Michael Johnson",
-  "Sarah Williams",
-  "John Smith",
-  "Jessica Brown"
-]
-
-const salesManagers = [
-  "Robert Brown",
-  "Emily Davis",
-  "David Wilson",
-  "Lisa Anderson"
-]
 
 const salespeople = [
   "Tom White",
@@ -55,7 +40,6 @@ const salespeople = [
 export function SoldModal({ isOpen, onClose, onConfirm }: SoldModalProps) {
   const [formData, setFormData] = useState({
     locationSold: "",
-    deskManagerName: "",
     salesManagerName: "",
     salespersonName: "",
     dealNumber: "",
@@ -69,10 +53,7 @@ export function SoldModal({ isOpen, onClose, onConfirm }: SoldModalProps) {
     if (!formData.locationSold.trim()) {
       newErrors.locationSold = "Location Sold is required"
     }
-    if (!formData.deskManagerName) {
-      newErrors.deskManagerName = "Desk Manager Name is required"
-    }
-    if (!formData.salesManagerName) {
+    if (!formData.salesManagerName.trim()) {
       newErrors.salesManagerName = "Sales Manager Name is required"
     }
     if (!formData.salespersonName) {
@@ -129,47 +110,14 @@ export function SoldModal({ isOpen, onClose, onConfirm }: SoldModalProps) {
             )}
           </div>
           <div className="grid gap-2">
-            <Select
-              value={formData.deskManagerName}
-              onValueChange={(value) =>
-                setFormData({ ...formData, deskManagerName: value })
-              }
-            >
-              <SelectTrigger className={errors.deskManagerName ? "border-red-500" : ""}>
-                <SelectValue placeholder="Select Desk Manager" />
-              </SelectTrigger>
-              <SelectContent>
-                {deskManagers.map((manager) => (
-                  <SelectItem key={manager} value={manager}>
-                    {manager}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.deskManagerName && (
-              <span className="text-xs text-red-500">
-                {errors.deskManagerName}
-              </span>
-            )}
-          </div>
-          <div className="grid gap-2">
-            <Select
+            <Input
+              placeholder="Sales Manager Name"
               value={formData.salesManagerName}
-              onValueChange={(value) =>
-                setFormData({ ...formData, salesManagerName: value })
+              onChange={(e) =>
+                setFormData({ ...formData, salesManagerName: e.target.value })
               }
-            >
-              <SelectTrigger className={errors.salesManagerName ? "border-red-500" : ""}>
-                <SelectValue placeholder="Select Sales Manager" />
-              </SelectTrigger>
-              <SelectContent>
-                {salesManagers.map((manager) => (
-                  <SelectItem key={manager} value={manager}>
-                    {manager}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              className={errors.salesManagerName ? "border-red-500" : ""}
+            />
             {errors.salesManagerName && (
               <span className="text-xs text-red-500">
                 {errors.salesManagerName}
