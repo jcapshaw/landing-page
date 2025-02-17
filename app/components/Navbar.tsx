@@ -107,12 +107,15 @@ const Navbar = () => {
           </>
         )}
         {user ? (
-          <button
-            onClick={handleSignOut}
-            className="bg-orange-500 text-white hover:bg-orange-600 px-4 py-2 rounded-md text-sm font-medium"
-          >
-            Sign Out
-          </button>
+          <div className="flex flex-col items-center">
+            <button
+              onClick={handleSignOut}
+              className="bg-orange-500 text-white hover:bg-orange-600 px-4 py-2 rounded-md text-sm font-medium"
+            >
+              Sign Out
+            </button>
+            <span className="text-xs text-gray-400 mt-1">{user.email}</span>
+          </div>
         ) : (
           <Link
             href="/auth"

@@ -86,26 +86,26 @@ export default function InventorySummary() {
         {Object.entries(summaries).map(([location, summary]) => (
           <div key={location} className="border-b pb-2">
             <h3 className="font-medium text-sm mb-2">{location}</h3>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Total:</span>
-                <span className="font-medium">{summary.total}</span>
+            <div className="grid grid-cols-5 gap-4 text-sm">
+              <div className="text-center">
+                <div className="text-gray-600 mb-1">Total</div>
+                <div className="font-medium">{summary.total}</div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Available:</span>
-                <span className="font-medium text-green-600">{summary.available}</span>
+              <div className="text-center">
+                <div className="text-gray-600 mb-1">Available</div>
+                <div className="font-medium text-green-600">{summary.available}</div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Deposit:</span>
-                <span className="font-medium text-yellow-600">{summary.deposit}</span>
+              <div className="text-center">
+                <div className="text-gray-600 mb-1">Deposit</div>
+                <div className="font-medium text-yellow-600">{summary.deposit}</div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Sold:</span>
-                <span className="font-medium text-blue-600">{summary.sold}</span>
+              <div className="text-center">
+                <div className="text-gray-600 mb-1">Sold</div>
+                <div className="font-medium text-blue-600">{summary.sold}</div>
               </div>
-              <div className="flex justify-between col-span-2">
-                <span className="text-gray-600">Pending Recon:</span>
-                <span className="font-medium text-orange-600">{summary.pendingRecon}</span>
+              <div className="text-center">
+                <div className="text-gray-600 mb-1">Pending Recon</div>
+                <div className="font-medium text-orange-600">{summary.pendingRecon}</div>
               </div>
             </div>
           </div>
