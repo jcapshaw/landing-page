@@ -2,9 +2,20 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow authenticated users to read and write to the dailyLogs collection
+    match /prospects/{prospectId} {
+      allow read, write: if request.auth != null && request.auth.uid != null;
+    }
+    
+    match /vehicles/{vehicleId} {
+      allow read, write: if request.auth != null && request.auth.uid != null;
+    }
+    
     match /dailyLogs/{document=**} {
-      allow read, write: if request.auth != null;
+      allow read, write: if request.auth != null && request.auth.uid != null;
+    }
+    
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

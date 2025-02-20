@@ -1,5 +1,15 @@
 "use client"
 
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -31,6 +41,9 @@ const formSchema = z.object({
   date: z.date({
     required_error: "A date is required.",
   }).nullable().transform(val => val || new Date()),
+  customerName: z.string().min(2, {
+    message: "Customer name must be at least 2 characters.",
+  }),
   hasAppointment: z.enum(["YES", "NO"], {
     required_error: "Please select if this was an appointment.",
   }),
@@ -80,7 +93,7 @@ interface DailyLogFormProps {
   isEditing?: boolean
 }
 
-export default function DailyLogForm({ onSubmit, initialData, isEditing }: DailyLogFormProps) {
+function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormProps) {
   const [isSplit, setIsSplit] = useState(initialData?.isSplit || false)
   const [hasAppointment, setHasAppointment] = useState(initialData?.hasAppointment === "YES")
   const [hasTrade, setHasTrade] = useState(initialData?.hasTrade === "YES" || false)
@@ -378,6 +391,25 @@ export default function DailyLogForm({ onSubmit, initialData, isEditing }: Daily
 
           <FormField
             control={form.control}
+            name="customerName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Customer Name</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="John Doe"
+                    {...field}
+                    className="h-8 text-sm uppercase"
+                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="customerPhone"
             render={({ field }) => (
               <FormItem>
@@ -484,5 +516,24 @@ export default function DailyLogForm({ onSubmit, initialData, isEditing }: Daily
         </div>
       </form>
     </Form>
+  )
+}
+
+export default function DailyLogForm(props: DailyLogFormProps) {
+  return (
+    <Drawer>
+      <DrawerTrigger asChild>
+        <Button variant="outline">Add Store Visit</Button>
+      </DrawerTrigger>
+      <DrawerContent>
+        <DrawerHeader>
+          <DrawerTitle>New Store Visit</DrawerTitle>
+          <DrawerDescription>Add a new store visit to the daily log.</DrawerDescription>
+        </DrawerHeader>
+        <div className="px-4">
+          <DailyLogFormContent {...props} />
+        </div>
+      </DrawerContent>
+    </Drawer>
   )
 }

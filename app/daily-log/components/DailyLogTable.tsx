@@ -12,6 +12,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import { useRouter } from "next/navigation"
 
 interface DailyLogTableProps {
   entries: DailyLogEntry[]
@@ -30,6 +39,27 @@ export function DailyLogTable({
   onEditEntry,
   isLoading
 }: DailyLogTableProps) {
+  const router = useRouter()
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [selectedEntry, setSelectedEntry] = useState<DailyLogEntry | null>(null)
+
+  const handleStatusChange = (entry: DailyLogEntry, value: DailyLogEntry["status"]) => {
+    if (value === "SOLD!") {
+      setSelectedEntry(entry)
+      setDialogOpen(true)
+    } else {
+      onEntryUpdate({ ...entry, status: value })
+    }
+  }
+
+  const handleBoardDeal = () => {
+    if (selectedEntry) {
+      onEntryUpdate({ ...selectedEntry, status: "SOLD!" })
+      router.push(`/sold-log?entry=${selectedEntry.id}`)
+    }
+    setDialogOpen(false)
+  }
+
   // Filter entries for selected date
   const filteredEntries = entries.filter(entry => {
     const entryDate = new Date(entry.date)
@@ -85,7 +115,16 @@ export function DailyLogTable({
             ) : (
               <>
                 {filteredEntries.map((entry) => (
-                  <tr key={entry.id}>
+                  <tr
+                    key={entry.id}
+                    className={
+                      entry.status === "SOLD!"
+                        ? "bg-green-50"
+                        : entry.status === "DEPOSIT"
+                        ? "bg-yellow-50"
+                        : ""
+                    }
+                  >
                     <td className="px-4 py-2 whitespace-nowrap text-xs text-center">
                       {new Date(entry.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </td>
@@ -111,8 +150,11 @@ export function DailyLogTable({
                     <td className="px-4 py-2 whitespace-nowrap text-xs text-center">
                       {entry.voi}
                     </td>
-                    <td className="px-4 py-2 whitespace-nowrap text-xs text-center">
-                      {entry.customerPhone}
+                    <td className="px-4 py-2 whitespace-nowrap text-center">
+                      <div className="text-xs">
+                        <div>{entry.customerName}</div>
+                        <div className="text-gray-500 text-[10px]">{entry.customerPhone}</div>
+                      </div>
                     </td>
                     <td className="px-4 py-2 text-center">
                       <div className="text-xs">
@@ -126,7 +168,7 @@ export function DailyLogTable({
                       <Select
                         value={entry.status}
                         onValueChange={(value: DailyLogEntry["status"]) =>
-                          onEntryUpdate({ ...entry, status: value })
+                          handleStatusChange(entry, value)
                         }
                       >
                         <SelectTrigger className="w-[100px] h-7 text-xs">
@@ -164,6 +206,25 @@ export function DailyLogTable({
           </tbody>
         </table>
       </div>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent aria-describedby="dialog-description">
+          <p id="dialog-description" className="text-sm text-gray-500 mb-4">
+            Click Yes to proceed to the sales log entry form.
+          </p>
+          <DialogHeader>
+            <DialogTitle>Want to board the deal now?</DialogTitle>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              No
+            </Button>
+            <Button onClick={handleBoardDeal}>
+              Yes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

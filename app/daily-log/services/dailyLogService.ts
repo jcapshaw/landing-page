@@ -9,6 +9,7 @@ import {
   updateDoc,
   doc,
   orderBy,
+  getDoc,
 } from 'firebase/firestore';
 
 const COLLECTION_NAME = 'dailyLogs';
@@ -80,6 +81,24 @@ export const updateDailyLogEntry = async (entryId: string, updates: Partial<Dail
     };
   } catch (error) {
     console.error('Error updating daily log entry:', error);
+    throw error;
+  }
+};
+
+export const getDailyLogEntryById = async (entryId: string) => {
+  try {
+    const entryRef = doc(db, COLLECTION_NAME, entryId);
+    const docSnap = await getDoc(entryRef);
+    
+    if (docSnap.exists()) {
+      return {
+        id: docSnap.id,
+        ...docSnap.data()
+      } as DailyLogEntry;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting daily log entry:', error);
     throw error;
   }
 };

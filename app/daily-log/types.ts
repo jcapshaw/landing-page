@@ -10,6 +10,7 @@ export interface DailyLogEntry {
   voi: string
   hasTrade: "YES" | "NO"
   tradeDetails?: string
+  customerName: string
   customerPhone: string
   status: "SOLD!" | "DEPOSIT" | "NO DEAL" | "PENDING"
   createdAt: string

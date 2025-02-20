@@ -104,8 +104,7 @@ export default function DailyLogContent() {
     <div className="container mx-auto py-10 space-y-10">
       <h1 className="text-3xl font-bold">Daily Customer Log</h1>
       
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-semibold mb-6">Add New Entry</h2>
+      <div className="flex justify-end mb-6">
         <DailyLogForm onSubmit={handleNewEntry} />
       </div>
 
