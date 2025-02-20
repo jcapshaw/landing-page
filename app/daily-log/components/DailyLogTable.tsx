@@ -19,6 +19,7 @@ interface DailyLogTableProps {
   onDateChange: (date: Date) => void
   onEntryUpdate: (updatedEntry: DailyLogEntry) => void
   onEditEntry: (entry: DailyLogEntry) => void
+  isLoading: boolean
 }
 
 export function DailyLogTable({ 
@@ -26,7 +27,8 @@ export function DailyLogTable({
   selectedDate, 
   onDateChange,
   onEntryUpdate,
-  onEditEntry
+  onEditEntry,
+  isLoading
 }: DailyLogTableProps) {
   // Filter entries for selected date
   const filteredEntries = entries.filter(entry => {
@@ -50,7 +52,11 @@ export function DailyLogTable({
           />
         </div>
         <div className="text-xs text-gray-500">
-          Showing {filteredEntries.length} entries for {selectedDate.toLocaleDateString()}
+          {isLoading ? (
+            "Loading entries..."
+          ) : (
+            `Showing ${filteredEntries.length} entries for ${selectedDate.toLocaleDateString()}`
+          )}
         </div>
       </div>
 
@@ -70,75 +76,90 @@ export function DailyLogTable({
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredEntries.map((entry) => (
-              <tr key={entry.id}>
-                <td className="px-4 py-2 whitespace-nowrap text-xs text-center">
-                  {new Date(entry.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-xs text-center">
-                  {entry.hasAppointment}
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-center">
-                  <div className="text-xs">
-                    <div>{entry.salesperson}</div>
-                    {entry.isSplit && entry.secondSalesperson && (
-                      <div className="text-gray-500 text-[10px]">Split w/ {entry.secondSalesperson}</div>
-                    )}
-                  </div>
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-xs text-center">
-                  {entry.stockNumber}
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-xs text-center">
-                  {entry.voi}
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-xs text-center">
-                  {entry.customerPhone}
-                </td>
-                <td className="px-4 py-2 text-center">
-                  <div className="text-xs">
-                    <div>{entry.hasTrade}</div>
-                    {entry.hasTrade === "YES" && entry.tradeDetails && (
-                      <div className="text-gray-500 text-[10px]">{entry.tradeDetails}</div>
-                    )}
-                  </div>
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-center">
-                  <Select
-                    value={entry.status}
-                    onValueChange={(value: DailyLogEntry["status"]) =>
-                      onEntryUpdate({ ...entry, status: value })
-                    }
-                  >
-                    <SelectTrigger className="w-[100px] h-7 text-xs">
-                      <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="PENDING" className="text-xs">PENDING</SelectItem>
-                      <SelectItem value="SOLD!" className="text-xs">SOLD!</SelectItem>
-                      <SelectItem value="DEPOSIT" className="text-xs">DEPOSIT</SelectItem>
-                      <SelectItem value="NO DEAL" className="text-xs">NO DEAL</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-center">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-xs h-7 px-2"
-                    onClick={() => onEditEntry(entry)}
-                  >
-                    Edit
-                  </Button>
-                </td>
-              </tr>
-            ))}
-            {filteredEntries.length === 0 && (
+            {isLoading ? (
               <tr>
-                <td colSpan={9} className="px-4 py-2 text-center text-xs text-gray-500">
-                  No entries found for this date
+                <td colSpan={9} className="px-4 py-8 text-center text-sm text-gray-500">
+                  Loading entries...
                 </td>
               </tr>
+            ) : (
+              <>
+                {filteredEntries.map((entry) => (
+                  <tr key={entry.id}>
+                    <td className="px-4 py-2 whitespace-nowrap text-xs text-center">
+                      {new Date(entry.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </td>
+                    <td className="px-4 py-2 whitespace-nowrap text-center">
+                      <div className="text-xs">
+                        <div>{entry.hasAppointment}</div>
+                        {entry.isBeBack && (
+                          <div className="text-gray-500 text-[10px]">Be Back</div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-2 whitespace-nowrap text-center">
+                      <div className="text-xs">
+                        <div>{entry.salesperson}</div>
+                        {entry.isSplit && entry.secondSalesperson && (
+                          <div className="text-gray-500 text-[10px]">Split w/ {entry.secondSalesperson}</div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-2 whitespace-nowrap text-xs text-center">
+                      {entry.stockNumber}
+                    </td>
+                    <td className="px-4 py-2 whitespace-nowrap text-xs text-center">
+                      {entry.voi}
+                    </td>
+                    <td className="px-4 py-2 whitespace-nowrap text-xs text-center">
+                      {entry.customerPhone}
+                    </td>
+                    <td className="px-4 py-2 text-center">
+                      <div className="text-xs">
+                        <div>{entry.hasTrade}</div>
+                        {entry.hasTrade === "YES" && entry.tradeDetails && (
+                          <div className="text-gray-500 text-[10px]">{entry.tradeDetails}</div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-2 whitespace-nowrap text-center">
+                      <Select
+                        value={entry.status}
+                        onValueChange={(value: DailyLogEntry["status"]) =>
+                          onEntryUpdate({ ...entry, status: value })
+                        }
+                      >
+                        <SelectTrigger className="w-[100px] h-7 text-xs">
+                          <SelectValue placeholder="Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="PENDING" className="text-xs">PENDING</SelectItem>
+                          <SelectItem value="SOLD!" className="text-xs">SOLD!</SelectItem>
+                          <SelectItem value="DEPOSIT" className="text-xs">DEPOSIT</SelectItem>
+                          <SelectItem value="NO DEAL" className="text-xs">NO DEAL</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </td>
+                    <td className="px-4 py-2 whitespace-nowrap text-center">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs h-7 px-2"
+                        onClick={() => onEditEntry(entry)}
+                      >
+                        Edit
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+                {!isLoading && filteredEntries.length === 0 && (
+                  <tr>
+                    <td colSpan={9} className="px-4 py-2 text-center text-xs text-gray-500">
+                      No entries found for this date
+                    </td>
+                  </tr>
+                )}
+              </>
             )}
           </tbody>
         </table>

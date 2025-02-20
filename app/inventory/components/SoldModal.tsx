@@ -23,6 +23,7 @@ interface SoldModalProps {
   onClose: () => void
   onConfirm: (soldDetails: {
     locationSold: string
+    deskManagerName: string
     salesManagerName: string
     salespersonName: string
     dealNumber: string
@@ -40,6 +41,7 @@ const salespeople = [
 export function SoldModal({ isOpen, onClose, onConfirm }: SoldModalProps) {
   const [formData, setFormData] = useState({
     locationSold: "",
+    deskManagerName: "",
     salesManagerName: "",
     salespersonName: "",
     dealNumber: "",
@@ -52,6 +54,9 @@ export function SoldModal({ isOpen, onClose, onConfirm }: SoldModalProps) {
     
     if (!formData.locationSold.trim()) {
       newErrors.locationSold = "Location Sold is required"
+    }
+    if (!formData.deskManagerName.trim()) {
+      newErrors.deskManagerName = "Desk Manager Name is required"
     }
     if (!formData.salesManagerName.trim()) {
       newErrors.salesManagerName = "Sales Manager Name is required"
@@ -94,6 +99,19 @@ export function SoldModal({ isOpen, onClose, onConfirm }: SoldModalProps) {
             />
             {errors.locationSold && (
               <span className="text-xs text-red-500">{errors.locationSold}</span>
+            )}
+          </div>
+          <div className="grid gap-2">
+            <Input
+              placeholder="Desk Manager Name"
+              value={formData.deskManagerName}
+              onChange={(e) =>
+                setFormData({ ...formData, deskManagerName: e.target.value })
+              }
+              className={errors.deskManagerName ? "border-red-500" : ""}
+            />
+            {errors.deskManagerName && (
+              <span className="text-xs text-red-500">{errors.deskManagerName}</span>
             )}
           </div>
           <div className="grid gap-2">

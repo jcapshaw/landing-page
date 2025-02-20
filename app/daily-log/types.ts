@@ -13,4 +13,5 @@ export interface DailyLogEntry {
   customerPhone: string
   status: "SOLD!" | "DEPOSIT" | "NO DEAL" | "PENDING"
   createdAt: string
+  isBeBack: boolean
 }
