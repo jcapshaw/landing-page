@@ -6,12 +6,18 @@ import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./AuthProvider";
 import { auth } from "@/lib/firebase";
-import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const Navbar = () => {
   const router = useRouter();
   const { user } = useAuth();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
     try {
@@ -23,6 +29,10 @@ const Navbar = () => {
     } catch (error) {
       console.error("Error signing out:", error);
     }
+  };
+
+  const handleMoreSelect = (value: string) => {
+    router.push(`/${value}`);
   };
 
   return (
@@ -45,65 +55,21 @@ const Navbar = () => {
             >
               Inventory
             </Link>
-            <div className="relative">
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="text-sm font-medium text-white hover:text-orange-400 flex items-center gap-1"
-              >
-                More
-                <svg
-                  className={`w-4 h-4 transition-transform ${
-                    isMenuOpen ? "rotate-180" : ""
-                  }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </button>
-              {isMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-                  <div className="py-1">
-                    <Link
-                      href="/hot-prospects"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Hot Prospects
-                    </Link>
-                    <Link
-                      href="/sales-stats"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Sales Stats
-                    </Link>
-                    <Link
-                      href="/resources"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Resources
-                    </Link>
-                    <Link
-                      href="/daily-log"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Daily Log
-                    </Link>
-                    <Link
-                      href="/service-request"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Service Request
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
+            <Select onValueChange={handleMoreSelect}>
+              <SelectTrigger className="w-[100px] bg-transparent text-white border-none hover:text-orange-400 focus:ring-0">
+                <SelectValue placeholder="More" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="hot-prospects">Hot Prospects</SelectItem>
+                  <SelectItem value="sales-stats">Sales Stats</SelectItem>
+                  <SelectItem value="resources">Resources</SelectItem>
+                  <SelectItem value="daily-log">Daily Log</SelectItem>
+                  <SelectItem value="sold-log">Sold Log</SelectItem>
+                  <SelectItem value="service-request">Service Request</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </>
         )}
         {user ? (
