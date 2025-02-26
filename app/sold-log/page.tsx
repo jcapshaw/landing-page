@@ -360,7 +360,7 @@ export default function SoldLogPage() {
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
           <p>{error}</p>
           <p className="mt-2 text-sm">
-            Make sure you're accessing this page with a valid entry ID in the URL.
+            Make sure you&apos;re accessing this page with a valid entry ID in the URL.
             <br />
             Example: /sold-log?entry=your-entry-id
           </p>
