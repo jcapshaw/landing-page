@@ -27,8 +27,6 @@ const nextConfig = {
     },
     // Optimize for React 19 features
     optimizePackageImports: ['react', 'react-dom'],
-    // Improved image optimization
-    optimizeImages: true,
   },
   // We don't need redirects here as middleware.ts handles authentication and redirects
   // Add CodeSandbox specific configuration

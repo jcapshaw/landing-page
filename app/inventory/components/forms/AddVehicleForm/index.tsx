@@ -144,15 +144,8 @@ export function AddVehicleForm({ onSubmit, onCancel }: AddVehicleFormProps) {
       form.setValue("hasPaintMatch", false)
       form.setValue("hasLeather", false)
       form.setValue("hasOther", false)
-      
       // Reset the entire additions object
       form.setValue("additions", {
-        lift: undefined,
-        wheels: undefined,
-        tires: undefined,
-        paintMatch: undefined,
-        leather: undefined,
-        other: undefined,
         totalPrice: 0
       })
       
@@ -175,14 +168,9 @@ export function AddVehicleForm({ onSubmit, onCancel }: AddVehicleFormProps) {
       return
     }
 
-    try {
-      // Let zod handle the validation through the resolver
-      console.log('Form validation passed, submitting data...')
-      onSubmit(data)
-    } catch (error) {
-      console.error('Error in form submission:', error)
-      alert('Error submitting form. Please check all required fields are filled correctly.')
-    }
+    // Let zod handle the validation through the resolver
+    console.log('Form validation passed, submitting data...')
+    onSubmit(data)
   }
 
   return (
@@ -199,18 +187,27 @@ export function AddVehicleForm({ onSubmit, onCancel }: AddVehicleFormProps) {
           </div>
 
           <div className="flex justify-end space-x-4">
-            <Button variant="outline" onClick={onCancel}>
+            <Button type="button" variant="outline" onClick={onCancel}>
               Cancel
             </Button>
-            <Button type="submit">
+            <Button type="submit" variant="default">
               Add Vehicle
             </Button>
           </div>
         </form>
         <LiftDetailsModal
           isOpen={isLiftModalOpen}
-          onClose={() => setIsLiftModalOpen(false)}
-          onSave={handleLiftDetailsSubmit}
+          onClose={() => {
+            setIsLiftModalOpen(false)
+            // If user closes modal without saving, reset hasLift to false
+            if (form.getValues("liftDescription") === "") {
+              form.setValue("hasLift", false)
+            }
+          }}
+          onSave={(data) => {
+            handleLiftDetailsSubmit(data)
+            setIsLiftModalOpen(false)
+          }}
           initialData={liftDetails}
         />
       </Form>

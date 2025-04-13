@@ -101,7 +101,13 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
   }
 
   return (
-    <div className="overflow-x-auto">
+    <>
+      <style jsx global>{`
+        .no-chevron > svg {
+          display: none !important;
+        }
+      `}</style>
+      <div className="overflow-x-auto">
       <table className="min-w-full bg-white shadow-md rounded-lg">
         <thead className="bg-gray-50">
           <tr>
@@ -119,7 +125,7 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
           {vehicles.map((vehicle) => (
             <tr
               key={vehicle.id}
-              className={`${vehicle.status === "DEPOSIT" ? "bg-yellow-200" : ""} hover:bg-gray-50 transition-colors cursor-pointer`}
+              className={`${vehicle.status === "DEPOSIT" ? "bg-yellow-200" : ""} hover:bg-gray-50 hover:shadow-md transition-colors cursor-pointer`}
               onClick={() => handleEdit(vehicle)}
             >
               <td className="px-4 py-2 whitespace-nowrap text-xs text-center">
@@ -164,6 +170,7 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-center">
+                <div className="flex justify-center">
                 <Select
                   value={vehicle.status}
                   onValueChange={(value: Vehicle["status"]) => {
@@ -189,8 +196,8 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
                     }
                   }}
                 >
-                  <SelectTrigger className="w-[100px] h-7 text-xs py-1">
-                    <SelectValue placeholder="Status" />
+                  <SelectTrigger className="w-[100px] h-7 text-xs py-1 border-0 shadow-none bg-transparent hover:bg-gray-100 focus:ring-0 flex justify-center no-chevron">
+                    <SelectValue placeholder="Status" className="text-center" />
                   </SelectTrigger>
                   <SelectContent className="text-xs">
                     <SelectItem value="AVAILABLE" className="text-xs py-1">Available</SelectItem>
@@ -199,6 +206,7 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
                     <SelectItem value="PENDING_RECON" className="text-xs py-1">Pending Recon</SelectItem>
                   </SelectContent>
                 </Select>
+                </div>
               </td>
             </tr>
           ))}
@@ -231,5 +239,6 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
         onLiftEdit={onLiftEdit}
       />
     </div>
+    </>
   )
 }

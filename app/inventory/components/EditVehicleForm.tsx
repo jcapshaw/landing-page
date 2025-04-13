@@ -218,12 +218,6 @@ export function EditVehicleForm({ vehicle, onSubmit, onCancel, onLiftEdit }: Edi
       
       // Reset the entire additions object
       form.setValue("additions", {
-        lift: undefined,
-        wheels: undefined,
-        tires: undefined,
-        paintMatch: undefined,
-        leather: undefined,
-        other: undefined,
         totalPrice: 0
       })
       

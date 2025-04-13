@@ -68,7 +68,7 @@ export async function updateVehicle(id: string, vehicleData: Partial<Vehicle>) {
     
     // Handle basic fields
     Object.entries(vehicleData).forEach(([key, value]) => {
-      if (key !== 'statusData' && key !== 'metadata') {
+      if (key !== 'statusData' && key !== 'metadata' && key !== 'additions') {
         updateData[key] = value;
       }
     });
@@ -83,6 +83,69 @@ export async function updateVehicle(id: string, vehicleData: Partial<Vehicle>) {
       });
       // Override timestamp fields with server timestamps
       updateData['statusData.updatedAt'] = serverTimestamp();
+    }
+
+    // Handle additions object - filter out undefined values
+    if (vehicleData.additions) {
+      // Handle totalPrice separately
+      if (vehicleData.additions.totalPrice !== undefined) {
+        updateData['additions.totalPrice'] = vehicleData.additions.totalPrice;
+      }
+      
+      // Handle lift
+      if (vehicleData.additions.lift !== undefined) {
+        if (vehicleData.additions.lift === null) {
+          // Use deleteField() to remove the field if it's explicitly set to null
+          updateData['additions.lift'] = null;
+        } else {
+          updateData['additions.lift'] = vehicleData.additions.lift;
+        }
+      }
+      
+      // Handle wheels
+      if (vehicleData.additions.wheels !== undefined) {
+        if (vehicleData.additions.wheels === null) {
+          updateData['additions.wheels'] = null;
+        } else {
+          updateData['additions.wheels'] = vehicleData.additions.wheels;
+        }
+      }
+      
+      // Handle tires
+      if (vehicleData.additions.tires !== undefined) {
+        if (vehicleData.additions.tires === null) {
+          updateData['additions.tires'] = null;
+        } else {
+          updateData['additions.tires'] = vehicleData.additions.tires;
+        }
+      }
+      
+      // Handle paintMatch
+      if (vehicleData.additions.paintMatch !== undefined) {
+        if (vehicleData.additions.paintMatch === null) {
+          updateData['additions.paintMatch'] = null;
+        } else {
+          updateData['additions.paintMatch'] = vehicleData.additions.paintMatch;
+        }
+      }
+      
+      // Handle leather
+      if (vehicleData.additions.leather !== undefined) {
+        if (vehicleData.additions.leather === null) {
+          updateData['additions.leather'] = null;
+        } else {
+          updateData['additions.leather'] = vehicleData.additions.leather;
+        }
+      }
+      
+      // Handle other
+      if (vehicleData.additions.other !== undefined) {
+        if (vehicleData.additions.other === null) {
+          updateData['additions.other'] = null;
+        } else {
+          updateData['additions.other'] = vehicleData.additions.other;
+        }
+      }
     }
 
     // Always update lastStatusUpdate with server timestamp if it's being modified
