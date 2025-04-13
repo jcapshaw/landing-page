@@ -19,6 +19,17 @@ const nextConfig = {
 
     return config;
   },
+  // Next.js 15 specific experimental features
+  experimental: {
+    // Enable server actions with increased payload limit for forms
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+    // Optimize for React 19 features
+    optimizePackageImports: ['react', 'react-dom'],
+    // Improved image optimization
+    optimizeImages: true,
+  },
   // We don't need redirects here as middleware.ts handles authentication and redirects
   // Add CodeSandbox specific configuration
   async headers() {
@@ -34,6 +45,10 @@ const nextConfig = {
       },
     ];
   },
+  // Next.js 15 uses React 19 by default, but we can specify it explicitly
+  reactStrictMode: true,
+  // Improved caching for better performance
+  poweredByHeader: false,
 };
 
 export default nextConfig;
