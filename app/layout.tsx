@@ -1,13 +1,16 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
-import type { Metadata } from "next";
 import type { PropsWithChildren } from "react";
 import NavbarWrapper from "./components/NavbarWrapper";
 import { AuthProvider } from "./components/AuthProvider";
+import { metadata as siteMetadata } from "./metadata";
+import { metadata as homeMetadata } from "./home-metadata";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
+export const metadata = {
+  ...siteMetadata,
+  ...homeMetadata,
   title: "Lifted Trucks Employee Portal",
   description: "Internal portal for Lifted Trucks employees",
   icons: {

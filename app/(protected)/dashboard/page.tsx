@@ -2,21 +2,20 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "./components/AuthProvider";
-import HomeContent from "./components/HomeContent";
+import { useAuth } from "@/app/components/AuthProvider";
+import DashboardContent from "@/app/dashboard/components/DashboardContent";
 
-export default function HomePage() {
+export default function DashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    // If user is authenticated, redirect to dashboard
-    if (!loading && user) {
-      router.push("/dashboard");
+    // If authentication is complete and user is not logged in, redirect to auth
+    if (!loading && !user) {
+      router.push("/auth");
     }
   }, [user, loading, router]);
 
-  // If still loading, show loading state
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -28,6 +27,14 @@ export default function HomePage() {
     );
   }
 
-  // If user is not authenticated, show home content
-  return <HomeContent />;
+  if (!user) {
+    return null; // Will redirect in the useEffect
+  }
+
+  return (
+    <div className="container mx-auto py-8 px-4">
+      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+      <DashboardContent />
+    </div>
+  );
 }

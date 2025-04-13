@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { auth } from "@/lib/firebase";
 import { User, getIdTokenResult, AuthError } from "firebase/auth";
+import { setAuthToken, clearAuthToken, setupFetchInterceptor, resetFetchInterceptor } from "@/lib/auth-utils";
 
 interface AuthContextType {
   user: (User & { role?: string }) | null;
@@ -50,11 +51,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               if (firebaseUser) {
                 console.log('User authenticated:', firebaseUser.email);
                 
-                // Get fresh token and set cookie
+                // Get fresh token
                 const token = await firebaseUser.getIdToken(true); // Force refresh
-                const cookieValue = `session=${token}; path=/; max-age=${60 * 60 * 24 * 5}; SameSite=Strict; Secure`;
-                document.cookie = cookieValue;
-                console.log('Session cookie set successfully');
+                
+                // Store token in localStorage
+                setAuthToken(token);
+                
+                // Set up fetch interceptor
+                setupFetchInterceptor();
+                
+                // Also set the session cookie via API for server-side access
+                try {
+                  const response = await fetch('/api/auth/session', {
+                    method: 'POST',
+                    headers: {
+                      'Authorization': `Bearer ${token}`,
+                      'Content-Type': 'application/json'
+                    }
+                  });
+                  
+                  if (!response.ok) {
+                    console.warn('Failed to set session cookie via API, but client-side auth is still working');
+                  }
+                } catch (error) {
+                  console.warn('Error setting session cookie:', error);
+                }
+                
+                console.log('Auth token set and fetch interceptor configured');
 
                 // Get user role and update state
                 const tokenResult = await getIdTokenResult(firebaseUser);
@@ -65,7 +88,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setUser(userWithRole);
               } else {
                 console.log('No user authenticated, clearing session');
-                document.cookie = 'session=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Strict; Secure';
+                
+                // Clear the token from localStorage
+                clearAuthToken();
+                
+                // Reset fetch interceptor
+                resetFetchInterceptor();
+                
+                // Also clear the session cookie via API
+                try {
+                  await fetch('/api/auth/session', {
+                    method: 'DELETE'
+                  });
+                } catch (error) {
+                  console.warn('Error clearing session cookie:', error);
+                }
+                
                 setUser(null);
               }
             } catch (err) {

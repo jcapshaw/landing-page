@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, ControllerRenderProps, Control } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { setAuthToken, setupFetchInterceptor } from "@/lib/auth-utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 
@@ -77,8 +78,38 @@ export default function AuthForm() {
       
       if (!isRegister && data.email === 'demo@liftedtrucks.com' && data.password === 'password') {
         console.log('Mock login successful');
-        await signInWithEmailAndPassword(auth, data.email, data.password);
+        const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
+        
+        // Get the ID token
+        const token = await userCredential.user.getIdToken();
+        
+        // Store token in localStorage for client-side use
+        setAuthToken(token);
+        
+        // Set up fetch interceptor
+        setupFetchInterceptor();
+        
+        // Set the session cookie via API for server-side access
+        try {
+          const response = await fetch('/api/auth/session', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (!response.ok) {
+            console.warn('Failed to set session cookie via API');
+          }
+        } catch (error) {
+          console.warn('Error setting session cookie:', error);
+        }
+        
         console.log('User signed in successfully');
+        
+        // Redirect to dashboard with token in URL for initial auth
+        router.push(`/dashboard?token=${token}`);
       } else if (isRegister) {
         throw new Error('Registration is disabled in demo mode');
       } else {
@@ -128,9 +159,9 @@ export default function AuthForm() {
             <>
               <div className="grid grid-cols-2 gap-4">
                 <FormField
-                  control={form.control}
+                  control={form.control as unknown as Control<RegisterFormData>}
                   name="firstName"
-                  render={({ field }) => (
+                  render={({ field }: { field: ControllerRenderProps<RegisterFormData, "firstName"> }) => (
                     <FormItem>
                       <FormLabel>First Name</FormLabel>
                       <FormControl>
@@ -141,9 +172,9 @@ export default function AuthForm() {
                   )}
                 />
                 <FormField
-                  control={form.control}
+                  control={form.control as unknown as Control<RegisterFormData>}
                   name="lastName"
-                  render={({ field }) => (
+                  render={({ field }: { field: ControllerRenderProps<RegisterFormData, "lastName"> }) => (
                     <FormItem>
                       <FormLabel>Last Name</FormLabel>
                       <FormControl>
@@ -155,9 +186,9 @@ export default function AuthForm() {
                 />
               </div>
               <FormField
-                control={form.control}
+                control={form.control as unknown as Control<RegisterFormData>}
                 name="phone"
-                render={({ field }) => (
+                render={({ field }: { field: ControllerRenderProps<RegisterFormData, "phone"> }) => (
                   <FormItem>
                     <FormLabel>Phone Number</FormLabel>
                     <FormControl>
@@ -168,9 +199,9 @@ export default function AuthForm() {
                 )}
               />
               <FormField
-                control={form.control}
+                control={form.control as unknown as Control<RegisterFormData>}
                 name="jobTitle"
-                render={({ field }) => (
+                render={({ field }: { field: ControllerRenderProps<RegisterFormData, "jobTitle"> }) => (
                   <FormItem>
                     <FormLabel>Job Title</FormLabel>
                     <FormControl>
@@ -181,9 +212,9 @@ export default function AuthForm() {
                 )}
               />
               <FormField
-                control={form.control}
+                control={form.control as unknown as Control<RegisterFormData>}
                 name="location"
-                render={({ field }) => (
+                render={({ field }: { field: ControllerRenderProps<RegisterFormData, "location"> }) => (
                   <FormItem>
                     <FormLabel>Location</FormLabel>
                     <FormControl>
@@ -199,7 +230,7 @@ export default function AuthForm() {
           <FormField
             control={form.control}
             name="email"
-            render={({ field }) => (
+            render={({ field }: { field: ControllerRenderProps<FormData, "email"> }) => (
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
@@ -217,7 +248,7 @@ export default function AuthForm() {
           <FormField
             control={form.control}
             name="password"
-            render={({ field }) => (
+            render={({ field }: { field: ControllerRenderProps<FormData, "password"> }) => (
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
@@ -235,9 +266,9 @@ export default function AuthForm() {
 
           {isRegister && (
             <FormField
-              control={form.control}
+              control={form.control as unknown as Control<RegisterFormData>}
               name="requestAdmin"
-              render={({ field }) => (
+              render={({ field }: { field: ControllerRenderProps<RegisterFormData, "requestAdmin"> }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                   <FormControl>
                     <Checkbox

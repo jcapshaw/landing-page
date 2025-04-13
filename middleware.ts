@@ -21,16 +21,70 @@ export function middleware(request: NextRequest) {
   // Define public paths that don't require authentication
   const isPublicPath = path === '/' || path === '/auth' || path.includes('/auth?');
 
-  // Get the token from cookies
-  const token = request.cookies.get('session')?.value;
-
+  // Check for authentication in multiple places
+  // 1. First check cookies
+  let token = request.cookies.get('session')?.value;
+  
+  // 2. Then check Authorization header (used by our client-side code)
+  if (!token) {
+    const authHeader = request.headers.get('Authorization');
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7);
+    }
+  }
+  
+  // 3. Finally check for a token in the URL (for initial auth)
+  if (!token && !isPublicPath) {
+    const url = new URL(request.url);
+    token = url.searchParams.get('token') ?? undefined;
+  }
+  
   // Log for debugging
-  console.log('Middleware:', { path, isPublicPath, hasToken: !!token });
+  console.log('Middleware:', {
+    path,
+    isPublicPath,
+    hasToken: !!token,
+    cookieNames: Array.from(request.cookies.getAll()).map(c => c.name),
+    tokenLength: token ? token.length : 0,
+    hasAuthHeader: !!request.headers.get('Authorization')
+  });
+
+  // Create a response object that we can modify
+  let response = NextResponse.next();
+  
+  // If we have a token from any source but not in cookies, set it in the cookie
+  if (token && !request.cookies.get('session')?.value) {
+    response.cookies.set({
+      name: 'session',
+      value: token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24 * 5, // 5 days
+      path: '/',
+      sameSite: 'lax', // Changed from strict to lax for better compatibility
+    });
+    console.log('Set session cookie in middleware');
+  }
 
   // Redirect authenticated users to dashboard if they try to access public paths
   if (isPublicPath && token) {
     console.log('Redirecting authenticated user to dashboard');
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    response = NextResponse.redirect(new URL('/dashboard', request.url));
+    
+    // Ensure the cookie is also set in the redirect response
+    if (token) {
+      response.cookies.set({
+        name: 'session',
+        value: token,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60 * 24 * 5, // 5 days
+        path: '/',
+        sameSite: 'lax',
+      });
+    }
+    
+    return response;
   }
 
   // Redirect unauthenticated users to login if they try to access protected paths
@@ -39,7 +93,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/auth', request.url));
   }
 
-  return NextResponse.next();
+  return response;
 }
 
 // Configure the paths that should be handled by this middleware
