@@ -142,33 +142,36 @@ export default function InventoryPage() {
             className="max-w-md"
           />
           <Select value={selectedStatus} onValueChange={(value: Vehicle["status"] | "ALL") => setSelectedStatus(value)}>
-            <SelectTrigger className="w-[130px]">
+            <SelectTrigger className="w-[130px] h-8 text-xs">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">All Status</SelectItem>
-              <SelectItem value="AVAILABLE">Available</SelectItem>
-              <SelectItem value="DEPOSIT">Deposit</SelectItem>
-              <SelectItem value="SOLD">Sold</SelectItem>
-              <SelectItem value="PENDING_RECON">Pending Recon</SelectItem>
-              <SelectItem value="OTHER">Other</SelectItem>
+            <SelectContent className="text-xs">
+              <SelectItem value="ALL" className="text-xs py-1">All Status</SelectItem>
+              <SelectItem value="AVAILABLE" className="text-xs py-1">Available</SelectItem>
+              <SelectItem value="DEPOSIT" className="text-xs py-1">Deposit</SelectItem>
+              <SelectItem value="SOLD" className="text-xs py-1">Sold</SelectItem>
+              <SelectItem value="PENDING_RECON" className="text-xs py-1">Pending Recon</SelectItem>
+              <SelectItem value="OTHER" className="text-xs py-1">Other</SelectItem>
             </SelectContent>
           </Select>
           <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-            <SelectTrigger className="w-[200px]">
+            <SelectTrigger className="w-[200px] h-8 text-xs">
               <SelectValue placeholder="Location" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">All Locations</SelectItem>
+            <SelectContent className="text-xs">
+              <SelectItem value="ALL" className="text-xs py-1">All Locations</SelectItem>
               {locations.map(location => (
-                <SelectItem key={location} value={location}>
+                <SelectItem key={location} value={location} className="text-xs py-1">
                   {location}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
           <div className="ml-auto">
-            <Button onClick={() => setShowNewVehicleForm(!showNewVehicleForm)}>
+            <Button
+              size="sm"
+              onClick={() => setShowNewVehicleForm(!showNewVehicleForm)}
+            >
               {showNewVehicleForm ? "Cancel" : "Add New Vehicle"}
             </Button>
           </div>
@@ -178,7 +181,51 @@ export default function InventoryPage() {
       {showNewVehicleForm && (
         <div className="bg-white p-6 rounded-lg shadow-md mb-6">
           <AddVehicleForm
-            onSubmit={() => {}}
+            onSubmit={async (data) => {
+              if (!user) return;
+              
+              try {
+                // Prepare the vehicle data with required metadata
+                const vehicleData = {
+                  ...data,
+                  status: "AVAILABLE" as const, // Use const assertion to preserve the literal type
+                  statusData: {
+                    current: "Available" as const,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    updatedBy: { uid: user.uid, name: user.displayName || 'Unknown' }
+                  },
+                  // Create search index for filtering and searching
+                  searchIndex: {
+                    makeModel: `${data.make} ${data.model}`.toLowerCase(),
+                    yearMakeModel: `${data.year} ${data.make} ${data.model}`.toLowerCase(),
+                    priceRange: `${Math.floor(data.totalPrice / 5000) * 5000}`
+                  },
+                  // Add dateAdded field (will be overwritten by serverTimestamp in addVehicle function)
+                  dateAdded: new Date().toISOString(),
+                  metadata: {
+                    createdAt: new Date().toISOString(),
+                    createdBy: { uid: user.uid, name: user.displayName || 'Unknown' },
+                    lastUpdated: new Date().toISOString(),
+                    lastUpdatedBy: { uid: user.uid, name: user.displayName || 'Unknown' }
+                  },
+                  lastStatusUpdate: new Date().toISOString()
+                };
+                
+                // Add the vehicle to the database
+                await addVehicle(vehicleData);
+                
+                // Refresh the vehicles list
+                const updatedVehicles = await getAllVehicles();
+                setVehicles(updatedVehicles);
+                
+                // Close the form
+                setShowNewVehicleForm(false);
+              } catch (error) {
+                console.error('Error adding vehicle:', error);
+                alert('Error adding vehicle. Please try again.');
+              }
+            }}
             onCancel={() => setShowNewVehicleForm(false)}
           />
         </div>

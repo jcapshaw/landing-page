@@ -189,14 +189,14 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
                     }
                   }}
                 >
-                  <SelectTrigger className="w-[100px] h-7 text-xs">
+                  <SelectTrigger className="w-[100px] h-7 text-xs py-1">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="AVAILABLE" className="text-xs">Available</SelectItem>
-                    <SelectItem value="DEPOSIT" className="text-xs">Deposit</SelectItem>
-                    <SelectItem value="SOLD" className="text-xs">Sold</SelectItem>
-                    <SelectItem value="PENDING_RECON" className="text-xs">Pending Recon</SelectItem>
+                  <SelectContent className="text-xs">
+                    <SelectItem value="AVAILABLE" className="text-xs py-1">Available</SelectItem>
+                    <SelectItem value="DEPOSIT" className="text-xs py-1">Deposit</SelectItem>
+                    <SelectItem value="SOLD" className="text-xs py-1">Sold</SelectItem>
+                    <SelectItem value="PENDING_RECON" className="text-xs py-1">Pending Recon</SelectItem>
                   </SelectContent>
                 </Select>
               </td>
