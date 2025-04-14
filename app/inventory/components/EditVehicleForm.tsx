@@ -44,7 +44,7 @@ const vehicleSchema = z.object({
   hasLeather: z.boolean().default(false),
   hasOther: z.boolean().default(false),
   needsSmog: z.boolean().default(false),
-  liftDescription: z.string().optional(),
+  liftDescription: z.string().default(""),
   liftPrice: z.number().optional(),
   description: z.string().optional(),
   additions: z.object({
@@ -189,7 +189,7 @@ export function EditVehicleForm({ vehicle, onSubmit, onCancel, onLiftEdit }: Edi
     })
     
     // Set both legacy fields and new additions structure
-    form.setValue("liftDescription", data.liftDescription)
+    form.setValue("liftDescription", data.liftDescription || "")
     form.setValue("liftPrice", data.addsPrice)
     form.setValue("hasLift", data.hasLift)
     form.setValue("hasWheels", data.hasWheels)

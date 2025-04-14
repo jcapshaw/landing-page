@@ -26,7 +26,8 @@ interface FormData {
   location: string;
   customerName: string;
   customerPhone: string;
-  salesContact: string;
+  salesperson: string;
+  salesManager: string;
   itemDetails: string;
   isFunded: boolean;
   isDelivered: boolean;
@@ -59,7 +60,8 @@ const ServiceRequestForm = () => {
     location: '',
     customerName: '',
     customerPhone: '',
-    salesContact: 'Mike',
+    salesperson: '',
+    salesManager: '',
     itemDetails: '',
     isFunded: false,
     isDelivered: false,
@@ -83,7 +85,8 @@ const ServiceRequestForm = () => {
       location: '',
       customerName: '',
       customerPhone: '',
-      salesContact: 'Mike',
+      salesperson: '',
+      salesManager: '',
       itemDetails: '',
       isFunded: false,
       isDelivered: false,
@@ -206,20 +209,24 @@ const ServiceRequestForm = () => {
               />
             </div>
 
-            {/* Sales Contact */}
+            {/* Salesperson */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Sales Contact</label>
-              <Select
-                value={formData.salesContact}
-                onValueChange={(value) => handleSelectChange(value, 'salesContact')}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select sales contact" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Mike">Mike</SelectItem>
-                </SelectContent>
-              </Select>
+              <label className="text-sm font-medium">Salesperson</label>
+              <Input
+                name="salesperson"
+                value={formData.salesperson}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            {/* Sales Manager */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Sales Manager</label>
+              <Input
+                name="salesManager"
+                value={formData.salesManager}
+                onChange={handleInputChange}
+              />
             </div>
 
             {/* Status Checkboxes */}

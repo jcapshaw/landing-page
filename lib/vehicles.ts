@@ -69,7 +69,10 @@ export async function updateVehicle(id: string, vehicleData: Partial<Vehicle>) {
     // Handle basic fields
     Object.entries(vehicleData).forEach(([key, value]) => {
       if (key !== 'statusData' && key !== 'metadata' && key !== 'additions') {
-        updateData[key] = value;
+        // Skip undefined values to prevent Firestore errors
+        if (value !== undefined) {
+          updateData[key] = value;
+        }
       }
     });
 
