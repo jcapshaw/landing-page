@@ -13,8 +13,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import DatePicker from "react-datepicker"
-import "react-datepicker/dist/react-datepicker.css"
+import { FormDatePicker } from "@/components/ui/form-date-picker"
 import { useState, useCallback } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -48,6 +47,7 @@ const formSchema = z.object({
     required_error: "Please select if this was an appointment.",
   }),
   isBeBack: z.boolean().default(false),
+  isBDC: z.boolean().default(false),
   appointmentSalesperson: z.string().min(2, {
     message: "Appointment salesperson name must be at least 2 characters.",
   }).optional(),
@@ -58,6 +58,7 @@ const formSchema = z.object({
   secondSalesperson: z.string().min(2, {
     message: "Second salesperson name must be at least 2 characters.",
   }).optional(),
+  salesManager: z.string().optional(),
   stockNumber: z.string().min(1, {
     message: "Stock number is required.",
   }),
@@ -71,6 +72,7 @@ const formSchema = z.object({
   customerPhone: z.string().min(10, {
     message: "Please enter a valid phone number.",
   }),
+  comments: z.string().optional(),
   status: z.enum(["SOLD!", "DEPOSIT", "NO DEAL", "PENDING"], {
     required_error: "Please select a status.",
   }),
@@ -87,6 +89,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>
 
+
 interface DailyLogFormProps {
   onSubmit?: (data: Omit<DailyLogEntry, 'id' | 'createdAt'>) => void
   initialData?: Partial<DailyLogEntry>
@@ -98,6 +101,7 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
   const [hasAppointment, setHasAppointment] = useState(initialData?.hasAppointment === "YES")
   const [hasTrade, setHasTrade] = useState(initialData?.hasTrade === "YES" || false)
   const [isBeBack, setIsBeBack] = useState(initialData?.isBeBack || false)
+  const [isBDC, setIsBDC] = useState(initialData?.isBDC || false)
 
   const formatPhoneNumber = useCallback((value: string) => {
     const numbers = value.replace(/\D/g, '')
@@ -114,16 +118,20 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
       date: initialData?.date ? new Date(initialData.date) : new Date(),
       hasAppointment: initialData?.hasAppointment || "NO",
       isBeBack: initialData?.isBeBack || false,
+      isBDC: initialData?.isBDC || false,
       appointmentSalesperson: initialData?.appointmentSalesperson || "",
       salesperson: initialData?.salesperson || "",
       isSplit: initialData?.isSplit || false,
-      secondSalesperson: initialData?.secondSalesperson || undefined,
+      secondSalesperson: initialData?.secondSalesperson || "",
+      salesManager: initialData?.salesManager || "",
       stockNumber: initialData?.stockNumber || "",
       voi: initialData?.voi || "",
       hasTrade: initialData?.hasTrade || "NO",
       tradeDetails: initialData?.tradeDetails || "",
       customerPhone: initialData?.customerPhone || "",
+      comments: initialData?.comments || "",
       status: initialData?.status || "PENDING",
+      customerName: initialData?.customerName || "",
     },
   })
 
@@ -168,6 +176,7 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
       setHasTrade(false)
       setHasAppointment(false)
       setIsBeBack(false)
+      setIsBDC(false)
     }
   }
 
@@ -183,91 +192,111 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
             console.error('Form validation errors:', errors);
           }
         )}
-        className="w-full space-y-6 bg-white p-6 rounded-lg shadow-sm"
+        className="w-full space-y-4 bg-white p-4 rounded-lg shadow-sm"
       >
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          <div className="flex space-x-4 md:col-span-3 lg:col-span-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="md:col-span-2 lg:col-span-3 flex flex-wrap gap-3 items-center border-b pb-3 mb-2">
             <FormField
               control={form.control}
               name="date"
               render={({ field }) => (
-                <FormItem className="w-40">
-                  <FormLabel>Date</FormLabel>
-                  <FormControl>
-                    <DatePicker
-                      selected={field.value}
-                      onChange={(date: Date | null) => field.onChange(date || new Date())}
-                      className="flex h-8 w-full rounded-md border border-input bg-background px-3 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      wrapperClassName="w-full"
-                    />
-                  </FormControl>
+                <FormItem className="w-40 mb-0">
+                  <FormLabel className="text-xs">Date</FormLabel>
+                  <FormDatePicker
+                    name="date"
+                    control={form.control}
+                    className="h-8 text-xs"
+                  />
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="hasAppointment"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center space-x-1 space-y-0">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value === "YES"}
-                      onCheckedChange={(checked) => {
-                        field.onChange(checked ? "YES" : "NO");
-                        setHasAppointment(checked as boolean);
-                      }}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Appointment</FormLabel>
-                  </div>
-                </FormItem>
-              )}
-            />
+            <div className="flex flex-wrap gap-4">
+              <FormField
+                control={form.control}
+                name="hasAppointment"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center space-x-1 space-y-0 mb-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value === "YES"}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked ? "YES" : "NO");
+                          setHasAppointment(checked as boolean);
+                        }}
+                      />
+                    </FormControl>
+                    <div className="space-y-0 leading-none">
+                      <FormLabel className="text-xs">Appt</FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="isBeBack"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={(checked) => {
-                        field.onChange(checked);
-                        setIsBeBack(checked as boolean);
-                      }}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Be Back</FormLabel>
-                  </div>
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="isBeBack"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center space-x-1 space-y-0 mb-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked);
+                          setIsBeBack(checked as boolean);
+                        }}
+                      />
+                    </FormControl>
+                    <div className="space-y-0 leading-none">
+                      <FormLabel className="text-xs">Be Back</FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="isSplit"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={(checked) => {
-                        field.onChange(checked);
-                        setIsSplit(checked as boolean);
-                      }}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Split Deal</FormLabel>
-                  </div>
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="isBDC"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center space-x-1 space-y-0 mb-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked);
+                          setIsBDC(checked as boolean);
+                        }}
+                      />
+                    </FormControl>
+                    <div className="space-y-0 leading-none">
+                      <FormLabel className="text-xs">BDC</FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="isSplit"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center space-x-1 space-y-0 mb-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked);
+                          setIsSplit(checked as boolean);
+                        }}
+                      />
+                    </FormControl>
+                    <div className="space-y-0 leading-none">
+                      <FormLabel className="text-xs">Split</FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
 
           <FormField
@@ -275,12 +304,12 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
             name="salesperson"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Salesperson</FormLabel>
+                <FormLabel className="text-xs">Salesperson</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Jane Smith"
                     {...field}
-                    className="h-8 text-sm uppercase"
+                    className="h-8 text-xs uppercase"
                     onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                   />
                 </FormControl>
@@ -295,15 +324,15 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
               name="secondSalesperson"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Second Salesperson</FormLabel>
+                  <FormLabel className="text-xs">Second Salesperson</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="John Doe"
                       {...field}
-                      className="h-8 text-sm uppercase"
+                      className="h-8 text-xs uppercase"
                       onChange={(e) => {
                         const value = e.target.value.toUpperCase();
-                        field.onChange(value || undefined);
+                        field.onChange(value);
                       }}
                     />
                   </FormControl>
@@ -312,6 +341,32 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
               )}
             />
           )}
+
+          <FormField
+            control={form.control}
+            name="salesManager"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs">Sales Manager</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || ""}
+                >
+                  <FormControl>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue placeholder="Select manager" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="MANAGER1">MANAGER 1</SelectItem>
+                    <SelectItem value="MANAGER2">MANAGER 2</SelectItem>
+                    <SelectItem value="MANAGER3">MANAGER 3</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           {hasAppointment && (
             <FormField
@@ -322,7 +377,7 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
                   <FormLabel>Appointment Belongs To</FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    value={field.value || ""}
                   >
                     <FormControl>
                       <SelectTrigger className="h-8">
@@ -438,6 +493,7 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
               <FormItem>
                 <FormLabel>Trade-in</FormLabel>
                 <Select
+                  value={field.value || ""}
                   onValueChange={(value) => {
                     field.onChange(value);
                     setHasTrade(value === "YES");
@@ -469,12 +525,12 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
               name="tradeDetails"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Trade-in Details</FormLabel>
+                  <FormLabel className="text-xs">Trade-in Details</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Year Make Model"
                       {...field}
-                      className="h-8 text-sm uppercase"
+                      className="h-8 text-xs uppercase"
                       onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                     />
                   </FormControl>
@@ -489,10 +545,10 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
             name="status"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Status</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormLabel className="text-xs">Status</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value || ""}>
                   <FormControl>
-                    <SelectTrigger className="h-8">
+                    <SelectTrigger className="h-8 text-xs">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                   </FormControl>
@@ -507,10 +563,28 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="comments"
+            render={({ field }) => (
+              <FormItem className="md:col-span-2 lg:col-span-3">
+                <FormLabel className="text-xs">Comments</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Additional notes or comments"
+                    {...field}
+                    className="h-8 text-xs"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
-        <div className="col-span-1 md:col-span-3 lg:col-span-4 mt-4 flex justify-center">
-          <Button type="submit" className="w-48">
+        <div className="mt-4 flex justify-center">
+          <Button type="submit" className="w-40 h-9 text-sm">
             {isEditing ? "Save Changes" : "Submit"}
           </Button>
         </div>
@@ -526,9 +600,9 @@ export default function DailyLogForm(props: DailyLogFormProps) {
         <Button variant="outline">Add Store Visit</Button>
       </DrawerTrigger>
       <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle>New Store Visit</DrawerTitle>
-          <DrawerDescription>Add a new store visit to the daily log.</DrawerDescription>
+        <DrawerHeader className="py-3">
+          <DrawerTitle className="text-lg">New Store Visit</DrawerTitle>
+          <DrawerDescription className="text-xs">Add a new store visit to the daily log.</DrawerDescription>
         </DrawerHeader>
         <div className="px-4">
           <DailyLogFormContent {...props} />

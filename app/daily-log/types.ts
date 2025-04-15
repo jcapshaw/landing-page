@@ -6,6 +6,7 @@ export interface DailyLogEntry {
   salesperson: string
   isSplit: boolean
   secondSalesperson?: string
+  salesManager?: string
   stockNumber: string
   voi: string
   hasTrade: "YES" | "NO"
@@ -15,4 +16,6 @@ export interface DailyLogEntry {
   status: "SOLD!" | "DEPOSIT" | "NO DEAL" | "PENDING"
   createdAt: string
   isBeBack: boolean
+  isBDC?: boolean
+  comments?: string
 }

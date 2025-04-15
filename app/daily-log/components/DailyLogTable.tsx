@@ -1,8 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import DatePicker from "react-datepicker"
-import "react-datepicker/dist/react-datepicker.css"
+import { DatePicker } from "@/components/ui/date-picker"
 import { DailyLogEntry } from "../types"
 import { Button } from "@/components/ui/button"
 import {
@@ -75,11 +74,13 @@ export function DailyLogTable({
       <div className="flex items-center gap-4">
         <div className="flex-1">
           <h2 className="text-base font-semibold mb-2">Daily Log Entries</h2>
-          <DatePicker
-            selected={selectedDate}
-            onChange={(date: Date | null) => date && onDateChange(date)}
-            className="flex h-8 w-full max-w-[160px] rounded-md border border-input bg-background px-2 py-1 text-xs ring-offset-background file:border-0 file:bg-transparent file:text-xs file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          />
+          <div className="max-w-[240px]">
+            <DatePicker
+              date={selectedDate}
+              onSelect={onDateChange}
+              className="h-8 text-xs"
+            />
+          </div>
         </div>
         <div className="text-xs text-gray-500">
           {isLoading ? (
@@ -97,18 +98,20 @@ export function DailyLogTable({
               <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Time</th>
               <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Appointment</th>
               <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Salesperson</th>
+              <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Manager</th>
               <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Stock #</th>
               <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Vehicle</th>
               <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Customer</th>
               <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Trade</th>
               <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Comments</th>
               <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {isLoading ? (
               <tr>
-                <td colSpan={9} className="px-4 py-8 text-center text-sm text-gray-500">
+                <td colSpan={11} className="px-4 py-8 text-center text-sm text-gray-500">
                   Loading entries...
                 </td>
               </tr>
@@ -131,9 +134,14 @@ export function DailyLogTable({
                     <td className="px-4 py-2 whitespace-nowrap text-center">
                       <div className="text-xs">
                         <div>{entry.hasAppointment}</div>
-                        {entry.isBeBack && (
-                          <div className="text-gray-500 text-[10px]">Be Back</div>
-                        )}
+                        <div className="flex flex-col gap-1">
+                          {entry.isBeBack && (
+                            <div className="text-gray-500 text-[10px]">Be Back</div>
+                          )}
+                          {entry.isBDC && (
+                            <div className="text-blue-500 text-[10px]">BDC</div>
+                          )}
+                        </div>
                       </div>
                     </td>
                     <td className="px-4 py-2 whitespace-nowrap text-center">
@@ -143,6 +151,9 @@ export function DailyLogTable({
                           <div className="text-gray-500 text-[10px]">Split w/ {entry.secondSalesperson}</div>
                         )}
                       </div>
+                    </td>
+                    <td className="px-4 py-2 whitespace-nowrap text-xs text-center">
+                      {entry.salesManager || "-"}
                     </td>
                     <td className="px-4 py-2 whitespace-nowrap text-xs text-center">
                       {entry.stockNumber}
@@ -182,6 +193,9 @@ export function DailyLogTable({
                         </SelectContent>
                       </Select>
                     </td>
+                    <td className="px-4 py-2 whitespace-nowrap text-xs text-center">
+                      {entry.comments || "-"}
+                    </td>
                     <td className="px-4 py-2 whitespace-nowrap text-center">
                       <Button
                         variant="ghost"
@@ -196,7 +210,7 @@ export function DailyLogTable({
                 ))}
                 {!isLoading && filteredEntries.length === 0 && (
                   <tr>
-                    <td colSpan={9} className="px-4 py-2 text-center text-xs text-gray-500">
+                    <td colSpan={11} className="px-4 py-2 text-center text-xs text-gray-500">
                       No entries found for this date
                     </td>
                   </tr>
