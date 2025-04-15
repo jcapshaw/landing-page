@@ -4,6 +4,7 @@ import { useEffect, useState, ReactNode } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useAuth } from "./AuthProvider";
 import { getAuthToken, setupFetchInterceptor } from "@/lib/auth-utils";
+import Spinner from "@/components/ui/loading-spinner";
 
 export default function ProtectedLayout({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -57,8 +58,8 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-blue-600 mb-4"></div>
-          <div className="text-lg font-medium text-gray-700">
+          <Spinner size="medium" />
+          <div className="text-lg font-medium text-gray-700 mt-4">
             Initializing application...
           </div>
           <div className="text-sm text-gray-500 mt-2">

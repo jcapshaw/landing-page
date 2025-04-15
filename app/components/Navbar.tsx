@@ -69,6 +69,7 @@ const Navbar = () => {
                     <SelectItem value="daily-log">Daily Log</SelectItem>
                     <SelectItem value="sold-log">Sold Log</SelectItem>
                     <SelectItem value="service-request">Service Request</SelectItem>
+                    <SelectItem value="loading-demo">Loading Demo</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -90,6 +91,7 @@ const Navbar = () => {
                     <SelectItem value="daily-log">Daily Log</SelectItem>
                     <SelectItem value="sold-log">Sold Log</SelectItem>
                     <SelectItem value="service-request">Service Request</SelectItem>
+                    <SelectItem value="loading-demo">Loading Demo</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>

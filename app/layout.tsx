@@ -5,6 +5,7 @@ import NavbarWrapper from "./components/NavbarWrapper";
 import { AuthProvider } from "./components/AuthProvider";
 import { metadata as siteMetadata } from "./metadata";
 import { metadata as homeMetadata } from "./home-metadata";
+import PageTransition from "@/components/ui/page-transition";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,7 +25,9 @@ export default function RootLayout({ children }: PropsWithChildren): React.React
       <body className={inter.className}>
         <AuthProvider>
           <NavbarWrapper />
-          {children}
+          <PageTransition>
+            {children}
+          </PageTransition>
         </AuthProvider>
       </body>
     </html>
