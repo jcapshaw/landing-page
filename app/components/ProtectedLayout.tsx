@@ -4,7 +4,7 @@ import { useEffect, useState, ReactNode } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useAuth } from "./AuthProvider";
 import { getAuthToken, setupFetchInterceptor } from "@/lib/auth-utils";
-import Spinner from "@/components/ui/loading-spinner";
+import Spinner from "@/components/ui/spinner";
 
 export default function ProtectedLayout({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -53,21 +53,9 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
     }
   }, [user, loading, isInitialized, pathname, router]);
 
-  // Show loading state while authentication is being checked
-  if (loading || !isInitialized) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <Spinner size="medium" />
-          <div className="text-lg font-medium text-gray-700 mt-4">
-            Initializing application...
-          </div>
-          <div className="text-sm text-gray-500 mt-2">
-            Please wait while we set up your session
-          </div>
-        </div>
-      </div>
-    );
+  // Skip showing loading state, but still wait for initialization
+  if (!isInitialized) {
+    return null; // Return empty instead of loading spinner
   }
 
   // If user is authenticated or we're on a public path, render children

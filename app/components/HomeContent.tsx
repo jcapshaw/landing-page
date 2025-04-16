@@ -24,15 +24,9 @@ export default function HomeContent() {
     }
   }, [user, authLoading, router]);
 
-  // Show loading state while either auth is loading or page is transitioning
+  // Skip showing loading state
   if (authLoading || pageLoading) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="mb-4">Loading...</div>
-        </div>
-      </div>
-    );
+    return null; // Return empty instead of loading spinner
   }
 
   return (

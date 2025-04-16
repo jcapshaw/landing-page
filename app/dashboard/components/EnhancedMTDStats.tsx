@@ -85,11 +85,7 @@ export default function EnhancedMTDStats() {
           selectedLocation={selectedLocation}
         />
         
-        {loading ? (
-          <div className="flex justify-center py-8">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-blue-600"></div>
-          </div>
-        ) : (
+        {loading ? null : (
           <>
             <div className="flex mb-4 border-b">
               <button

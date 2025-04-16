@@ -25,15 +25,9 @@ export default function AuthContent() {
     }
   }, [user, authLoading, router]);
 
-  // Show loading state while auth is being determined
+  // Skip showing loading state
   if (authLoading || pageLoading) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="mb-4">Loading authentication...</div>
-        </div>
-      </div>
-    );
+    return null; // Return empty instead of loading spinner
   }
 
   return (

@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from 'react';
-import Spinner from '@/components/ui/loading-spinner';
+import Spinner from '@/components/ui/spinner';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 

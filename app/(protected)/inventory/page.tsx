@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import Spinner from "@/components/ui/loading-spinner";
+import Spinner from "@/components/ui/spinner";
 import {
   Select,
   SelectContent,
@@ -127,12 +127,9 @@ export default function InventoryPage() {
     }
   };
 
+  // Skip showing loading spinner
   if (isLoading) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <Spinner size="medium" />
-      </div>
-    );
+    return null; // Return empty instead of loading spinner
   }
 
   return (

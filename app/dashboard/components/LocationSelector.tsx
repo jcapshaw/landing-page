@@ -49,7 +49,7 @@ export default function LocationSelector({
   }, [onLocationChange, selectedLocation]);
 
   if (loading) {
-    return <div>Loading locations...</div>;
+    return null; // Return empty instead of loading text
   }
 
   return (

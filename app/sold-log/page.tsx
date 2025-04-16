@@ -352,11 +352,7 @@ export default function SoldLogPage() {
         )}
       </div>
       
-      {loading ? (
-        <div className="text-center py-8">
-          <p className="text-gray-500">Loading entry data...</p>
-        </div>
-      ) : error ? (
+      {loading ? null : error ? (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
           <p>{error}</p>
           <p className="mt-2 text-sm">
@@ -419,9 +415,7 @@ export default function SoldLogPage() {
           <div className="bg-white shadow-md rounded-lg p-6 mb-6">
             <h2 className="text-xl font-bold mb-4">Board Deals</h2>
             
-            {loadingDeals ? (
-              <p className="text-gray-500">Loading deals...</p>
-            ) : boardDeals.length === 0 ? (
+            {loadingDeals ? null : boardDeals.length === 0 ? (
               <div className="bg-gray-50 border border-gray-200 rounded p-4 text-center">
                 <p className="text-gray-600">No board deals have been added yet.</p>
                 <p className="text-sm text-gray-500 mt-1">Click the Board Deal button to add a new deal.</p>

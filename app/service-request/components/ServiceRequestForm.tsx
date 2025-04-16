@@ -438,9 +438,7 @@ const ServiceRequestForm = () => {
                 {uploadState.error && (
                   <p className="text-sm text-red-500">{uploadState.error}</p>
                 )}
-                {uploadState.isUploading && (
-                  <p className="text-sm text-blue-500">Uploading files...</p>
-                )}
+                {/* Removed loading indicator for file uploads */}
                 {formData.attachments.length > 0 && (
                   <div className="mt-2">
                     <p className="text-sm font-medium mb-1">Uploaded files:</p>

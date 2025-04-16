@@ -83,9 +83,7 @@ export function DailyLogTable({
           </div>
         </div>
         <div className="text-xs text-gray-500">
-          {isLoading ? (
-            "Loading entries..."
-          ) : (
+          {isLoading ? null : (
             `Showing ${filteredEntries.length} entries for ${selectedDate.toLocaleDateString()}`
           )}
         </div>
@@ -109,13 +107,7 @@ export function DailyLogTable({
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {isLoading ? (
-              <tr>
-                <td colSpan={11} className="px-4 py-8 text-center text-sm text-gray-500">
-                  Loading entries...
-                </td>
-              </tr>
-            ) : (
+            {isLoading ? null : (
               <>
                 {filteredEntries.map((entry) => (
                   <tr

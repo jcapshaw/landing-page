@@ -289,13 +289,7 @@ export default function AuthForm() {
           )}
           
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? (
-              "Loading..."
-            ) : isRegister ? (
-              "Create Account"
-            ) : (
-              "Sign In"
-            )}
+            {isRegister ? "Create Account" : "Sign In"}
           </Button>
         </form>
         <div className="mt-4 text-center text-sm">

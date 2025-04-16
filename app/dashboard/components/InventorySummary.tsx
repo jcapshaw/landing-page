@@ -72,7 +72,7 @@ export default function InventorySummary() {
   }, [])
 
   if (loading) {
-    return <div>Loading inventory summary...</div>
+    return null; // Return empty instead of loading text
   }
 
   if (error) {
