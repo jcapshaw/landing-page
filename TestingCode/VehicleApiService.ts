@@ -1,5 +1,5 @@
 import axios from "axios";
-import IVehicleApiResponse, { IDecoderAttribute } from "../utilities/IVehicleApiResponse";
+import IVehicleApiResponse, { IDecoderAttribute } from "./IVehicleApiResponse";
 
 const VPIC_API_URI = "https://vpic.nhtsa.dot.gov/api/vehicles/";
 const RESPONSE_FORMAT = "json";

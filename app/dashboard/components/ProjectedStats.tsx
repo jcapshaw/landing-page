@@ -91,7 +91,7 @@ export default function ProjectedStats() {
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2.5">
               <div
-                className={`h-2.5 rounded-full transition-all duration-[1500ms] delay-[1000ms] ${getProgressColor(calculateProgress(stats.projectedSales, BENCHMARKS.sales))}`}
+                className={`h-2.5 rounded-full transition-all duration-\[1500ms\] delay-\[1000ms\] ${getProgressColor(calculateProgress(stats.projectedSales, BENCHMARKS.sales))}`}
                 style={{ width: `${calculateProgress(stats.projectedSales, BENCHMARKS.sales)}%` }}
               ></div>
             </div>
@@ -111,7 +111,7 @@ export default function ProjectedStats() {
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2.5">
               <div
-                className={`h-2.5 rounded-full transition-all duration-[1500ms] delay-[1000ms] ${getProgressColor(calculateProgress(stats.projectedLeads, BENCHMARKS.leads))}`}
+                className={`h-2.5 rounded-full transition-all duration-\[1500ms\] delay-\[1000ms\] ${getProgressColor(calculateProgress(stats.projectedLeads, BENCHMARKS.leads))}`}
                 style={{ width: `${calculateProgress(stats.projectedLeads, BENCHMARKS.leads)}%` }}
               ></div>
             </div>
@@ -131,7 +131,7 @@ export default function ProjectedStats() {
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2.5">
               <div
-                className={`h-2.5 rounded-full transition-all duration-[1500ms] delay-[1000ms] ${getProgressColor(calculateProgress(stats.projectedAppts, BENCHMARKS.appts))}`}
+                className={`h-2.5 rounded-full transition-all duration-\[1500ms\] delay-\[1000ms\] ${getProgressColor(calculateProgress(stats.projectedAppts, BENCHMARKS.appts))}`}
                 style={{ width: `${calculateProgress(stats.projectedAppts, BENCHMARKS.appts)}%` }}
               ></div>
             </div>

@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState, ReactNode } from "react";
+import { useEffect, useState, ReactNode, Suspense } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useAuth } from "./AuthProvider";
 import { getAuthToken, setupFetchInterceptor } from "@/lib/auth-utils";
 import Spinner from "@/components/ui/spinner";
 
-export default function ProtectedLayout({ children }: { children: ReactNode }) {
+// Create a client component that uses useSearchParams
+function ProtectedLayoutContent({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -60,4 +61,13 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
 
   // If user is authenticated or we're on a public path, render children
   return <>{children}</>;
+}
+
+// Main component that wraps the content in a Suspense boundary
+export default function ProtectedLayout({ children }: { children: ReactNode }) {
+  return (
+    <Suspense fallback={null}>
+      <ProtectedLayoutContent>{children}</ProtectedLayoutContent>
+    </Suspense>
+  );
 }
