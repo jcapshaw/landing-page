@@ -27,19 +27,19 @@ export default function MTDStats() {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-4">Month to Date Stats</h2>
+      <h2 className="dashboard-title mb-4">Month to Date Stats</h2>
       <div className="space-y-4">
         <div>
-          <p className="text-gray-600">Total Sold</p>
-          <p className="text-2xl font-bold">{stats.totalSales.toLocaleString()}</p>
+          <p className="dashboard-subtitle">Total Sold</p>
+          <p className="text-xl font-bold">{stats.totalSales.toLocaleString()}</p>
         </div>
         <div>
-          <p className="text-gray-600">Total Leads</p>
-          <p className="text-2xl font-bold">{stats.totalLeads}</p>
+          <p className="dashboard-subtitle">Total Leads</p>
+          <p className="text-xl font-bold">{stats.totalLeads}</p>
         </div>
         <div>
-          <p className="text-gray-600">Conversion Rate</p>
-          <p className="text-2xl font-bold">{stats.conversionRate}%</p>
+          <p className="dashboard-subtitle">Conversion Rate</p>
+          <p className="text-xl font-bold">{stats.conversionRate}%</p>
         </div>
       </div>
     </div>

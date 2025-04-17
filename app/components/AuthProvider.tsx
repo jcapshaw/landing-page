@@ -5,6 +5,33 @@ import { auth } from "@/lib/firebase";
 import { User, getIdTokenResult, AuthError } from "firebase/auth";
 import { setAuthToken, clearAuthToken, setupFetchInterceptor, resetFetchInterceptor } from "@/lib/auth-utils";
 
+// Helper function to get token with retry mechanism
+const getTokenWithRetry = async (user: User, maxRetries = 3): Promise<string> => {
+  let retryCount = 0;
+  let lastError: any;
+
+  while (retryCount < maxRetries) {
+    try {
+      // Exponential backoff delay
+      if (retryCount > 0) {
+        const delay = Math.pow(2, retryCount) * 1000; // 2s, 4s, 8s
+        console.log(`Retry attempt ${retryCount}/${maxRetries} after ${delay}ms delay`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+
+      // Try to get a fresh token
+      return await user.getIdToken(true);
+    } catch (error) {
+      lastError = error;
+      console.warn(`Token refresh attempt ${retryCount + 1}/${maxRetries} failed:`, error);
+      retryCount++;
+    }
+  }
+
+  // If we've exhausted all retries, throw the last error
+  throw lastError;
+};
+
 interface AuthContextType {
   user: (User & { role?: string }) | null;
   loading: boolean;
@@ -51,8 +78,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               if (firebaseUser) {
                 console.log('User authenticated:', firebaseUser.email);
                 
-                // Get fresh token
-                const token = await firebaseUser.getIdToken(true); // Force refresh
+                let token: string;
+                
+                // Try to get a fresh token with retry mechanism
+                try {
+                  // First try to get a fresh token
+                  token = await getTokenWithRetry(firebaseUser);
+                  console.log('Successfully refreshed auth token');
+                } catch (tokenError) {
+                  console.warn('Failed to refresh token, using existing token:', tokenError);
+                  
+                  // If refresh fails, try to get the current token without forcing refresh
+                  try {
+                    token = await firebaseUser.getIdToken(false);
+                    console.log('Using existing token');
+                  } catch (currentTokenError) {
+                    console.error('Failed to get current token:', currentTokenError);
+                    throw currentTokenError; // Re-throw to be caught by outer catch
+                  }
+                }
                 
                 // Store token in localStorage
                 setAuthToken(token);
@@ -80,12 +124,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 console.log('Auth token set and fetch interceptor configured');
 
                 // Get user role and update state
-                const tokenResult = await getIdTokenResult(firebaseUser);
-                const userWithRole = {
-                  ...firebaseUser,
-                  role: tokenResult.claims.role as string
-                };
-                setUser(userWithRole);
+                try {
+                  const tokenResult = await getIdTokenResult(firebaseUser);
+                  const userWithRole = {
+                    ...firebaseUser,
+                    role: tokenResult.claims.role as string
+                  };
+                  setUser(userWithRole);
+                } catch (roleError) {
+                  console.warn('Failed to get user role, proceeding without role:', roleError);
+                  setUser(firebaseUser);
+                }
               } else {
                 console.log('No user authenticated, clearing session');
                 
@@ -108,11 +157,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               }
             } catch (err) {
               console.error("Error in auth state change:", err);
+              
+              // Provide more detailed error information
+              let errorCode = 'auth/internal-error';
+              let errorMessage = err instanceof Error ? err.message : 'Unknown error';
+              
+              // Check for specific Firebase auth errors
+              if (err instanceof Error && errorMessage.includes('auth/request-had-invalid-authentication-credentials')) {
+                errorCode = 'auth/invalid-credentials';
+                errorMessage = 'Authentication session expired or invalid. This can happen after long periods of inactivity. Please try signing out and signing in again.';
+                
+                // Clear the token to force a fresh login
+                clearAuthToken();
+                resetFetchInterceptor();
+                
+                // Attempt to clear the session cookie
+                try {
+                  fetch('/api/auth/session', { method: 'DELETE' }).catch(e =>
+                    console.warn('Failed to clear session cookie:', e)
+                  );
+                } catch (clearError) {
+                  console.warn('Error during session cleanup:', clearError);
+                }
+              }
+              
+              // Log additional details for debugging but don't include in the error object
+              if (err instanceof Error) {
+                console.error('Original error details:', err.toString());
+              }
+              
               const authError: AuthError = {
-                code: 'auth/internal-error',
-                message: `Authentication error: ${err instanceof Error ? err.message : 'Unknown error'}`,
+                code: errorCode,
+                message: errorMessage,
                 customData: {
-                  appName: auth?.app?.name || 'default',
+                  appName: auth?.app?.name || 'default'
                 },
                 name: 'AuthError'
               };
@@ -123,11 +201,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           },
           (error: Error) => {
             console.error("Auth state change error:", error);
+            
+            // Provide more detailed error information
+            let errorCode = 'auth/internal-error';
+            let errorMessage = `Auth state change error: ${error.message}`;
+            
+            // Check for specific Firebase auth errors
+            if (error.message.includes('auth/request-had-invalid-authentication-credentials')) {
+              errorCode = 'auth/invalid-credentials';
+              errorMessage = 'Authentication session expired or invalid. Please try signing out and signing in again.';
+              
+              // Clear the token to force a fresh login
+              clearAuthToken();
+              resetFetchInterceptor();
+            }
+            
             const authError: AuthError = {
-              code: 'auth/internal-error',
-              message: `Auth state change error: ${error.message}`,
+              code: errorCode,
+              message: errorMessage,
               customData: {
-                appName: auth?.app?.name || 'default',
+                appName: auth?.app?.name || 'default'
               },
               name: 'AuthError'
             };
@@ -137,12 +230,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         );
       } catch (error) {
         console.error('Error in setupAuth:', error);
+        
+        // Provide more detailed error information
+        let errorCode = 'auth/setup-failed';
+        let errorMessage = error instanceof Error ? error.message : 'Failed to setup authentication';
+        
+        // Log additional details for debugging
+        if (error instanceof Error) {
+          console.error('Setup error details:', error.toString());
+        }
+        
         const authError: AuthError = {
-          code: 'auth/setup-failed',
-          message: error instanceof Error ? error.message : 'Failed to setup authentication',
+          code: errorCode,
+          message: errorMessage,
           customData: { appName: 'default' },
           name: 'AuthError'
         };
+        
         setError(authError);
         setLoading(false);
       }
@@ -157,10 +261,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
   }, []);
-
-  if (error) {
-    return <div>Authentication Error: {error.message}</div>;
-  }
 
   return (
     <AuthContext.Provider value={{ user, loading, error }}>

@@ -111,14 +111,14 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
       <table className="min-w-full bg-white shadow-md rounded-lg">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Location</th>
-            <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-            <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Vehicle</th>
-            <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Specs</th>
-            <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Color</th>
-            <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Price/Mileage</th>
-            <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Adds?</th>
-            <th className="px-4 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th className="px-6 py-3 text-center text-sm font-medium text-gray-600 uppercase tracking-wider">Location</th>
+            <th className="px-6 py-3 text-center text-sm font-medium text-gray-600 uppercase tracking-wider">Stock</th>
+            <th className="px-6 py-3 text-center text-sm font-medium text-gray-600 uppercase tracking-wider">Vehicle</th>
+            <th className="px-6 py-3 text-center text-sm font-medium text-gray-600 uppercase tracking-wider">Specs</th>
+            <th className="px-8 py-4 text-center text-sm font-medium text-gray-600 uppercase tracking-wider">Color</th>
+            <th className="px-6 py-3 text-center text-sm font-medium text-gray-600 uppercase tracking-wider">Price/Mileage</th>
+            <th className="px-8 py-4 text-center text-sm font-medium text-gray-600 uppercase tracking-wider">Adds?</th>
+            <th className="px-8 py-4 text-center text-sm font-medium text-gray-600 uppercase tracking-wider">Status</th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
@@ -128,39 +128,39 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
               className={`${vehicle.status === "DEPOSIT" ? "bg-yellow-200" : ""} hover:bg-gray-50 hover:shadow-md transition-colors cursor-pointer`}
               onClick={() => handleEdit(vehicle)}
             >
-              <td className="px-4 py-2 whitespace-nowrap text-xs text-center">
+              <td className="px-6 py-3 whitespace-nowrap text-sm text-center">
                 {vehicle.location}
               </td>
-              <td className="px-4 py-2 whitespace-nowrap text-xs text-center">
+              <td className="px-6 py-3 whitespace-nowrap text-sm text-center">
                 {vehicle.stock}
               </td>
-              <td className="px-4 py-2 whitespace-nowrap text-center">
-                <div className="text-xs">
+              <td className="px-6 py-3 whitespace-nowrap text-center">
+                <div className="text-sm">
                   <div className="font-medium">{vehicle.year} {vehicle.make}</div>
                   <div>{vehicle.model} {vehicle.trim}</div>
                   <div className="text-gray-500">{vehicle.vin}</div>
                 </div>
               </td>
-              <td className="px-4 py-2 whitespace-nowrap text-center">
-                <div className="text-xs">
+              <td className="px-6 py-3 whitespace-nowrap text-center">
+                <div className="text-sm">
                   <div>{vehicle.transmission}</div>
                   <div>{vehicle.fuelType}</div>
                   {vehicle.engineSize && ` - ${vehicle.engineSize}`}
                 </div>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-center">
-                <div className="flex flex-col items-center text-xs gap-1">
+              <td className="px-8 py-4 whitespace-nowrap text-center">
+                <div className="flex flex-col items-center text-sm gap-1">
                   <div className="w-4 h-4 border border-gray-300 rounded" style={{ backgroundColor: vehicle.exteriorColor }}></div>
                   <div>{vehicle.exteriorColor}</div>
                 </div>
               </td>
-              <td className="px-4 py-2 whitespace-nowrap text-center">
-                <div className="text-xs">
+              <td className="px-6 py-3 whitespace-nowrap text-center">
+                <div className="text-sm">
                   <div className="font-medium">${vehicle.totalPrice.toLocaleString()}</div>
                   <div>{vehicle.mileage.toLocaleString()} miles</div>
                 </div>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-center">
+              <td className="px-8 py-4 whitespace-nowrap text-center">
                 <div className="flex justify-center">
                   {vehicle.hasLift || vehicle.hasWheels || vehicle.hasTires || vehicle.hasPaintMatch || vehicle.hasLeather || vehicle.hasOther ? (
                     <Image src="/liftedtruck.svg" alt="Has adds" width={24} height={24} />
@@ -169,43 +169,43 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
                   )}
                 </div>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-center">
+              <td className="px-8 py-4 whitespace-nowrap text-center">
                 <div className="flex justify-center">
-                <Select
-                  value={vehicle.status}
-                  onValueChange={(value: Vehicle["status"]) => {
-                    if (value === "DEPOSIT") {
-                      setSelectedVehicle(vehicle)
-                      setShowDepositModal(true)
-                    } else if (value === "SOLD") {
-                      setSelectedVehicle(vehicle)
-                      setShowSoldModal(true)
-                    } else {
-                      const mockUser = { uid: "mock-user", name: "Mock User" } // Replace with actual user data
-                      const updatedVehicle: Vehicle = {
-                        ...vehicle,
-                        status: value,
-                        statusData: {
-                          current: mapStatusToFirebase(value),
-                          updatedAt: new Date().toISOString(),
-                          updatedBy: mockUser
-                        },
-                        lastStatusUpdate: new Date().toISOString()
+                  <Select
+                    value={vehicle.status}
+                    onValueChange={(value: Vehicle["status"]) => {
+                      if (value === "DEPOSIT") {
+                        setSelectedVehicle(vehicle)
+                        setShowDepositModal(true)
+                      } else if (value === "SOLD") {
+                        setSelectedVehicle(vehicle)
+                        setShowSoldModal(true)
+                      } else {
+                        const mockUser = { uid: "mock-user", name: "Mock User" } // Replace with actual user data
+                        const updatedVehicle: Vehicle = {
+                          ...vehicle,
+                          status: value,
+                          statusData: {
+                            current: mapStatusToFirebase(value),
+                            updatedAt: new Date().toISOString(),
+                            updatedBy: mockUser
+                          },
+                          lastStatusUpdate: new Date().toISOString()
+                        }
+                        onVehicleUpdate(updatedVehicle)
                       }
-                      onVehicleUpdate(updatedVehicle)
-                    }
-                  }}
-                >
-                  <SelectTrigger className="w-[100px] h-7 text-xs py-1 border-0 shadow-none bg-transparent hover:bg-gray-100 focus:ring-0 flex justify-center no-chevron">
-                    <SelectValue placeholder="Status" className="text-center" />
-                  </SelectTrigger>
-                  <SelectContent className="text-xs">
-                    <SelectItem value="AVAILABLE" className="text-xs py-1">Available</SelectItem>
-                    <SelectItem value="DEPOSIT" className="text-xs py-1">Deposit</SelectItem>
-                    <SelectItem value="SOLD" className="text-xs py-1">Sold</SelectItem>
-                    <SelectItem value="PENDING_RECON" className="text-xs py-1">Pending Recon</SelectItem>
-                  </SelectContent>
-                </Select>
+                    }}
+                  >
+                    <SelectTrigger className="w-[100px] h-7 text-sm py-2 border-0 shadow-none bg-transparent hover:bg-gray-100 focus:ring-0 flex justify-center no-chevron">
+                      <SelectValue placeholder="Status" className="text-center" />
+                    </SelectTrigger>
+                    <SelectContent className="text-sm">
+                      <SelectItem value="AVAILABLE" className="text-sm py-2">Available</SelectItem>
+                      <SelectItem value="DEPOSIT" className="text-sm py-2">Deposit</SelectItem>
+                      <SelectItem value="SOLD" className="text-sm py-2">Sold</SelectItem>
+                      <SelectItem value="PENDING_RECON" className="text-sm py-2">Pending Recon</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </td>
             </tr>

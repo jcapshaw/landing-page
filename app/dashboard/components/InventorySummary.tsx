@@ -81,30 +81,30 @@ export default function InventorySummary() {
 
   return (
     <div>
-      <h2 className="text-lg font-semibold mb-4">Inventory by Location</h2>
+      <h2 className="dashboard-title mb-4 mt-4 ml-4">Inventory by Location</h2>
       <div className="space-y-4">
         {Object.entries(summaries).map(([location, summary]) => (
-          <div key={location} className="border-b pb-2">
-            <h3 className="font-medium text-sm mb-2">{location}</h3>
+          <div key={location} className="border rounded-lg p-6 bg-card shadow-sm mb-4 ml-4 mr-4">
+            <h3 className="dashboard-subtitle mb-2">{location}</h3>
             <div className="grid grid-cols-5 gap-4 text-sm">
               <div className="text-center">
-                <div className="text-gray-600 mb-1">Total</div>
+                <div className="dashboard-subtitle mb-1">Total</div>
                 <div className="font-medium">{summary.total}</div>
               </div>
               <div className="text-center">
-                <div className="text-gray-600 mb-1">Available</div>
+                <div className="dashboard-subtitle mb-1">Available</div>
                 <div className="font-medium text-green-600">{summary.available}</div>
               </div>
               <div className="text-center">
-                <div className="text-gray-600 mb-1">Deposit</div>
+                <div className="dashboard-subtitle mb-1">Deposit</div>
                 <div className="font-medium text-yellow-600">{summary.deposit}</div>
               </div>
               <div className="text-center">
-                <div className="text-gray-600 mb-1">Sold</div>
+                <div className="dashboard-subtitle mb-1">Sold</div>
                 <div className="font-medium text-blue-600">{summary.sold}</div>
               </div>
               <div className="text-center">
-                <div className="text-gray-600 mb-1">Pending Recon</div>
+                <div className="dashboard-subtitle mb-1">Pending Recon</div>
                 <div className="font-medium text-orange-600">{summary.pendingRecon}</div>
               </div>
             </div>

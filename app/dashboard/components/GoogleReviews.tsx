@@ -92,7 +92,7 @@ export default function GoogleReviews() {
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-xl font-semibold">Google Reviews</CardTitle>
+        <CardTitle className="dashboard-title">Google Reviews</CardTitle>
       </CardHeader>
       <CardContent>
         {loading ? null : (
@@ -101,8 +101,8 @@ export default function GoogleReviews() {
               <div className="flex mr-2">
                 {renderStars(Math.round(averageRating))}
               </div>
-              <span className="text-2xl font-bold">{averageRating}</span>
-              <span className="text-gray-500 ml-2">out of 5</span>
+              <span className="text-xl font-bold">{averageRating}</span>
+              <span className="dashboard-subtitle ml-2">out of 5</span>
             </div>
             
             <div className="space-y-4">

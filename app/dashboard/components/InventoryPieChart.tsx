@@ -127,7 +127,7 @@ export default function InventoryPieChart() {
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-xl font-semibold">Inventory Distribution</CardTitle>
+        <CardTitle className="dashboard-title">Inventory Distribution</CardTitle>
       </CardHeader>
       <CardContent>
         <LocationSelector 

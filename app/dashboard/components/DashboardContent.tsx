@@ -7,6 +7,7 @@ import HotProspects from './HotProspects';
 import InventorySummary from './InventorySummary';
 import InventoryPieChart from './InventoryPieChart';
 import GoogleReviews from './GoogleReviews';
+import { Card } from '@/components/ui/card';
 
 export default function DashboardContent() {
   return (
@@ -16,7 +17,9 @@ export default function DashboardContent() {
           <EnhancedMTDStats />
         </div>
         <div className="col-span-1">
-          <ProjectedStats />
+          <Card>
+            <ProjectedStats />
+          </Card>
         </div>
         <div className="col-span-1">
           <HotProspects />
@@ -32,9 +35,9 @@ export default function DashboardContent() {
         </div>
       </div>
       
-      <div className="p-6 bg-white rounded-lg shadow-md">
+      <Card>
         <InventorySummary />
-      </div>
+      </Card>
     </div>
   );
 }

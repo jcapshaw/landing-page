@@ -77,7 +77,7 @@ export default function EnhancedMTDStats() {
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-xl font-semibold">Sales Statistics</CardTitle>
+        <CardTitle className="dashboard-title">Sales Statistics</CardTitle>
       </CardHeader>
       <CardContent>
         <LocationSelector 
@@ -105,30 +105,30 @@ export default function EnhancedMTDStats() {
             {activeTab === 'mtd' ? (
               <div className="space-y-4">
                 <div>
-                  <p className="text-gray-600">Total Sold</p>
+                  <p className="dashboard-subtitle">Total Sold</p>
                   <p className="text-2xl font-bold">{mtdStats.totalSales.toLocaleString()}</p>
                 </div>
                 <div>
-                  <p className="text-gray-600">Total Leads</p>
+                  <p className="dashboard-subtitle">Total Leads</p>
                   <p className="text-2xl font-bold">{mtdStats.totalLeads}</p>
                 </div>
                 <div>
-                  <p className="text-gray-600">Conversion Rate</p>
+                  <p className="dashboard-subtitle">Conversion Rate</p>
                   <p className="text-2xl font-bold">{mtdStats.conversionRate}%</p>
                 </div>
               </div>
             ) : (
               <div className="space-y-4">
                 <div>
-                  <p className="text-gray-600">Total Sold</p>
+                  <p className="dashboard-subtitle">Total Sold</p>
                   <p className="text-2xl font-bold">{todayStats.totalSales.toLocaleString()}</p>
                 </div>
                 <div>
-                  <p className="text-gray-600">Total Leads</p>
+                  <p className="dashboard-subtitle">Total Leads</p>
                   <p className="text-2xl font-bold">{todayStats.totalLeads}</p>
                 </div>
                 <div>
-                  <p className="text-gray-600">Conversion Rate</p>
+                  <p className="dashboard-subtitle">Conversion Rate</p>
                   <p className="text-2xl font-bold">{todayStats.conversionRate}%</p>
                 </div>
               </div>
