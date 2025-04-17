@@ -35,7 +35,7 @@ export interface Vehicle {
     soldDetails?: {
       locationSold: string
       deskManagerName: string
-      salesManagerName: string
+      financeManagerName: string
       salespersonName: string
       dealNumber: string
       dateSold: string

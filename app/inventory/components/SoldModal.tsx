@@ -24,7 +24,7 @@ interface SoldModalProps {
   onConfirm: (soldDetails: {
     locationSold: string
     deskManagerName: string
-    salesManagerName: string
+    financeManagerName: string
     salespersonName: string
     dealNumber: string
     dateSold: string
@@ -42,7 +42,7 @@ export function SoldModal({ isOpen, onClose, onConfirm }: SoldModalProps) {
   const [formData, setFormData] = useState({
     locationSold: "",
     deskManagerName: "",
-    salesManagerName: "",
+    financeManagerName: "",
     salespersonName: "",
     dealNumber: "",
     dateSold: "",
@@ -58,8 +58,8 @@ export function SoldModal({ isOpen, onClose, onConfirm }: SoldModalProps) {
     if (!formData.deskManagerName.trim()) {
       newErrors.deskManagerName = "Desk Manager Name is required"
     }
-    if (!formData.salesManagerName.trim()) {
-      newErrors.salesManagerName = "Sales Manager Name is required"
+    if (!formData.financeManagerName.trim()) {
+      newErrors.financeManagerName = "Finance Manager Name is required"
     }
     if (!formData.salespersonName) {
       newErrors.salespersonName = "Salesperson Name is required"
@@ -129,16 +129,16 @@ export function SoldModal({ isOpen, onClose, onConfirm }: SoldModalProps) {
           </div>
           <div className="grid gap-2">
             <Input
-              placeholder="Sales Manager Name"
-              value={formData.salesManagerName}
+              placeholder="Finance Manager Name"
+              value={formData.financeManagerName}
               onChange={(e) =>
-                setFormData({ ...formData, salesManagerName: e.target.value })
+                setFormData({ ...formData, financeManagerName: e.target.value })
               }
-              className={errors.salesManagerName ? "border-red-500" : ""}
+              className={errors.financeManagerName ? "border-red-500" : ""}
             />
-            {errors.salesManagerName && (
+            {errors.financeManagerName && (
               <span className="text-xs text-red-500">
-                {errors.salesManagerName}
+                {errors.financeManagerName}
               </span>
             )}
           </div>

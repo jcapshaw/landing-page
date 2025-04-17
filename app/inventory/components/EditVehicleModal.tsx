@@ -119,6 +119,7 @@ export function EditVehicleModal({
             <VehicleDetailsView
               vehicle={vehicle}
               depositDetails={vehicle.status === "DEPOSIT" ? vehicle.statusData?.depositDetails : undefined}
+              soldDetails={vehicle.status === "SOLD" ? vehicle.statusData?.soldDetails : undefined}
             />
             <DialogFooter className="mt-6">
               <Button variant="outline" onClick={handleClose}>

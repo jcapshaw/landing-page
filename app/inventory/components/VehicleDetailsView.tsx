@@ -10,9 +10,17 @@ interface VehicleDetailsViewProps {
     dealNumber: string
     depositAmount: number
   }
+  soldDetails?: {
+    locationSold: string
+    deskManagerName: string
+    financeManagerName: string
+    salespersonName: string
+    dealNumber: string
+    dateSold: string
+  }
 }
 
-export function VehicleDetailsView({ vehicle, depositDetails }: VehicleDetailsViewProps) {
+export function VehicleDetailsView({ vehicle, depositDetails, soldDetails }: VehicleDetailsViewProps) {
   const formatDate = (date: { seconds: number; nanoseconds: number } | string) => {
     try {
       let timestamp: Date;
@@ -76,6 +84,39 @@ export function VehicleDetailsView({ vehicle, depositDetails }: VehicleDetailsVi
                 <div>
                   <span className="font-medium block">Amount:</span>
                   <span className="text-gray-600">${depositDetails.depositAmount.toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Sold Information - if available */}
+          {soldDetails && (
+            <div className="bg-green-50 rounded p-3 text-xs border mb-2">
+              <h3 className="font-medium mb-2 text-sm">Sold Information</h3>
+              <div className="grid grid-cols-4 gap-2">
+                <div>
+                  <span className="font-medium block">Location:</span>
+                  <span className="text-gray-600">{soldDetails.locationSold}</span>
+                </div>
+                <div>
+                  <span className="font-medium block">Desk Manager:</span>
+                  <span className="text-gray-600">{soldDetails.deskManagerName}</span>
+                </div>
+                <div>
+                  <span className="font-medium block">Finance Manager:</span>
+                  <span className="text-gray-600">{soldDetails.financeManagerName}</span>
+                </div>
+                <div>
+                  <span className="font-medium block">Salesperson:</span>
+                  <span className="text-gray-600">{soldDetails.salespersonName}</span>
+                </div>
+                <div>
+                  <span className="font-medium block">Deal #:</span>
+                  <span className="text-gray-600">{soldDetails.dealNumber}</span>
+                </div>
+                <div>
+                  <span className="font-medium block">Date Sold:</span>
+                  <span className="text-gray-600">{formatDate(soldDetails.dateSold)}</span>
                 </div>
               </div>
             </div>
