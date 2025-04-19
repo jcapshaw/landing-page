@@ -21,7 +21,11 @@ interface User {
   uid: string
   email: string
   displayName: string
+  firstName?: string
+  lastName?: string
+  jobTitle?: string
   role?: string
+  location?: string
   disabled?: boolean
   createdAt?: string
   lastSignIn?: string
@@ -31,7 +35,11 @@ interface NewUserForm {
   email: string
   password: string
   displayName: string
+  firstName: string
+  lastName: string
+  jobTitle: string
   role: string
+  location: string
 }
 
 export default function AdminUsersPage() {
@@ -44,7 +52,11 @@ export default function AdminUsersPage() {
     email: "",
     password: "",
     displayName: "",
-    role: "salesperson"
+    firstName: "",
+    lastName: "",
+    jobTitle: "",
+    role: "salesperson",
+    location: "LTP"
   })
   const [createUserLoading, setCreateUserLoading] = useState(false)
   const [createUserError, setCreateUserError] = useState<string | null>(null)
@@ -83,6 +95,30 @@ export default function AdminUsersPage() {
       fetchUsers()
     }
   }, [user])
+
+  const handleLocationChange = async (userId: string, newLocation: string) => {
+    try {
+      // Call the API to update the user
+      const response = await fetchWithAuth(`/api/auth/users/${userId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ location: newLocation }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to update location")
+      }
+
+      // Update the local state
+      setUsers(users.map(u => u.uid === userId ? { ...u, location: newLocation } : u))
+    } catch (err) {
+      console.error("Error updating location:", err)
+      setError(err instanceof Error ? err.message : "Failed to update location")
+    }
+  }
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     try {
@@ -142,7 +178,11 @@ export default function AdminUsersPage() {
         email: "",
         password: "",
         displayName: "",
-        role: "salesperson"
+        firstName: "",
+        lastName: "",
+        jobTitle: "",
+        role: "salesperson",
+        location: "LTP"
       })
       setShowNewUserDialog(false)
     } catch (err) {
@@ -254,13 +294,37 @@ export default function AdminUsersPage() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="displayName" className="text-right">
-                  Name
+                <Label htmlFor="firstName" className="text-right">
+                  First Name
                 </Label>
                 <Input
-                  id="displayName"
-                  value={newUser.displayName}
-                  onChange={(e) => setNewUser({ ...newUser, displayName: e.target.value })}
+                  id="firstName"
+                  value={newUser.firstName}
+                  onChange={(e) => setNewUser({ ...newUser, firstName: e.target.value, displayName: `${e.target.value} ${newUser.lastName}` })}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="lastName" className="text-right">
+                  Last Name
+                </Label>
+                <Input
+                  id="lastName"
+                  value={newUser.lastName}
+                  onChange={(e) => setNewUser({ ...newUser, lastName: e.target.value, displayName: `${newUser.firstName} ${e.target.value}` })}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="jobTitle" className="text-right">
+                  Job Title
+                </Label>
+                <Input
+                  id="jobTitle"
+                  value={newUser.jobTitle}
+                  onChange={(e) => setNewUser({ ...newUser, jobTitle: e.target.value })}
                   className="col-span-3"
                   required
                 />
@@ -273,13 +337,38 @@ export default function AdminUsersPage() {
                   value={newUser.role}
                   onValueChange={(value) => setNewUser({ ...newUser, role: value })}
                 >
-                  <SelectTrigger className="col-span-3">
+                  <SelectTrigger className="col-span-3 text-xs text-center">
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="text-xs">
                     <SelectItem value="admin">Admin</SelectItem>
                     <SelectItem value="manager">Manager</SelectItem>
                     <SelectItem value="salesperson">Salesperson</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="location" className="text-right">
+                  Location
+                </Label>
+                <Select
+                  value={newUser.location}
+                  onValueChange={(value) => setNewUser({ ...newUser, location: value })}
+                >
+                  <SelectTrigger className="col-span-3 text-xs text-center">
+                    <SelectValue placeholder="Select location" />
+                  </SelectTrigger>
+                  <SelectContent className="text-xs">
+                    <SelectItem value="LTP">LTP</SelectItem>
+                    <SelectItem value="LTM">LTM</SelectItem>
+                    <SelectItem value="LTS">LTS</SelectItem>
+                    <SelectItem value="LTT">LTT</SelectItem>
+                    <SelectItem value="LTSA">LTSA</SelectItem>
+                    <SelectItem value="LTHV">LTHV</SelectItem>
+                    <SelectItem value="LTHB">LTHB</SelectItem>
+                    <SelectItem value="LTG">LTG</SelectItem>
+                    <SelectItem value="LTH">LTH</SelectItem>
+                    <SelectItem value="LTMK">LTMK</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -309,32 +398,41 @@ export default function AdminUsersPage() {
           <table className="min-w-full bg-white shadow-md rounded-lg">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">User</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Email</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Role</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Status</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Last Sign In</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Actions</th>
+                <th className="px-4 py-2 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">Name</th>
+                <th className="px-4 py-2 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">Email</th>
+                <th className="px-4 py-2 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">Job Title</th>
+                <th className="px-4 py-2 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">Role</th>
+                <th className="px-4 py-2 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">Location</th>
+                <th className="px-4 py-2 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">Status</th>
+                <th className="px-4 py-2 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">Last Sign In</th>
+                <th className="px-4 py-2 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {users.map((user) => (
                 <tr key={user.uid} className={user.disabled ? "bg-gray-100" : ""}>
-                  <td className="px-4 py-2 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{user.displayName || "N/A"}</div>
+                  <td className="px-4 py-2 whitespace-nowrap text-center">
+                    <div className="text-sm font-medium text-gray-900">
+                      {user.firstName && user.lastName
+                        ? `${user.firstName} ${user.lastName}`
+                        : user.displayName || "N/A"}
+                    </div>
                   </td>
-                  <td className="px-4 py-2 whitespace-nowrap">
+                  <td className="px-4 py-2 whitespace-nowrap text-center">
                     <div className="text-sm text-gray-500">{user.email}</div>
                   </td>
-                  <td className="px-4 py-2 whitespace-nowrap">
+                  <td className="px-4 py-2 whitespace-nowrap text-center">
+                    <div className="text-sm text-gray-500">{user.jobTitle || "N/A"}</div>
+                  </td>
+                  <td className="px-4 py-2 whitespace-nowrap text-center">
                     <Select
                       value={user.role || "none"}
                       onValueChange={(value) => handleRoleChange(user.uid, value)}
                     >
-                      <SelectTrigger className="w-[180px]">
+                      <SelectTrigger className="w-[140px] text-xs mx-auto">
                         <SelectValue placeholder="Select role" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="text-xs">
                         <SelectItem value="none">No Role</SelectItem>
                         <SelectItem value="admin">Admin</SelectItem>
                         <SelectItem value="manager">Manager</SelectItem>
@@ -342,17 +440,39 @@ export default function AdminUsersPage() {
                       </SelectContent>
                     </Select>
                   </td>
-                  <td className="px-4 py-2 whitespace-nowrap">
+                  <td className="px-4 py-2 whitespace-nowrap text-center">
+                    <Select
+                      value={user.location || "LTP"}
+                      onValueChange={(value) => handleLocationChange(user.uid, value)}
+                    >
+                      <SelectTrigger className="w-[140px] text-xs mx-auto">
+                        <SelectValue placeholder="Select location" />
+                      </SelectTrigger>
+                      <SelectContent className="text-xs">
+                        <SelectItem value="LTP">LTP</SelectItem>
+                        <SelectItem value="LTM">LTM</SelectItem>
+                        <SelectItem value="LTS">LTS</SelectItem>
+                        <SelectItem value="LTT">LTT</SelectItem>
+                        <SelectItem value="LTSA">LTSA</SelectItem>
+                        <SelectItem value="LTHV">LTHV</SelectItem>
+                        <SelectItem value="LTHB">LTHB</SelectItem>
+                        <SelectItem value="LTG">LTG</SelectItem>
+                        <SelectItem value="LTH">LTH</SelectItem>
+                        <SelectItem value="LTMK">LTMK</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </td>
+                  <td className="px-4 py-2 whitespace-nowrap text-center">
                     <div className={`text-sm ${user.disabled ? "text-red-500" : "text-green-500"}`}>
                       {user.disabled ? "Disabled" : "Active"}
                     </div>
                   </td>
-                  <td className="px-4 py-2 whitespace-nowrap">
+                  <td className="px-4 py-2 whitespace-nowrap text-center">
                     <div className="text-sm text-gray-500">
                       {user.lastSignIn ? new Date(user.lastSignIn).toLocaleString() : "Never"}
                     </div>
                   </td>
-                  <td className="px-4 py-2 whitespace-nowrap space-x-2">
+                  <td className="px-4 py-2 whitespace-nowrap space-x-2 text-center">
                     <Button
                       variant={user.disabled ? "default" : "outline"}
                       size="sm"

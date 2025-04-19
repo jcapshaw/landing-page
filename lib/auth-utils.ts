@@ -74,6 +74,10 @@ export function hasRole(user: any, role: UserRole): boolean {
 }
 
 export function isAdmin(user: any): boolean {
+  // Temporarily allow demo@liftedtrucks.com to access admin pages
+  if (user?.email === 'demo@liftedtrucks.com') {
+    return true;
+  }
   return hasRole(user, 'admin');
 }
 

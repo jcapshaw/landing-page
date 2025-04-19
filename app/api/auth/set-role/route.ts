@@ -21,7 +21,11 @@ export async function POST(request: NextRequest) {
     
     // Verify the token and check if the user is an admin
     const decodedToken = await admin.auth().verifyIdToken(token);
-    if (!decodedToken.role || decodedToken.role !== 'admin') {
+    
+    // Temporarily allow demo@liftedtrucks.com to perform admin actions
+    const isDemo = decodedToken.email === 'demo@liftedtrucks.com';
+    
+    if ((!decodedToken.role || decodedToken.role !== 'admin') && !isDemo) {
       return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
     

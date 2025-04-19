@@ -26,7 +26,11 @@ export async function GET(
     
     // Verify the token and check if the user is an admin
     const decodedToken = await admin.auth().verifyIdToken(token);
-    if (!decodedToken.role || decodedToken.role !== 'admin') {
+    
+    // Temporarily allow demo@liftedtrucks.com to perform admin actions
+    const isDemo = decodedToken.email === 'demo@liftedtrucks.com';
+    
+    if ((!decodedToken.role || decodedToken.role !== 'admin') && !isDemo) {
       return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
     
@@ -89,13 +93,17 @@ export async function PATCH(
     
     // Verify the token and check if the user is an admin
     const decodedToken = await admin.auth().verifyIdToken(token);
-    if (!decodedToken.role || decodedToken.role !== 'admin') {
+    
+    // Temporarily allow demo@liftedtrucks.com to perform admin actions
+    const isDemo = decodedToken.email === 'demo@liftedtrucks.com';
+    
+    if ((!decodedToken.role || decodedToken.role !== 'admin') && !isDemo) {
       return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
     
     // Get the request body
     const body = await request.json();
-    const { displayName, email, password, role, disabled } = body;
+    const { displayName, email, password, firstName, lastName, jobTitle, role, disabled, location } = body;
     
     // Update user in Firebase Auth
     const updateParams: any = {};
@@ -133,8 +141,12 @@ export async function PATCH(
     
     if (displayName !== undefined) firestoreUpdateData.displayName = displayName;
     if (email !== undefined) firestoreUpdateData.email = email;
+    if (firstName !== undefined) firestoreUpdateData.firstName = firstName;
+    if (lastName !== undefined) firestoreUpdateData.lastName = lastName;
+    if (jobTitle !== undefined) firestoreUpdateData.jobTitle = jobTitle;
     if (role !== undefined) firestoreUpdateData.role = role;
     if (disabled !== undefined) firestoreUpdateData.disabled = disabled;
+    if (location !== undefined) firestoreUpdateData.location = location;
     
     await admin.firestore().collection('users').doc(userId).set(firestoreUpdateData, { merge: true });
     
@@ -184,7 +196,11 @@ export async function DELETE(
     
     // Verify the token and check if the user is an admin
     const decodedToken = await admin.auth().verifyIdToken(token);
-    if (!decodedToken.role || decodedToken.role !== 'admin') {
+    
+    // Temporarily allow demo@liftedtrucks.com to perform admin actions
+    const isDemo = decodedToken.email === 'demo@liftedtrucks.com';
+    
+    if ((!decodedToken.role || decodedToken.role !== 'admin') && !isDemo) {
       return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
     
