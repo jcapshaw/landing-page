@@ -11,6 +11,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { getFirebaseAdmin } from "@/lib/firebase-admin"
 import { fetchWithAuth } from "@/lib/auth-utils"
 
@@ -19,6 +22,16 @@ interface User {
   email: string
   displayName: string
   role?: string
+  disabled?: boolean
+  createdAt?: string
+  lastSignIn?: string
+}
+
+interface NewUserForm {
+  email: string
+  password: string
+  displayName: string
+  role: string
 }
 
 export default function AdminUsersPage() {
@@ -26,6 +39,15 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [showNewUserDialog, setShowNewUserDialog] = useState(false)
+  const [newUser, setNewUser] = useState<NewUserForm>({
+    email: "",
+    password: "",
+    displayName: "",
+    role: "salesperson"
+  })
+  const [createUserLoading, setCreateUserLoading] = useState(false)
+  const [createUserError, setCreateUserError] = useState<string | null>(null)
 
   // Redirect if not admin
   useEffect(() => {
@@ -39,18 +61,19 @@ export default function AdminUsersPage() {
     const fetchUsers = async () => {
       try {
         setLoading(true)
-        // In a real app, you would fetch this from an API endpoint
-        // For demo purposes, we'll use mock data
-        const mockUsers: User[] = [
-          { uid: "user1", email: "admin@example.com", displayName: "Admin User", role: "admin" },
-          { uid: "user2", email: "manager@example.com", displayName: "Manager User", role: "manager" },
-          { uid: "user3", email: "sales@example.com", displayName: "Sales User", role: "salesperson" },
-          { uid: "user4", email: "newuser@example.com", displayName: "New User" },
-        ]
-        setUsers(mockUsers)
+        // Fetch users from the API
+        const response = await fetchWithAuth("/api/auth/users")
+        
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || "Failed to fetch users")
+        }
+        
+        const userData = await response.json()
+        setUsers(userData.users)
       } catch (err) {
         console.error("Error fetching users:", err)
-        setError("Failed to load users")
+        setError(err instanceof Error ? err.message : "Failed to load users")
       } finally {
         setLoading(false)
       }
@@ -63,13 +86,13 @@ export default function AdminUsersPage() {
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     try {
-      // Call the API to update the user's role
-      const response = await fetchWithAuth("/api/auth/set-role", {
-        method: "POST",
+      // Call the API to update the user
+      const response = await fetchWithAuth(`/api/auth/users/${userId}`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userId, role: newRole }),
+        body: JSON.stringify({ role: newRole }),
       })
 
       if (!response.ok) {
@@ -85,6 +108,99 @@ export default function AdminUsersPage() {
     }
   }
 
+  const handleCreateUser = async () => {
+    try {
+      setCreateUserLoading(true)
+      setCreateUserError(null)
+
+      // Validate form
+      if (!newUser.email || !newUser.password || !newUser.displayName) {
+        throw new Error("Please fill in all required fields")
+      }
+
+      // Call the API to create the user
+      const response = await fetchWithAuth("/api/auth/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newUser),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to create user")
+      }
+
+      const data = await response.json()
+      
+      // Add the new user to the local state
+      setUsers([...users, data.user])
+      
+      // Reset form and close dialog
+      setNewUser({
+        email: "",
+        password: "",
+        displayName: "",
+        role: "salesperson"
+      })
+      setShowNewUserDialog(false)
+    } catch (err) {
+      console.error("Error creating user:", err)
+      setCreateUserError(err instanceof Error ? err.message : "Failed to create user")
+    } finally {
+      setCreateUserLoading(false)
+    }
+  }
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
+      return
+    }
+
+    try {
+      // Call the API to delete the user
+      const response = await fetchWithAuth(`/api/auth/users/${userId}`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to delete user")
+      }
+
+      // Remove the user from the local state
+      setUsers(users.filter(u => u.uid !== userId))
+    } catch (err) {
+      console.error("Error deleting user:", err)
+      setError(err instanceof Error ? err.message : "Failed to delete user")
+    }
+  }
+
+  const handleToggleUserStatus = async (userId: string, currentDisabled: boolean) => {
+    try {
+      // Call the API to update the user
+      const response = await fetchWithAuth(`/api/auth/users/${userId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ disabled: !currentDisabled }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to update user status")
+      }
+
+      // Update the local state
+      setUsers(users.map(u => u.uid === userId ? { ...u, disabled: !currentDisabled } : u))
+    } catch (err) {
+      console.error("Error updating user status:", err)
+      setError(err instanceof Error ? err.message : "Failed to update user status")
+    }
+  }
+
   if (!user) {
     return <div className="p-8">Loading...</div>
   }
@@ -95,7 +211,90 @@ export default function AdminUsersPage() {
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold mb-6">User Management</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">User Management</h1>
+        <Dialog open={showNewUserDialog} onOpenChange={setShowNewUserDialog}>
+          <DialogTrigger asChild>
+            <Button>Add New User</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Create New User</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              {createUserError && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                  {createUserError}
+                </div>
+              )}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="email" className="text-right">
+                  Email
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={newUser.email}
+                  onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="password" className="text-right">
+                  Password
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={newUser.password}
+                  onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="displayName" className="text-right">
+                  Name
+                </Label>
+                <Input
+                  id="displayName"
+                  value={newUser.displayName}
+                  onChange={(e) => setNewUser({ ...newUser, displayName: e.target.value })}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="role" className="text-right">
+                  Role
+                </Label>
+                <Select
+                  value={newUser.role}
+                  onValueChange={(value) => setNewUser({ ...newUser, role: value })}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="manager">Manager</SelectItem>
+                    <SelectItem value="salesperson">Salesperson</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowNewUserDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleCreateUser} disabled={createUserLoading}>
+                {createUserLoading ? "Creating..." : "Create User"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
       
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -113,12 +312,14 @@ export default function AdminUsersPage() {
                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">User</th>
                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Email</th>
                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Role</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Status</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Last Sign In</th>
                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {users.map((user) => (
-                <tr key={user.uid}>
+                <tr key={user.uid} className={user.disabled ? "bg-gray-100" : ""}>
                   <td className="px-4 py-2 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">{user.displayName || "N/A"}</div>
                   </td>
@@ -142,15 +343,29 @@ export default function AdminUsersPage() {
                     </Select>
                   </td>
                   <td className="px-4 py-2 whitespace-nowrap">
+                    <div className={`text-sm ${user.disabled ? "text-red-500" : "text-green-500"}`}>
+                      {user.disabled ? "Disabled" : "Active"}
+                    </div>
+                  </td>
+                  <td className="px-4 py-2 whitespace-nowrap">
+                    <div className="text-sm text-gray-500">
+                      {user.lastSignIn ? new Date(user.lastSignIn).toLocaleString() : "Never"}
+                    </div>
+                  </td>
+                  <td className="px-4 py-2 whitespace-nowrap space-x-2">
                     <Button
-                      variant="outline"
+                      variant={user.disabled ? "default" : "outline"}
                       size="sm"
-                      onClick={() => {
-                        // In a real app, you would implement a reset password functionality
-                        alert("Reset password functionality would be implemented here")
-                      }}
+                      onClick={() => handleToggleUserStatus(user.uid, !!user.disabled)}
                     >
-                      Reset Password
+                      {user.disabled ? "Enable" : "Disable"}
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDeleteUser(user.uid)}
+                    >
+                      Delete
                     </Button>
                   </td>
                 </tr>
