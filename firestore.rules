@@ -7,6 +7,38 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid != null;
     }
     
+    function hasRole(role) {
+      return isSignedIn() && request.auth.token.role == role;
+    }
+    
+    function isAdmin() {
+      return hasRole('admin');
+    }
+    
+    function isManager() {
+      return hasRole('manager');
+    }
+    
+    function isSalesPerson() {
+      return hasRole('salesperson');
+    }
+    
+    function hasAdminAccess() {
+      return isAdmin();
+    }
+    
+    function hasManagerAccess() {
+      return isAdmin() || isManager();
+    }
+    
+    function hasReadAccess() {
+      return isSignedIn(); // All authenticated users can read
+    }
+    
+    function hasWriteAccess() {
+      return isAdmin() || isManager(); // Only admin and managers can write
+    }
+    
     function isValidDailyLogEntry() {
       let requiredFields = [
         'date', 'hasAppointment', 'salesperson', 'stockNumber', 
@@ -34,34 +66,49 @@ service cloud.firestore {
     
     // Prospects collection
     match /prospects/{prospectId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn() && isValidProspect();
-      allow update: if isSignedIn() && isValidProspect();
-      allow delete: if isSignedIn();
+      allow read: if hasReadAccess();
+      allow create: if hasWriteAccess() && isValidProspect();
+      allow update: if hasWriteAccess() && isValidProspect();
+      allow delete: if hasAdminAccess(); // Only admins can delete prospects
     }
     
     // Vehicles collection
     match /vehicles/{vehicleId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn() && isValidVehicle();
-      allow update: if isSignedIn() && isValidVehicle();
-      allow delete: if isSignedIn();
+      allow read: if hasReadAccess();
+      allow create: if hasWriteAccess() && isValidVehicle();
+      allow update: if hasWriteAccess() && isValidVehicle();
+      allow delete: if hasAdminAccess(); // Only admins can delete vehicles
     }
     
     // Daily Logs collection
     match /dailyLogs/{logId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn() && isValidDailyLogEntry();
-      allow update: if isSignedIn() && isValidDailyLogEntry();
-      allow delete: if isSignedIn();
+      allow read: if hasReadAccess();
+      allow create: if hasWriteAccess() && isValidDailyLogEntry();
+      allow update: if hasWriteAccess() && isValidDailyLogEntry();
+      allow delete: if hasAdminAccess(); // Only admins can delete logs
     }
     
     // Board Deals collection
     match /boardDeals/{dealId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn();
-      allow update: if isSignedIn();
-      allow delete: if isSignedIn();
+      allow read: if hasReadAccess();
+      allow create: if hasWriteAccess();
+      allow update: if hasWriteAccess();
+      allow delete: if hasAdminAccess(); // Only admins can delete deals
+    }
+    
+    // Users collection - for storing user roles and profiles
+    match /users/{userId} {
+      // Users can read and update their own profile
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn() && request.auth.uid == userId;
+      
+      // Only admins can read all user profiles, create new ones, or delete them
+      allow read, create, delete: if hasAdminAccess();
+      
+      // Only admins can update roles
+      allow update: if hasAdminAccess() ||
+                     (isSignedIn() && request.auth.uid == userId &&
+                      (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role'])));
     }
     
     // Deny access to all other collections by default

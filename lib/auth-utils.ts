@@ -2,6 +2,9 @@
  * Authentication utility functions
  */
 
+// User role types
+export type UserRole = 'admin' | 'manager' | 'salesperson';
+
 // Get the authentication token from localStorage
 export function getAuthToken(): string | null {
   if (typeof window === 'undefined') return null;
@@ -63,4 +66,37 @@ export function setupFetchInterceptor(): void {
 export function resetFetchInterceptor(): void {
   if (typeof window === 'undefined' || !window.fetchInterceptorSet) return;
   delete window.fetchInterceptorSet;
+}
+
+// Role-based access control utility functions
+export function hasRole(user: any, role: UserRole): boolean {
+  return user?.role === role;
+}
+
+export function isAdmin(user: any): boolean {
+  return hasRole(user, 'admin');
+}
+
+export function isManager(user: any): boolean {
+  return hasRole(user, 'manager');
+}
+
+export function isSalesPerson(user: any): boolean {
+  return hasRole(user, 'salesperson');
+}
+
+export function hasAdminAccess(user: any): boolean {
+  return isAdmin(user);
+}
+
+export function hasManagerAccess(user: any): boolean {
+  return isAdmin(user) || isManager(user);
+}
+
+export function hasWriteAccess(user: any): boolean {
+  return isAdmin(user) || isManager(user);
+}
+
+export function hasReadAccess(user: any): boolean {
+  return !!user; // Any authenticated user has read access
 }

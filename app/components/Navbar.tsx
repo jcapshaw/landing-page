@@ -6,6 +6,7 @@ import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./AuthProvider";
 import { auth } from "@/lib/firebase";
+import { isAdmin } from "@/lib/auth-utils";
 import {
   Select,
   SelectContent,
@@ -57,6 +58,14 @@ const Navbar = () => {
               >
                 Inventory
               </Link>
+              {isAdmin(user) && (
+                <Link
+                  href="/admin/users"
+                  className="text-sm font-medium text-white hover:text-orange-400"
+                >
+                  Admin
+                </Link>
+              )}
               <Select onValueChange={handleMoreSelect}>
                 <SelectTrigger className="w-[100px] bg-transparent text-white border-none hover:text-orange-400 focus:ring-0">
                   <SelectValue placeholder="More" />
@@ -85,6 +94,9 @@ const Navbar = () => {
                   <SelectGroup>
                     <SelectItem value="dashboard">Dashboard</SelectItem>
                     <SelectItem value="inventory">Inventory</SelectItem>
+                    {isAdmin(user) && (
+                      <SelectItem value="admin/users">Admin</SelectItem>
+                    )}
                     <SelectItem value="hot-prospects">Hot Prospects</SelectItem>
                     <SelectItem value="sales-stats">Sales Stats</SelectItem>
                     <SelectItem value="resources">Resources</SelectItem>

@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { auth } from "@/lib/firebase";
 import { User, getIdTokenResult, AuthError } from "firebase/auth";
-import { setAuthToken, clearAuthToken, setupFetchInterceptor, resetFetchInterceptor } from "@/lib/auth-utils";
+import { setAuthToken, clearAuthToken, setupFetchInterceptor, resetFetchInterceptor, fetchWithAuth } from "@/lib/auth-utils";
 
 // Helper function to get token with retry mechanism
 const getTokenWithRetry = async (user: User, maxRetries = 3): Promise<string> => {
@@ -125,10 +125,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
                 // Get user role and update state
                 try {
+                  // First try to get role from token claims
                   const tokenResult = await getIdTokenResult(firebaseUser);
+                  let role = tokenResult.claims.role as string;
+                  
+                  // If no role in claims, try to fetch from API
+                  if (!role) {
+                    try {
+                      const response = await fetchWithAuth('/api/auth/get-role');
+                      if (response.ok) {
+                        const data = await response.json();
+                        role = data.role;
+                      }
+                    } catch (apiError) {
+                      console.warn('Failed to fetch role from API:', apiError);
+                    }
+                  }
+                  
                   const userWithRole = {
                     ...firebaseUser,
-                    role: tokenResult.claims.role as string
+                    role
                   };
                   setUser(userWithRole);
                 } catch (roleError) {

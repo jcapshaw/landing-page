@@ -14,6 +14,8 @@ import { Vehicle } from "../types"
 import { DepositModal } from "./DepositModal"
 import { SoldModal } from "./SoldModal"
 import { EditVehicleModal } from "./EditVehicleModal"
+import { useAuth } from "@/app/components/AuthProvider"
+import { hasWriteAccess, isSalesPerson } from "@/lib/auth-utils"
 
 interface InventoryTableProps {
   vehicles: Vehicle[]
@@ -26,6 +28,12 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
   const [showSoldModal, setShowSoldModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null)
+  const { user } = useAuth()
+  
+  // Check if user has write access
+  const canEdit = hasWriteAccess(user)
+  // Check if user is a salesperson (view-only)
+  const isViewOnly = isSalesPerson(user)
 
   const handleSoldConfirm = async (soldDetails: {
     locationSold: string
@@ -171,41 +179,45 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
               </td>
               <td className="px-4 py-2 whitespace-nowrap text-center">
                 <div className="flex justify-center">
-                  <Select
-                    value={vehicle.status}
-                    onValueChange={(value: Vehicle["status"]) => {
-                      if (value === "DEPOSIT") {
-                        setSelectedVehicle(vehicle)
-                        setShowDepositModal(true)
-                      } else if (value === "SOLD") {
-                        setSelectedVehicle(vehicle)
-                        setShowSoldModal(true)
-                      } else {
-                        const mockUser = { uid: "mock-user", name: "Mock User" } // Replace with actual user data
-                        const updatedVehicle: Vehicle = {
-                          ...vehicle,
-                          status: value,
-                          statusData: {
-                            current: mapStatusToFirebase(value),
-                            updatedAt: new Date().toISOString(),
-                            updatedBy: mockUser
-                          },
-                          lastStatusUpdate: new Date().toISOString()
+                  {canEdit ? (
+                    <Select
+                      value={vehicle.status}
+                      onValueChange={(value: Vehicle["status"]) => {
+                        if (value === "DEPOSIT") {
+                          setSelectedVehicle(vehicle)
+                          setShowDepositModal(true)
+                        } else if (value === "SOLD") {
+                          setSelectedVehicle(vehicle)
+                          setShowSoldModal(true)
+                        } else {
+                          const mockUser = { uid: user?.uid || "mock-user", name: user?.displayName || "Mock User" }
+                          const updatedVehicle: Vehicle = {
+                            ...vehicle,
+                            status: value,
+                            statusData: {
+                              current: mapStatusToFirebase(value),
+                              updatedAt: new Date().toISOString(),
+                              updatedBy: mockUser
+                            },
+                            lastStatusUpdate: new Date().toISOString()
+                          }
+                          onVehicleUpdate(updatedVehicle)
                         }
-                        onVehicleUpdate(updatedVehicle)
-                      }
-                    }}
-                  >
-                    <SelectTrigger className="w-[90px] h-6 text-xs py-1 border-0 shadow-none bg-transparent hover:bg-gray-100 focus:ring-0 flex justify-center no-chevron">
-                      <SelectValue placeholder="Status" className="text-center" />
-                    </SelectTrigger>
-                    <SelectContent className="text-xs">
-                      <SelectItem value="AVAILABLE" className="text-xs py-1">Available</SelectItem>
-                      <SelectItem value="DEPOSIT" className="text-xs py-1">Deposit</SelectItem>
-                      <SelectItem value="SOLD" className="text-xs py-1">Sold</SelectItem>
-                      <SelectItem value="PENDING_RECON" className="text-xs py-1">Pending Recon</SelectItem>
-                    </SelectContent>
-                  </Select>
+                      }}
+                    >
+                      <SelectTrigger className="w-[90px] h-6 text-xs py-1 border-0 shadow-none bg-transparent hover:bg-gray-100 focus:ring-0 flex justify-center no-chevron">
+                        <SelectValue placeholder="Status" className="text-center" />
+                      </SelectTrigger>
+                      <SelectContent className="text-xs">
+                        <SelectItem value="AVAILABLE" className="text-xs py-1">Available</SelectItem>
+                        <SelectItem value="DEPOSIT" className="text-xs py-1">Deposit</SelectItem>
+                        <SelectItem value="SOLD" className="text-xs py-1">Sold</SelectItem>
+                        <SelectItem value="PENDING_RECON" className="text-xs py-1">Pending Recon</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <span className="text-xs">{mapStatusToFirebase(vehicle.status)}</span>
+                  )}
                 </div>
               </td>
             </tr>
@@ -237,6 +249,7 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
         vehicle={selectedVehicle}
         onSubmit={onVehicleUpdate}
         onLiftEdit={onLiftEdit}
+        isViewOnly={isViewOnly}
       />
     </div>
     </>
