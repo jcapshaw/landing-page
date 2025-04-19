@@ -190,6 +190,7 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
           },
           (errors) => {
             console.error('Form validation errors:', errors);
+            // Don't proceed with submission if there are validation errors
           }
         )}
         className="w-full space-y-4 bg-white p-4 rounded-lg shadow-sm"
@@ -374,13 +375,13 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
               name="appointmentSalesperson"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Appointment Belongs To</FormLabel>
+                  <FormLabel className="text-xs">Appointment Belongs To</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     value={field.value || ""}
                   >
                     <FormControl>
-                      <SelectTrigger className="h-8">
+                      <SelectTrigger className="h-8 text-xs">
                         <SelectValue placeholder="Select salesperson" />
                       </SelectTrigger>
                     </FormControl>
@@ -411,12 +412,12 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
             name="stockNumber"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Stock Number</FormLabel>
+                <FormLabel className="text-xs">Stock Number</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="12345"
                     {...field}
-                    className="h-8 text-sm uppercase"
+                    className="h-8 text-xs uppercase"
                     onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                   />
                 </FormControl>
@@ -430,12 +431,12 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
             name="voi"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>VOI</FormLabel>
+                <FormLabel className="text-xs">VOI</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Vehicle of Interest"
                     {...field}
-                    className="h-8 text-sm uppercase"
+                    className="h-8 text-xs uppercase"
                     onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                   />
                 </FormControl>
@@ -449,12 +450,12 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
             name="customerName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Customer Name</FormLabel>
+                <FormLabel className="text-xs">Customer Name</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="John Doe"
                     {...field}
-                    className="h-8 text-sm uppercase"
+                    className="h-8 text-xs uppercase"
                     onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                   />
                 </FormControl>
@@ -468,12 +469,12 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
             name="customerPhone"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Customer Phone</FormLabel>
+                <FormLabel className="text-xs">Customer Phone</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="(555) 555-5555"
                     {...field}
-                    className="h-8 text-sm"
+                    className="h-8 text-xs"
                     onChange={(e) => {
                       const formatted = formatPhoneNumber(e.target.value);
                       field.onChange(formatted);
@@ -491,7 +492,7 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
             name="hasTrade"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Trade-in</FormLabel>
+                <FormLabel className="text-xs">Trade-in</FormLabel>
                 <Select
                   value={field.value || ""}
                   onValueChange={(value) => {
@@ -505,7 +506,7 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger className="h-8">
+                    <SelectTrigger className="h-8 text-xs">
                       <SelectValue placeholder="Select trade-in status" />
                     </SelectTrigger>
                   </FormControl>
@@ -594,8 +595,19 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
 }
 
 export default function DailyLogForm(props: DailyLogFormProps) {
+  const [open, setOpen] = useState(false)
+  
+  // We'll pass this to the DailyLogFormContent component
+  const handleFormSubmit = (data: Omit<DailyLogEntry, 'id' | 'createdAt'>) => {
+    // Only call onSubmit and close drawer if we have valid data
+    if (data) {
+      props.onSubmit?.(data)
+      setOpen(false) // Close the drawer after successful submission
+    }
+  }
+  
   return (
-    <Drawer>
+    <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         <Button variant="outline">Add Store Visit</Button>
       </DrawerTrigger>
@@ -605,8 +617,13 @@ export default function DailyLogForm(props: DailyLogFormProps) {
           <DrawerDescription className="text-xs">Add a new store visit to the daily log.</DrawerDescription>
         </DrawerHeader>
         <div className="px-4">
-          <DailyLogFormContent {...props} />
+          <DailyLogFormContent {...props} onSubmit={handleFormSubmit} />
         </div>
+        <DrawerFooter className="pt-2">
+          <DrawerClose asChild>
+            <Button variant="outline">Cancel</Button>
+          </DrawerClose>
+        </DrawerFooter>
       </DrawerContent>
     </Drawer>
   )

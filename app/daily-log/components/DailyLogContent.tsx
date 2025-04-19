@@ -24,10 +24,22 @@ export default function DailyLogContent() {
     const fetchEntries = async () => {
       setIsLoading(true)
       try {
+        console.log('Fetching entries for date:', selectedDate.toISOString())
         const fetchedEntries = await getDailyLogEntries(selectedDate)
+        console.log('Entries fetched successfully:', fetchedEntries.length, 'entries')
+        
+        if (fetchedEntries.length === 0) {
+          console.log('No entries found for the selected date')
+        }
+        
         setEntries(fetchedEntries)
       } catch (error) {
         console.error('Error fetching entries:', error)
+        if (error instanceof Error) {
+          console.error('Error details:', error.message, error.stack)
+        }
+        // Set empty array to avoid undefined errors
+        setEntries([])
       } finally {
         setIsLoading(false)
       }
@@ -100,16 +112,27 @@ export default function DailyLogContent() {
     }
   }
 
+  // Add debug information to help troubleshoot
+  console.log('Current entries state:', entries);
+  
   return (
     <div className="container mx-auto py-10 space-y-10">
       <h1 className="text-3xl font-bold">Daily Customer Log</h1>
+      
+      {/* Debug information */}
+      <div className="bg-yellow-100 p-4 rounded-lg text-sm">
+        <h3 className="font-bold">Debug Info:</h3>
+        <p>Total entries: {entries.length}</p>
+        <p>Selected date: {selectedDate.toISOString()}</p>
+        <p>Loading state: {isLoading ? 'Loading...' : 'Loaded'}</p>
+      </div>
       
       <div className="flex justify-end mb-6">
         <DailyLogForm onSubmit={handleNewEntry} />
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow">
-        <DailyLogTable 
+        <DailyLogTable
           entries={entries}
           selectedDate={selectedDate}
           onDateChange={handleDateChange}

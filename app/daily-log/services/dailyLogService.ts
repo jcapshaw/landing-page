@@ -53,18 +53,33 @@ export const getDailyLogEntries = async (date: Date) => {
 
     console.log('Date range:', { startISO, endISO });
 
+    // Use a query that doesn't require a composite index
+    // Just get all entries and filter client-side
     const q = query(
-      collection(db, COLLECTION_NAME),
-      where('date', '>=', startISO),
-      where('date', '<=', endISO),
-      orderBy('date', 'desc')
+      collection(db, COLLECTION_NAME)
     );
 
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })) as DailyLogEntry[];
+    console.log('Query returned', querySnapshot.size, 'documents');
+    
+    // Filter the results client-side based on the date
+    const entries = querySnapshot.docs
+      .map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data
+        } as DailyLogEntry;
+      })
+      .filter(entry => {
+        if (!entry.date) return false;
+        
+        const entryDate = new Date(entry.date);
+        return entryDate >= startOfDay && entryDate <= endOfDay;
+      });
+    
+    console.log('Filtered entries:', entries.length, 'out of', querySnapshot.size);
+    return entries;
   } catch (error) {
     console.error('Error getting daily log entries:', error);
     throw error;

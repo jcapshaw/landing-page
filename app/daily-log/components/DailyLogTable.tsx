@@ -59,16 +59,34 @@ export function DailyLogTable({
     setDialogOpen(false)
   }
 
-  // Filter entries for selected date
+  // Filter entries for selected date - using a more reliable approach
   const filteredEntries = entries.filter(entry => {
-    const entryDate = new Date(entry.date)
-    return (
-      entryDate.getFullYear() === selectedDate.getFullYear() &&
-      entryDate.getMonth() === selectedDate.getMonth() &&
-      entryDate.getDate() === selectedDate.getDate()
-    )
-  })
+    if (!entry.date) {
+      console.warn('Entry missing date field:', entry);
+      return false;
+    }
+    
+    try {
+      const entryDate = new Date(entry.date);
+      const entryDay = entryDate.toISOString().split('T')[0];
+      const selectedDay = selectedDate.toISOString().split('T')[0];
+      
+      return entryDay === selectedDay;
+    } catch (error) {
+      console.error('Error parsing date:', error, entry);
+      return false;
+    }
+  });
+  
+  console.log('Filtered entries:', filteredEntries.length, 'out of', entries.length);
 
+  // Add more detailed logging for debugging
+  console.log('DailyLogTable props:', {
+    entriesCount: entries.length,
+    selectedDate: selectedDate.toISOString(),
+    filteredCount: filteredEntries.length
+  });
+  
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-4">
@@ -87,6 +105,13 @@ export function DailyLogTable({
             `Showing ${filteredEntries.length} entries for ${selectedDate.toLocaleDateString()}`
           )}
         </div>
+      </div>
+      
+      {/* Debug information */}
+      <div className="bg-blue-50 p-2 rounded text-xs">
+        <p>Raw entries: {entries.length}</p>
+        <p>Filtered entries: {filteredEntries.length}</p>
+        <p>Selected date: {selectedDate.toLocaleDateString()}</p>
       </div>
 
       <div className="overflow-x-auto">
