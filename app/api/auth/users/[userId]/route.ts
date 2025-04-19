@@ -5,13 +5,13 @@ import { getFirebaseAdmin } from '../../../../../lib/firebase-admin';
  * API endpoint to get a specific user
  * This endpoint is protected and can only be accessed by admins
  */
-export async function GET(
-  request: NextRequest,
-  context: { params: { userId: string } }
-) {
-  const { params } = context;
+export async function GET(request: NextRequest) {
+  // Extract userId from the URL path
+  const userId = request.url.split('/').pop();
   try {
-    const userId = params.userId;
+    if (!userId) {
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+    }
     
     // Initialize Firebase Admin if not already initialized
     const admin = getFirebaseAdmin();
@@ -72,13 +72,13 @@ export async function GET(
  * API endpoint to update a specific user
  * This endpoint is protected and can only be accessed by admins
  */
-export async function PATCH(
-  request: NextRequest,
-  context: { params: { userId: string } }
-) {
-  const { params } = context;
+export async function PATCH(request: NextRequest) {
+  // Extract userId from the URL path
+  const userId = request.url.split('/').pop();
   try {
-    const userId = params.userId;
+    if (!userId) {
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+    }
     
     // Initialize Firebase Admin if not already initialized
     const admin = getFirebaseAdmin();
@@ -175,13 +175,13 @@ export async function PATCH(
  * API endpoint to delete a specific user
  * This endpoint is protected and can only be accessed by admins
  */
-export async function DELETE(
-  request: NextRequest,
-  context: { params: { userId: string } }
-) {
-  const { params } = context;
+export async function DELETE(request: NextRequest) {
+  // Extract userId from the URL path
+  const userId = request.url.split('/').pop();
   try {
-    const userId = params.userId;
+    if (!userId) {
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+    }
     
     // Initialize Firebase Admin if not already initialized
     const admin = getFirebaseAdmin();
