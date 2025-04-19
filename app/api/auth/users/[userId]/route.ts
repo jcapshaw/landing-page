@@ -7,8 +7,9 @@ import { getFirebaseAdmin } from '../../../../../lib/firebase-admin';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  context: { params: { userId: string } }
 ) {
+  const { params } = context;
   try {
     const userId = params.userId;
     
@@ -69,8 +70,9 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  context: { params: { userId: string } }
 ) {
+  const { params } = context;
   try {
     const userId = params.userId;
     
@@ -163,8 +165,9 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  context: { params: { userId: string } }
 ) {
+  const { params } = context;
   try {
     const userId = params.userId;
     
