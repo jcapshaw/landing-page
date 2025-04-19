@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "set-admin": "npx ts-node scripts/set-admin-user.ts",
+    "set-admin:js": "node scripts/set-admin-user.js",
+    "check-role": "npx ts-node scripts/check-user-role.ts",
+    "check-role:js": "node scripts/check-user-role.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
