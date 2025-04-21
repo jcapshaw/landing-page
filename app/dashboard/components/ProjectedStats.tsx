@@ -140,11 +140,11 @@ export default function ProjectedStats() {
           <div className="grid grid-cols-2 gap-4 mt-4">
             <div>
               <p className="dashboard-subtitle">Days Remaining</p>
-              <p className="text-2xl font-bold">{stats.daysRemaining}</p>
+              <p className="text-lg font-bold">{stats.daysRemaining}</p>
             </div>
             <div>
               <p className="dashboard-subtitle">Daily Average</p>
-              <p className="text-2xl font-bold">{Math.round(stats.dailyAverage).toLocaleString()}</p>
+              <p className="text-lg font-bold">{Math.round(stats.dailyAverage).toLocaleString()}</p>
             </div>
           </div>
         </div>

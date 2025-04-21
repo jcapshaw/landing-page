@@ -106,30 +106,30 @@ export default function EnhancedMTDStats() {
               <div className="space-y-4">
                 <div>
                   <p className="dashboard-subtitle">Total Sold</p>
-                  <p className="text-2xl font-bold">{mtdStats.totalSales.toLocaleString()}</p>
+                  <p className="text-lg font-bold">{mtdStats.totalSales.toLocaleString()}</p>
                 </div>
                 <div>
                   <p className="dashboard-subtitle">Total Leads</p>
-                  <p className="text-2xl font-bold">{mtdStats.totalLeads}</p>
+                  <p className="text-lg font-bold">{mtdStats.totalLeads}</p>
                 </div>
                 <div>
                   <p className="dashboard-subtitle">Conversion Rate</p>
-                  <p className="text-2xl font-bold">{mtdStats.conversionRate}%</p>
+                  <p className="text-lg font-bold">{mtdStats.conversionRate}%</p>
                 </div>
               </div>
             ) : (
               <div className="space-y-4">
                 <div>
                   <p className="dashboard-subtitle">Total Sold</p>
-                  <p className="text-2xl font-bold">{todayStats.totalSales.toLocaleString()}</p>
+                  <p className="text-lg font-bold">{todayStats.totalSales.toLocaleString()}</p>
                 </div>
                 <div>
                   <p className="dashboard-subtitle">Total Leads</p>
-                  <p className="text-2xl font-bold">{todayStats.totalLeads}</p>
+                  <p className="text-lg font-bold">{todayStats.totalLeads}</p>
                 </div>
                 <div>
                   <p className="dashboard-subtitle">Conversion Rate</p>
-                  <p className="text-2xl font-bold">{todayStats.conversionRate}%</p>
+                  <p className="text-lg font-bold">{todayStats.conversionRate}%</p>
                 </div>
               </div>
             )}

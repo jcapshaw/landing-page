@@ -101,7 +101,7 @@ export default function GoogleReviews() {
               <div className="flex mr-2">
                 {renderStars(Math.round(averageRating))}
               </div>
-              <span className="text-xl font-bold">{averageRating}</span>
+              <span className="text-lg font-bold">{averageRating}</span>
               <span className="dashboard-subtitle ml-2">out of 5</span>
             </div>
             
