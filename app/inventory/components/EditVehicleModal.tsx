@@ -112,17 +112,54 @@ export function EditVehicleModal({
   
                 // Clean up additions object to remove undefined values
                 if (cleanData.additions) {
-                  const additions = {
-                    totalPrice: cleanData.additions.totalPrice || 0,
-                    lift: cleanData.hasLift && cleanData.additions.lift ? cleanData.additions.lift : undefined,
-                    wheels: cleanData.hasWheels && cleanData.additions.wheels ? cleanData.additions.wheels : undefined,
-                    tires: cleanData.hasTires && cleanData.additions.tires ? cleanData.additions.tires : undefined,
-                    paintMatch: cleanData.hasPaintMatch && cleanData.additions.paintMatch ? cleanData.additions.paintMatch : undefined,
-                    leather: cleanData.hasLeather && cleanData.additions.leather ? cleanData.additions.leather : undefined,
-                    other: cleanData.hasOther && cleanData.additions.other ? cleanData.additions.other : undefined
+                  // Create a clean additions object with the proper type
+                  const additions: Vehicle['additions'] = {
+                    totalPrice: cleanData.additions.totalPrice || cleanData.liftPrice || 0,
                   }
-  
+                  
+                  // Only include properties that are enabled (hasX is true) and have valid data
+                  if (cleanData.hasLift && cleanData.additions.lift) {
+                    additions.lift = {
+                      description: cleanData.liftDescription || cleanData.additions.lift.description,
+                      price: cleanData.liftPrice || cleanData.additions.lift.price,
+                      installed: true
+                    }
+                  }
+                  
+                  if (cleanData.hasWheels && cleanData.additions.wheels) {
+                    additions.wheels = cleanData.additions.wheels
+                  }
+                  
+                  if (cleanData.hasTires && cleanData.additions.tires) {
+                    additions.tires = cleanData.additions.tires
+                  }
+                  
+                  if (cleanData.hasPaintMatch && cleanData.additions.paintMatch) {
+                    additions.paintMatch = cleanData.additions.paintMatch
+                  }
+                  
+                  if (cleanData.hasLeather && cleanData.additions.leather) {
+                    additions.leather = cleanData.additions.leather
+                  }
+                  
+                  if (cleanData.hasOther && cleanData.additions.other) {
+                    additions.other = cleanData.additions.other
+                  }
+                  
+                  // Update the cleanData with the cleaned additions
                   cleanData.additions = additions
+                  
+                  // Ensure the legacy fields are also set for backward compatibility
+                  if (cleanData.hasLift) {
+                    cleanData.liftDescription = cleanData.liftDescription || additions.lift?.description || ""
+                    cleanData.liftPrice = cleanData.liftPrice || additions.lift?.price || 0
+                  } else {
+                    cleanData.liftDescription = ""
+                    cleanData.liftPrice = 0
+                  }
+                  
+                  // Set addsPrice for backward compatibility
+                  cleanData.addsPrice = additions.totalPrice
                 }
   
                 onSubmit(cleanData)

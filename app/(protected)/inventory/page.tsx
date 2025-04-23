@@ -72,17 +72,31 @@ export default function InventoryPage() {
       const vehicle = vehicles.find(v => v.id === vehicleId);
       if (!vehicle) return;
 
+      console.log("Saving lift details:", data);
+
+      // Create a properly structured updated vehicle object
       const updatedVehicle = {
         ...vehicle,
-        liftDescription: data.liftDescription,
-        addsPrice: data.addsPrice,
-        hasLift: data.hasLift,
-        hasWheels: data.hasWheels,
-        hasTires: data.hasTires,
-        hasPaintMatch: data.hasPaintMatch,
-        hasLeather: data.hasLeather,
-        hasOther: data.hasOther,
-        additions: data.additions,
+        // Set legacy fields for backward compatibility
+        liftDescription: data.liftDescription || "",
+        liftPrice: data.addsPrice || 0,
+        addsPrice: data.addsPrice || 0,
+        
+        // Set boolean flags
+        hasLift: data.hasLift || false,
+        hasWheels: data.hasWheels || false,
+        hasTires: data.hasTires || false,
+        hasPaintMatch: data.hasPaintMatch || false,
+        hasLeather: data.hasLeather || false,
+        hasOther: data.hasOther || false,
+        
+        // Set the additions object with proper structure
+        additions: {
+          totalPrice: data.addsPrice || 0,
+          ...(data.additions || {})
+        },
+        
+        // Update metadata
         metadata: {
           ...vehicle.metadata,
           lastUpdated: new Date().toISOString(),
@@ -90,9 +104,14 @@ export default function InventoryPage() {
         }
       };
 
+      // Save the updated vehicle to the database
       await updateVehicle(vehicleId, updatedVehicle);
+      
+      // Refresh the vehicles list
       const updatedVehicles = await getAllVehicles();
       setVehicles(updatedVehicles);
+      
+      // Close the modal
       setShowLiftModal(false);
       setSelectedVehicle(null);
     } catch (error) {

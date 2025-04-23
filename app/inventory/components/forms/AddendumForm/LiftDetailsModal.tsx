@@ -156,76 +156,73 @@ export function LiftDetailsModal({
     setAddsPrice(0)
   }
 
+  // Only reset the form when opening a new modal with no initial data
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen && !initialData) {
       resetForm()
     }
-  }, [isOpen])
+  }, [isOpen, initialData])
 
   const handleSave = () => {
     // Calculate total price from all additions
     const totalPrice = addsPrice || 0
 
-    // Get current timestamp
-    const now = new Date().toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: true,
-      timeZoneName: 'short'
-    })
-
     // Create the additions data structure with clean data (no undefined values)
     const additionsData: Vehicle['additions'] = {
       totalPrice,
-      ...(hasLift && {
-        lift: {
-          description: liftDescription,
-          price: addsPrice,
-          installed: true
-        }
-      }),
-      ...(hasWheels && {
-        wheels: {
-          description: "Custom Wheels",
-          price: addsPrice / (hasLift ? 2 : 1),
-          installed: true
-        }
-      }),
-      ...(hasTires && {
-        tires: {
-          description: "Custom Tires",
-          price: addsPrice / (hasLift ? 2 : 1),
-          installed: true
-        }
-      }),
-      ...(hasPaintMatch && {
-        paintMatch: {
-          description: "Paint Match",
-          price: addsPrice / (hasLift ? 2 : 1),
-          completed: true
-        }
-      }),
-      ...(hasLeather && {
-        leather: {
-          description: "Leather Interior",
-          price: addsPrice / (hasLift ? 2 : 1),
-          installed: true
-        }
-      }),
-      ...(hasOther && {
-        other: [{
-          description: "Other Modifications",
-          price: addsPrice / (hasLift ? 2 : 1),
-          completed: true
-        }]
-      })
+    }
+    
+    // Only add properties that are checked/enabled
+    if (hasLift) {
+      additionsData.lift = {
+        description: liftDescription,
+        price: addsPrice,
+        installed: true
+      }
+    }
+    
+    if (hasWheels) {
+      additionsData.wheels = {
+        description: "Custom Wheels",
+        price: addsPrice / (hasLift ? 2 : 1),
+        installed: true
+      }
+    }
+    
+    if (hasTires) {
+      additionsData.tires = {
+        description: "Custom Tires",
+        price: addsPrice / (hasLift ? 2 : 1),
+        installed: true
+      }
+    }
+    
+    if (hasPaintMatch) {
+      additionsData.paintMatch = {
+        description: "Paint Match",
+        price: addsPrice / (hasLift ? 2 : 1),
+        completed: true
+      }
+    }
+    
+    if (hasLeather) {
+      additionsData.leather = {
+        description: "Leather Interior",
+        price: addsPrice / (hasLift ? 2 : 1),
+        installed: true
+      }
+    }
+    
+    if (hasOther) {
+      additionsData.other = [{
+        description: "Other Modifications",
+        price: addsPrice / (hasLift ? 2 : 1),
+        completed: true
+      }]
     }
 
-    onSave({
+    // Create the complete data object to save
+    const dataToSave = {
       liftDescription,
       hasLift,
       hasWheels,
@@ -234,8 +231,12 @@ export function LiftDetailsModal({
       hasLeather,
       hasOther,
       addsPrice: totalPrice,
+      liftPrice: totalPrice, // Ensure liftPrice is also set
       additions: additionsData
-    })
+    }
+
+    // Save the data
+    onSave(dataToSave)
     onClose()
   }
 

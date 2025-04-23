@@ -173,22 +173,23 @@ export function VehicleDetailsView({ vehicle, depositDetails, soldDetails }: Veh
                 Addendum
                 {(vehicle.hasLift || vehicle.hasWheels || vehicle.hasTires || vehicle.hasPaintMatch || vehicle.hasLeather || vehicle.hasOther) &&
                   <span className="ml-2 text-blue-600">
-                    ${(vehicle.additions?.totalPrice || vehicle.addsPrice || 0).toLocaleString()}
+                    ${(vehicle.additions?.totalPrice || vehicle.addsPrice || vehicle.liftPrice || 0).toLocaleString()}
                   </span>
                 }
               </summary>
               
               {(vehicle.hasLift || vehicle.hasWheels || vehicle.hasTires || vehicle.hasPaintMatch || vehicle.hasLeather || vehicle.hasOther) ? (
                 <div className="pl-2 mt-1 grid grid-cols-2 gap-x-2 text-gray-600">
-                  {vehicle.liftDescription && (
-                    <p className="col-span-2">Lift: {vehicle.liftDescription}</p>
+                  {/* Show lift description from either source */}
+                  {(vehicle.liftDescription || vehicle.additions?.lift?.description) && (
+                    <p className="col-span-2">✓ Description: {vehicle.liftDescription || vehicle.additions?.lift?.description}</p>
                   )}
                   <div className="flex flex-wrap gap-x-4">
-                    {vehicle.hasWheels && <span>• Wheels</span>}
-                    {vehicle.hasTires && <span>• Tires</span>}
-                    {vehicle.hasPaintMatch && <span>• Paint Match</span>}
-                    {vehicle.hasLeather && <span>• Leather</span>}
-                    {vehicle.hasOther && <span>• Other</span>}
+                    {vehicle.hasWheels && <span>✓ Wheels{vehicle.additions?.wheels?.description ? `: ${vehicle.additions.wheels.description}` : ''}</span>}
+                    {vehicle.hasTires && <span>✓ Tires{vehicle.additions?.tires?.description ? `: ${vehicle.additions.tires.description}` : ''}</span>}
+                    {vehicle.hasPaintMatch && <span>✓ Paint Match{vehicle.additions?.paintMatch?.description ? `: ${vehicle.additions.paintMatch.description}` : ''}</span>}
+                    {vehicle.hasLeather && <span>✓ Leather{vehicle.additions?.leather?.description ? `: ${vehicle.additions.leather.description}` : ''}</span>}
+                    {vehicle.hasOther && <span>✓ Other{vehicle.additions?.other?.[0]?.description ? `: ${vehicle.additions.other[0].description}` : ''}</span>}
                   </div>
                 </div>
               ) : (

@@ -148,6 +148,7 @@ export function EditVehicleForm({ vehicle, onSubmit, onCancel, onLiftEdit }: Edi
     hasLeather: boolean
     hasOther: boolean
     addsPrice: number
+    liftPrice?: number
     additions: {
       lift?: {
         description: string
@@ -182,23 +183,90 @@ export function EditVehicleForm({ vehicle, onSubmit, onCancel, onLiftEdit }: Edi
       totalPrice: number
     }
   }) => {
+    console.log("Lift details submitted:", data);
+    
     // Update state with new data
     setLiftDetails({
       ...data,
       liftPrice: data.addsPrice
-    })
+    });
     
     // Set both legacy fields and new additions structure
-    form.setValue("liftDescription", data.liftDescription || "")
-    form.setValue("liftPrice", data.addsPrice)
-    form.setValue("hasLift", data.hasLift)
-    form.setValue("hasWheels", data.hasWheels)
-    form.setValue("hasTires", data.hasTires)
-    form.setValue("hasPaintMatch", data.hasPaintMatch)
-    form.setValue("hasLeather", data.hasLeather)
-    form.setValue("hasOther", data.hasOther)
-    form.setValue("additions.totalPrice", data.addsPrice)
-    form.setValue("additions", data.additions)
+    form.setValue("liftDescription", data.liftDescription || "");
+    form.setValue("liftPrice", data.addsPrice);
+    form.setValue("hasLift", data.hasLift);
+    form.setValue("hasWheels", data.hasWheels);
+    form.setValue("hasTires", data.hasTires);
+    form.setValue("hasPaintMatch", data.hasPaintMatch);
+    form.setValue("hasLeather", data.hasLeather);
+    form.setValue("hasOther", data.hasOther);
+    
+    // Ensure the additions object is properly set
+    if (data.additions) {
+      // Set the total price first
+      form.setValue("additions.totalPrice", data.addsPrice);
+      
+      // Set each individual addition property
+      if (data.hasLift && data.additions.lift) {
+        form.setValue("additions.lift", data.additions.lift);
+      } else {
+        form.setValue("additions.lift", undefined);
+      }
+      
+      if (data.hasWheels && data.additions.wheels) {
+        form.setValue("additions.wheels", data.additions.wheels);
+      } else {
+        form.setValue("additions.wheels", undefined);
+      }
+      
+      if (data.hasTires && data.additions.tires) {
+        form.setValue("additions.tires", data.additions.tires);
+      } else {
+        form.setValue("additions.tires", undefined);
+      }
+      
+      if (data.hasPaintMatch && data.additions.paintMatch) {
+        form.setValue("additions.paintMatch", data.additions.paintMatch);
+      } else {
+        form.setValue("additions.paintMatch", undefined);
+      }
+      
+      if (data.hasLeather && data.additions.leather) {
+        form.setValue("additions.leather", data.additions.leather);
+      } else {
+        form.setValue("additions.leather", undefined);
+      }
+      
+      if (data.hasOther && data.additions.other) {
+        form.setValue("additions.other", data.additions.other);
+      } else {
+        form.setValue("additions.other", undefined);
+      }
+    }
+    
+    // Get the current form values to create an updated vehicle object
+    const formValues = form.getValues();
+    
+    // Create an updated vehicle object with the new lift details
+    const updatedVehicle: Vehicle = {
+      ...vehicle,
+      hasLift: data.hasLift,
+      hasWheels: data.hasWheels,
+      hasTires: data.hasTires,
+      hasPaintMatch: data.hasPaintMatch,
+      hasLeather: data.hasLeather,
+      hasOther: data.hasOther,
+      liftDescription: data.liftDescription,
+      liftPrice: data.addsPrice,
+      addsPrice: data.addsPrice,
+      additions: data.additions
+    };
+    
+    // Call the parent's onLiftEdit function with the updated vehicle
+    onLiftEdit();
+    
+    // Force a form validation to ensure the changes are recognized
+    form.trigger();
   }
 
   const handleHasLiftChange = (checked: boolean) => {
@@ -588,7 +656,10 @@ export function EditVehicleForm({ vehicle, onSubmit, onCancel, onLiftEdit }: Edi
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={onLiftEdit}
+                    onClick={() => {
+                      // First open the lift modal to edit details
+                      setIsLiftModalOpen(true);
+                    }}
                     className="mt-4"
                   >
                     {vehicle.hasLift ? "Edit Adds" : "Add Equipment"}
