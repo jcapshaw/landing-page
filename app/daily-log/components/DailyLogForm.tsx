@@ -193,27 +193,28 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
             // Don't proceed with submission if there are validation errors
           }
         )}
-        className="w-full space-y-4 bg-white p-4 rounded-lg shadow-sm"
+        className="w-full space-y-4 bg-white p-4 rounded-lg shadow-sm overflow-visible"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="md:col-span-2 lg:col-span-3 flex flex-wrap gap-3 items-center border-b pb-3 mb-2">
-            <FormField
-              control={form.control}
-              name="date"
-              render={({ field }) => (
-                <FormItem className="w-40 mb-0">
-                  <FormLabel className="text-xs">Date</FormLabel>
-                  <FormDatePicker
-                    name="date"
-                    control={form.control}
-                    className="h-8 text-xs"
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <div className="md:col-span-2 lg:col-span-3 border-b pb-3 mb-2">
+            <div className="flex flex-row flex-nowrap gap-4 items-center">
+              <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                  <FormItem className="w-40 mb-0">
+                    <FormLabel className="text-xs">Date</FormLabel>
+                    <FormDatePicker
+                      name="date"
+                      control={form.control}
+                      className="h-8 text-xs"
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-4 items-center">
               <FormField
                 control={form.control}
                 name="hasAppointment"
@@ -297,6 +298,45 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
                   </FormItem>
                 )}
               />
+              
+              {hasAppointment && (
+                <FormField
+                  control={form.control}
+                  name="appointmentSalesperson"
+                  render={({ field }) => (
+                    <FormItem className="mb-0 min-w-[200px]">
+                      <FormLabel className="text-xs">Appointment Belongs To</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value || ""}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Select salesperson" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {form.getValues("salesperson") && (
+                            <SelectItem value={form.getValues("salesperson")}>
+                              {form.getValues("salesperson")}
+                            </SelectItem>
+                          )}
+                          {isSplit && (() => {
+                            const secondSalesperson = form.getValues("secondSalesperson");
+                            return secondSalesperson && secondSalesperson.length > 0 ? (
+                              <SelectItem value={secondSalesperson}>
+                                {secondSalesperson}
+                              </SelectItem>
+                            ) : null;
+                          })()}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              </div>
             </div>
           </div>
 
@@ -369,43 +409,7 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
             )}
           />
 
-          {hasAppointment && (
-            <FormField
-              control={form.control}
-              name="appointmentSalesperson"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs">Appointment Belongs To</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value || ""}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="h-8 text-xs">
-                        <SelectValue placeholder="Select salesperson" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {form.getValues("salesperson") && (
-                        <SelectItem value={form.getValues("salesperson")}>
-                          {form.getValues("salesperson")}
-                        </SelectItem>
-                      )}
-                      {isSplit && (() => {
-                        const secondSalesperson = form.getValues("secondSalesperson");
-                        return secondSalesperson && secondSalesperson.length > 0 ? (
-                          <SelectItem value={secondSalesperson}>
-                            {secondSalesperson}
-                          </SelectItem>
-                        ) : null;
-                      })()}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
+          {/* Appointment field moved to the checkbox row */}
 
           <FormField
             control={form.control}
@@ -611,15 +615,15 @@ export default function DailyLogForm(props: DailyLogFormProps) {
       <DrawerTrigger asChild>
         <Button variant="outline">Add Store Visit</Button>
       </DrawerTrigger>
-      <DrawerContent>
+      <DrawerContent className="max-h-[90vh] flex flex-col">
         <DrawerHeader className="py-3">
           <DrawerTitle className="text-lg">New Store Visit</DrawerTitle>
           <DrawerDescription className="text-xs">Add a new store visit to the daily log.</DrawerDescription>
         </DrawerHeader>
-        <div className="px-4">
+        <div className="px-4 overflow-y-auto flex-1">
           <DailyLogFormContent {...props} onSubmit={handleFormSubmit} />
         </div>
-        <DrawerFooter className="pt-2">
+        <DrawerFooter className="pt-2 mt-auto">
           <DrawerClose asChild>
             <Button variant="outline">Cancel</Button>
           </DrawerClose>
