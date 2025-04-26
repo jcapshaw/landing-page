@@ -182,6 +182,7 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
 
   return (
     <Form {...form}>
+      {/* Form context provider */}
       <form
         onSubmit={form.handleSubmit(
           (data) => {
@@ -195,193 +196,155 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
         )}
         className="w-full space-y-4 bg-white p-4 rounded-lg shadow-sm overflow-visible"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="md:col-span-2 lg:col-span-3 border-b pb-3 mb-2">
-            <div className="flex flex-row flex-nowrap gap-4 items-center">
-              <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem className="w-40 mb-0">
-                    <FormLabel className="text-xs">Date</FormLabel>
-                    <FormDatePicker
-                      name="date"
-                      control={form.control}
-                      className="h-8 text-xs"
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex flex-wrap gap-4 items-center">
-              <FormField
-                control={form.control}
-                name="hasAppointment"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center space-x-1 space-y-0 mb-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value === "YES"}
-                        onCheckedChange={(checked) => {
-                          field.onChange(checked ? "YES" : "NO");
-                          setHasAppointment(checked as boolean);
-                        }}
-                      />
-                    </FormControl>
-                    <div className="space-y-0 leading-none">
-                      <FormLabel className="text-xs">Appt</FormLabel>
-                    </div>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="isBeBack"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center space-x-1 space-y-0 mb-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={(checked) => {
-                          field.onChange(checked);
-                          setIsBeBack(checked as boolean);
-                        }}
-                      />
-                    </FormControl>
-                    <div className="space-y-0 leading-none">
-                      <FormLabel className="text-xs">Be Back</FormLabel>
-                    </div>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="isBDC"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center space-x-1 space-y-0 mb-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={(checked) => {
-                          field.onChange(checked);
-                          setIsBDC(checked as boolean);
-                        }}
-                      />
-                    </FormControl>
-                    <div className="space-y-0 leading-none">
-                      <FormLabel className="text-xs">BDC</FormLabel>
-                    </div>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="isSplit"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center space-x-1 space-y-0 mb-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={(checked) => {
-                          field.onChange(checked);
-                          setIsSplit(checked as boolean);
-                        }}
-                      />
-                    </FormControl>
-                    <div className="space-y-0 leading-none">
-                      <FormLabel className="text-xs">Split</FormLabel>
-                    </div>
-                  </FormItem>
-                )}
-              />
-              
-              {hasAppointment && (
-                <FormField
-                  control={form.control}
-                  name="appointmentSalesperson"
-                  render={({ field }) => (
-                    <FormItem className="mb-0 min-w-[200px]">
-                      <FormLabel className="text-xs">Appointment Belongs To</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value || ""}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="h-8 text-xs">
-                            <SelectValue placeholder="Select salesperson" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {form.getValues("salesperson") && (
-                            <SelectItem value={form.getValues("salesperson")}>
-                              {form.getValues("salesperson")}
-                            </SelectItem>
-                          )}
-                          {isSplit && (() => {
-                            const secondSalesperson = form.getValues("secondSalesperson");
-                            return secondSalesperson && secondSalesperson.length > 0 ? (
-                              <SelectItem value={secondSalesperson}>
-                                {secondSalesperson}
-                              </SelectItem>
-                            ) : null;
-                          })()}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-              </div>
-            </div>
-          </div>
-
-          <FormField
+        {/* Update this portion of your component */}
+        <div className="md:col-span-2 lg:col-span-3 border-b pb-3 mb-2">
+  <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+    {/* Date picker section */}
+    <FormField
+      control={form.control}
+      name="date"
+      render={({ field }) => (
+        <FormItem className="w-40 mb-0">
+          <FormLabel className="text-xs">Date</FormLabel>
+          <FormDatePicker
+            name="date"
             control={form.control}
-            name="salesperson"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs">Salesperson</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Jane Smith"
-                    {...field}
-                    className="h-8 text-xs uppercase"
-                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            className="h-8 text-xs"
           />
+          <FormMessage />
+        </FormItem>
+      )}
+    />
 
-          {isSplit && (
-            <FormField
-              control={form.control}
-              name="secondSalesperson"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs">Second Salesperson</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="John Doe"
-                      {...field}
-                      className="h-8 text-xs uppercase"
-                      onChange={(e) => {
-                        const value = e.target.value.toUpperCase();
-                        field.onChange(value);
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+    {/* Checkboxes section - now centered */}
+    <div className="flex flex-wrap justify-center gap-4 items-center">
+      <FormField
+        control={form.control}
+        name="hasAppointment"
+        render={({ field }) => (
+          <FormItem className="flex flex-row items-center space-x-1 space-y-0 mb-0">
+            <FormControl>
+              <Checkbox
+                checked={field.value === "YES"}
+                onCheckedChange={(checked) => {
+                  field.onChange(checked ? "YES" : "NO");
+                  setHasAppointment(checked as boolean);
+                }}
+              />
+            </FormControl>
+            <div className="space-y-0 leading-none">
+              <FormLabel className="text-xs">Appt</FormLabel>
+            </div>
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="isBeBack"
+        render={({ field }) => (
+          <FormItem className="flex flex-row items-center space-x-1 space-y-0 mb-0">
+            <FormControl>
+              <Checkbox
+                checked={field.value}
+                onCheckedChange={(checked) => {
+                  field.onChange(checked);
+                  setIsBeBack(checked as boolean);
+                }}
+              />
+            </FormControl>
+            <div className="space-y-0 leading-none">
+              <FormLabel className="text-xs">Be Back</FormLabel>
+            </div>
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="isBDC"
+        render={({ field }) => (
+          <FormItem className="flex flex-row items-center space-x-1 space-y-0 mb-0">
+            <FormControl>
+              <Checkbox
+                checked={field.value}
+                onCheckedChange={(checked) => {
+                  field.onChange(checked);
+                  setIsBDC(checked as boolean);
+                }}
+              />
+            </FormControl>
+            <div className="space-y-0 leading-none">
+              <FormLabel className="text-xs">BDC</FormLabel>
+            </div>
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="isSplit"
+        render={({ field }) => (
+          <FormItem className="flex flex-row items-center space-x-1 space-y-0 mb-0">
+            <FormControl>
+              <Checkbox
+                checked={field.value}
+                onCheckedChange={(checked) => {
+                  field.onChange(checked);
+                  setIsSplit(checked as boolean);
+                }}
+              />
+            </FormControl>
+            <div className="space-y-0 leading-none">
+              <FormLabel className="text-xs">Split</FormLabel>
+            </div>
+          </FormItem>
+        )}
+      />
+    </div>
+    
+    {/* Appointment salesperson section - also centered */}
+    {hasAppointment && (
+      <div className="flex justify-center">
+        <FormField
+          control={form.control}
+          name="appointmentSalesperson"
+          render={({ field }) => (
+            <FormItem className="mb-0 min-w-[200px]">
+              <FormLabel className="text-xs">Appointment Belongs To</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                value={field.value || ""}
+              >
+                <FormControl>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Select salesperson" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {form.getValues("salesperson") && (
+                    <SelectItem value={form.getValues("salesperson")}>
+                      {form.getValues("salesperson")}
+                    </SelectItem>
+                  )}
+                  {isSplit && (() => {
+                    const secondSalesperson = form.getValues("secondSalesperson");
+                    return secondSalesperson && secondSalesperson.length > 0 ? (
+                      <SelectItem value={secondSalesperson}>
+                        {secondSalesperson}
+                      </SelectItem>
+                    ) : null;
+                  })()}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
           )}
+        />
+      </div>
+    )}
+  </div>
+</div>
 
           <FormField
             control={form.control}
@@ -586,8 +549,6 @@ function DailyLogFormContent({ onSubmit, initialData, isEditing }: DailyLogFormP
               </FormItem>
             )}
           />
-        </div>
-
         <div className="mt-4 flex justify-center">
           <Button type="submit" className="w-40 h-9 text-sm">
             {isEditing ? "Save Changes" : "Submit"}
