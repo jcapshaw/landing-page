@@ -115,6 +115,9 @@ export interface Vehicle {
 
   // Vehicle Compliance
   needsSmog?: boolean // Indicates if the vehicle needs smog certification
+  
+  // Vehicle Images
+  images?: string[] // Array of image URLs
 }
 
 export interface User {

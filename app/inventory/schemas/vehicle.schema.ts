@@ -1,6 +1,7 @@
 import * as z from "zod"
 
 export const vehicleSchema = z.object({
+  images: z.array(z.string()).optional().default([]),
   location: z.string().min(1, "Location is required"),
   stock: z.string().default(""),
   year: z.string().min(1, "Year is required"),

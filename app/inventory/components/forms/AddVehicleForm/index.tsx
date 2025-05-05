@@ -9,6 +9,7 @@ import { vehicleSchema, type VehicleFormData } from "@/app/inventory/schemas/veh
 import { BasicInfoSection } from "./BasicInfoSection"
 import { VehicleDetailsSection } from "./VehicleDetailsSection"
 import { AdditionalDetailsSection } from "./AdditionalDetailsSection"
+import { ImageUploadSection } from "./ImageUploadSection"
 import { LiftDetailsModal } from "../../forms/AddendumForm/LiftDetailsModal"
 import { useState } from "react"
 
@@ -19,6 +20,7 @@ interface AddVehicleFormProps {
 
 export function AddVehicleForm({ onSubmit, onCancel }: AddVehicleFormProps) {
   const [isLiftModalOpen, setIsLiftModalOpen] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
   const [liftDetails, setLiftDetails] = useState({
     liftDescription: "",
     hasLift: false,
@@ -55,6 +57,7 @@ export function AddVehicleForm({ onSubmit, onCancel }: AddVehicleFormProps) {
       needsSmog: false,
       liftDescription: "",
       description: "",
+      images: [],
       additions: {
         totalPrice: 0
       }
@@ -168,6 +171,11 @@ export function AddVehicleForm({ onSubmit, onCancel }: AddVehicleFormProps) {
       return
     }
 
+    if (isUploading) {
+      alert('Please wait for image uploads to complete before submitting')
+      return
+    }
+
     // Let zod handle the validation through the resolver
     console.log('Form validation passed, submitting data...')
     onSubmit(data)
@@ -180,9 +188,16 @@ export function AddVehicleForm({ onSubmit, onCancel }: AddVehicleFormProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <BasicInfoSection form={form} />
             <VehicleDetailsSection form={form} />
-            <AdditionalDetailsSection 
+            <AdditionalDetailsSection
               form={form}
               onHasLiftChange={handleHasLiftChange}
+            />
+          </div>
+          
+          <div className="mt-6">
+            <ImageUploadSection
+              form={form}
+              onUploadStateChange={setIsUploading}
             />
           </div>
 
@@ -190,8 +205,12 @@ export function AddVehicleForm({ onSubmit, onCancel }: AddVehicleFormProps) {
             <Button type="button" variant="outline" onClick={onCancel}>
               Cancel
             </Button>
-            <Button type="submit" variant="default">
-              Add Vehicle
+            <Button
+              type="submit"
+              variant="default"
+              disabled={isUploading}
+            >
+              {isUploading ? 'Uploading Images...' : 'Add Vehicle'}
             </Button>
           </div>
         </form>

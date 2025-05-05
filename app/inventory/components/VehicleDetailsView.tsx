@@ -62,6 +62,17 @@ export function VehicleDetailsView({ vehicle, depositDetails, soldDetails }: Veh
           <span className="ml-1 text-blue-600">${vehicle.totalPrice.toLocaleString()}</span>
         </h2>
         
+        {/* Vehicle Image */}
+        {vehicle.images && vehicle.images.length > 0 && (
+          <div className="mb-4">
+            <img
+              src={vehicle.images[0]}
+              alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
+              className="w-full h-auto max-h-64 object-cover rounded-md"
+            />
+          </div>
+        )}
+        
         {/* Main content in a compact layout */}
         <div className="space-y-3">
           {/* Deposit Information - if available */}

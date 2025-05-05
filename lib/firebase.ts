@@ -14,7 +14,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyDkDSF9Dq50j8LnxENgYyjeXv6edfTtwu0",
   authDomain: "liftedtrucks-7d7c6.firebaseapp.com",
   projectId: "liftedtrucks-7d7c6",
-  storageBucket: "liftedtrucks-7d7c6.appspot.com",
+  storageBucket: "liftedtrucks-7d7c6.firebasestorage.app",
   messagingSenderId: "157523753930",
   appId: "1:157523753930:web:3fdcdfdf233521b7b6ed33"
 };
