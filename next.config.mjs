@@ -20,6 +20,8 @@ const nextConfig = {
       bodySizeLimit: "2mb",
     },
     optimizePackageImports: ["react", "react-dom"],
+    pageLoadTimeout: 180, // Increase timeout for chunks
+    externalMiddlewareRewritesResolve: true,
   },
   async headers() {
     return [
