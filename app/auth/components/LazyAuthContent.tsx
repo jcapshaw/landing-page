@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/components/AuthProvider";
 import AuthForm from "./AuthForm";
 
-export default function AuthContent() {
+export default function LazyAuthContent() {
   const router = useRouter();
   const { user, loading: authLoading, error } = useAuth();
   const [pageLoading, setPageLoading] = useState(true);

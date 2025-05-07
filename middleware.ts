@@ -4,6 +4,9 @@ import type { NextRequest } from 'next/server';
 // Add static asset paths to be excluded from auth check
 const PUBLIC_FILE = /\.(.*)$/;
 
+// This middleware works with Supabase authentication
+// It checks for authentication tokens in cookies, headers, and URL parameters
+
 export function middleware(request: NextRequest) {
   // Get the pathname of the request
   const path = request.nextUrl.pathname;
@@ -15,6 +18,15 @@ export function middleware(request: NextRequest) {
     path.startsWith('/api') || // Skip API routes
     path.includes('/favicon.') // Skip favicon
   ) {
+    return NextResponse.next();
+  }
+
+  // Check for development bypass parameter
+  const url = new URL(request.url);
+  const bypassAuth = url.searchParams.get('bypassAuth') === 'true';
+  
+  if (bypassAuth) {
+    console.log('Bypassing authentication for development');
     return NextResponse.next();
   }
 
@@ -66,31 +78,38 @@ export function middleware(request: NextRequest) {
     console.log('Set session cookie in middleware');
   }
 
-  // Redirect authenticated users to dashboard if they try to access public paths
-  if (isPublicPath && token) {
-    console.log('Redirecting authenticated user to dashboard');
-    response = NextResponse.redirect(new URL('/dashboard', request.url));
-    
-    // Ensure the cookie is also set in the redirect response
-    if (token) {
-      response.cookies.set({
-        name: 'session',
-        value: token,
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 60 * 60 * 24 * 5, // 5 days
-        path: '/',
-        sameSite: 'lax',
-      });
-    }
-    
-    return response;
-  }
+  // Allow access to /auth even if authenticated, so users can always reach the sign in page
+  // if (isPublicPath && token) {
+  //   console.log('Redirecting authenticated user to dashboard');
+  //   response = NextResponse.redirect(new URL('/dashboard', request.url));
+  //
+  //   // Ensure the cookie is also set in the redirect response
+  //   if (token) {
+  //     response.cookies.set({
+  //       name: 'session',
+  //       value: token,
+  //       httpOnly: true,
+  //       secure: process.env.NODE_ENV === 'production',
+  //       maxAge: 60 * 60 * 24 * 5, // 5 days
+  //       path: '/',
+  //       sameSite: 'lax',
+  //     });
+  //   }
+  //
+  //   return response;
+  // }
 
   // Redirect unauthenticated users to login if they try to access protected paths
   if (!isPublicPath && !token) {
     console.log('Redirecting unauthenticated user to auth');
-    return NextResponse.redirect(new URL('/auth', request.url));
+    
+    // Create the redirect URL
+    const redirectUrl = new URL('/auth', request.url);
+    
+    // Add a parameter to prevent redirect loops
+    redirectUrl.searchParams.set('redirect', 'true');
+    
+    return NextResponse.redirect(redirectUrl);
   }
 
   return response;

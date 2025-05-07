@@ -1,33 +1,29 @@
-import { db } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 import { DailyLogEntry } from '../types';
-import {
-  collection,
-  addDoc,
-  query,
-  where,
-  getDocs,
-  updateDoc,
-  doc,
-  orderBy,
-  getDoc,
-} from 'firebase/firestore';
 
-const COLLECTION_NAME = 'dailyLogs';
+const TABLE_NAME = 'daily_logs';
 
 export const addDailyLogEntry = async (entry: Omit<DailyLogEntry, 'id' | 'createdAt'>) => {
   try {
-    console.log('Adding entry to Firestore:', entry);
+    console.log('Adding entry to Supabase:', entry);
     const entryWithTimestamp = {
       ...entry,
-      createdAt: new Date().toISOString(),
+      created_at: new Date().toISOString(),
     };
     console.log('Entry with timestamp:', entryWithTimestamp);
     
-    const docRef = await addDoc(collection(db, COLLECTION_NAME), entryWithTimestamp);
-    console.log('Document written with ID:', docRef.id);
+    const { data, error } = await supabase
+      .from(TABLE_NAME)
+      .insert(entryWithTimestamp)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    
+    console.log('Document written with ID:', data.id);
     
     const newEntry = {
-      id: docRef.id,
+      id: data.id,
       ...entryWithTimestamp,
     };
     console.log('Returning new entry:', newEntry);
@@ -53,32 +49,24 @@ export const getDailyLogEntries = async (date: Date) => {
 
     console.log('Date range:', { startISO, endISO });
 
-    // Use a query that doesn't require a composite index
-    // Just get all entries and filter client-side
-    const q = query(
-      collection(db, COLLECTION_NAME)
-    );
-
-    const querySnapshot = await getDocs(q);
-    console.log('Query returned', querySnapshot.size, 'documents');
+    // Query Supabase for entries within the date range
+    const { data, error } = await supabase
+      .from(TABLE_NAME)
+      .select('*')
+      .gte('date', startISO)
+      .lte('date', endISO);
     
-    // Filter the results client-side based on the date
-    const entries = querySnapshot.docs
-      .map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          ...data
-        } as DailyLogEntry;
-      })
-      .filter(entry => {
-        if (!entry.date) return false;
-        
-        const entryDate = new Date(entry.date);
-        return entryDate >= startOfDay && entryDate <= endOfDay;
-      });
+    if (error) throw error;
     
-    console.log('Filtered entries:', entries.length, 'out of', querySnapshot.size);
+    console.log('Query returned', data.length, 'documents');
+    
+    // Map the results to the expected format
+    const entries = data.map(entry => ({
+      id: entry.id,
+      ...entry
+    })) as DailyLogEntry[];
+    
+    console.log('Entries:', entries.length);
     return entries;
   } catch (error) {
     console.error('Error getting daily log entries:', error);
@@ -88,8 +76,15 @@ export const getDailyLogEntries = async (date: Date) => {
 
 export const updateDailyLogEntry = async (entryId: string, updates: Partial<DailyLogEntry>) => {
   try {
-    const entryRef = doc(db, COLLECTION_NAME, entryId);
-    await updateDoc(entryRef, updates);
+    const { data, error } = await supabase
+      .from(TABLE_NAME)
+      .update(updates)
+      .eq('id', entryId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    
     return {
       id: entryId,
       ...updates,
@@ -102,16 +97,24 @@ export const updateDailyLogEntry = async (entryId: string, updates: Partial<Dail
 
 export const getDailyLogEntryById = async (entryId: string) => {
   try {
-    const entryRef = doc(db, COLLECTION_NAME, entryId);
-    const docSnap = await getDoc(entryRef);
+    const { data, error } = await supabase
+      .from(TABLE_NAME)
+      .select('*')
+      .eq('id', entryId)
+      .single();
     
-    if (docSnap.exists()) {
-      return {
-        id: docSnap.id,
-        ...docSnap.data()
-      } as DailyLogEntry;
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // Record not found
+        return null;
+      }
+      throw error;
     }
-    return null;
+    
+    return {
+      id: data.id,
+      ...data
+    } as DailyLogEntry;
   } catch (error) {
     console.error('Error getting daily log entry:', error);
     throw error;

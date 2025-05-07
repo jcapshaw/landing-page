@@ -4,8 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm, ControllerRenderProps, Control } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { setAuthToken, setupFetchInterceptor } from "@/lib/auth-utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
@@ -70,25 +69,30 @@ export default function AuthForm() {
   async function onSubmit(data: FormData) {
     setIsLoading(true);
     try {
-      console.log('Attempting authentication...');
-      // Mock login check
-      if (!auth) {
-        throw new Error('Firebase auth is not initialized');
-      }
+      console.log('Attempting authentication with Supabase...');
       
-      if (!isRegister && data.email === 'demo@liftedtrucks.com' && data.password === 'password') {
-        console.log('Mock login successful');
-        const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
-        
-        // Get the ID token
-        const token = await userCredential.user.getIdToken();
-        
+      if (!isRegister) {
+        // Sign in with Supabase
+        const { data: authData, error } = await supabase.auth.signInWithPassword({
+          email: data.email,
+          password: data.password,
+        });
+
+        if (error) throw error;
+
+        if (!authData.session) {
+          throw new Error('No session returned from Supabase');
+        }
+
+        // Get the access token
+        const token = authData.session.access_token;
+
         // Store token in localStorage for client-side use
         setAuthToken(token);
-        
+
         // Set up fetch interceptor
         setupFetchInterceptor();
-        
+
         // Set the session cookie via API for server-side access
         try {
           const response = await fetch('/api/auth/session', {
@@ -98,22 +102,43 @@ export default function AuthForm() {
               'Content-Type': 'application/json'
             }
           });
-          
+
           if (!response.ok) {
             console.warn('Failed to set session cookie via API');
           }
         } catch (error) {
           console.warn('Error setting session cookie:', error);
         }
-        
+
         console.log('User signed in successfully');
-        
+
         // Redirect to dashboard with token in URL for initial auth
         router.push(`/dashboard?token=${token}`);
       } else if (isRegister) {
-        throw new Error('Registration is disabled in demo mode');
-      } else {
-        throw new Error('Invalid credentials. Use demo@liftedtrucks.com / password');
+        // Registration with Supabase
+        const { data: userData, error: userError } = await supabase.auth.signUp({
+          email: data.email,
+          password: data.password,
+          options: {
+            data: {
+              first_name: (data as RegisterFormData).firstName,
+              last_name: (data as RegisterFormData).lastName,
+              phone: (data as RegisterFormData).phone,
+              job_title: (data as RegisterFormData).jobTitle,
+              location: (data as RegisterFormData).location,
+              role: (data as RegisterFormData).requestAdmin ? 'pending_admin' : 'salesperson',
+            }
+          }
+        });
+
+        if (userError) throw userError;
+        
+        // Show confirmation message
+        form.setError("root", {
+          message: "Registration successful! Please check your email to confirm your account.",
+        });
+        
+        return;
       }
       console.log('Authentication successful, waiting for redirect...');
     } catch (error) {
@@ -121,12 +146,12 @@ export default function AuthForm() {
       let errorMessage = "Authentication failed. Please check your credentials.";
       
       if (error instanceof Error) {
-        if (error.message.includes("auth/user-not-found")) {
-          errorMessage = "No account found with this email.";
-        } else if (error.message.includes("auth/wrong-password")) {
-          errorMessage = "Incorrect password.";
-        } else if (error.message.includes("auth/email-already-in-use")) {
+        if (error.message.includes("Invalid login credentials")) {
+          errorMessage = "Invalid email or password.";
+        } else if (error.message.includes("User already registered")) {
           errorMessage = "An account with this email already exists.";
+        } else if (error.message.includes("Email not confirmed")) {
+          errorMessage = "Please confirm your email address before signing in.";
         }
       }
       

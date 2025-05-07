@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,6 +22,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Token is required' },
         { status: 400 }
+      );
+    }
+
+    // Verify the token with Supabase
+    const supabaseAdmin = getSupabaseAdmin();
+    const { data, error } = await supabaseAdmin.auth.getUser(token);
+    
+    if (error || !data.user) {
+      console.error('Invalid token:', error);
+      return NextResponse.json(
+        { error: 'Invalid token' },
+        { status: 401 }
       );
     }
 
@@ -50,7 +64,17 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function DELETE() {
+export async function DELETE(request: NextRequest) {
+  // Check if the cookie already doesn't exist to prevent loops
+  const sessionCookie = request.cookies.get('session');
+  
+  if (!sessionCookie || !sessionCookie.value) {
+    return NextResponse.json(
+      { success: true, message: 'Session already cleared' },
+      { status: 200 }
+    );
+  }
+  
   const response = NextResponse.json(
     { success: true },
     { status: 200 }
@@ -75,7 +99,17 @@ export async function GET(request: NextRequest) {
   const token = request.cookies.get('session')?.value;
   
   if (token) {
-    return NextResponse.json({ authenticated: true });
+    // Verify the token with Supabase
+    try {
+      const { data, error } = await supabase.auth.getUser(token);
+      if (error || !data.user) {
+        return NextResponse.json({ authenticated: false });
+      }
+      return NextResponse.json({ authenticated: true, user: data.user });
+    } catch (error) {
+      console.error('Error verifying token:', error);
+      return NextResponse.json({ authenticated: false });
+    }
   } else {
     return NextResponse.json({ authenticated: false });
   }

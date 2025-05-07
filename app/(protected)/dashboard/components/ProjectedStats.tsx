@@ -38,9 +38,9 @@ export default function ProjectedStats() {
     const daysRemaining = lastDay.getDate() - today.getDate();
     
     // Simulated data based on MTD performance
-    const mtdSales = 44; // This should come from actual data
-    const mtdLeads = 315; // This should come from actual data
-    const mtdAppts = 65; // This should come from actual data
+    const mtdSales = 27; // This should come from actual data
+    const mtdLeads = 185; // This should come from actual data
+    const mtdAppts = 37; // This should come from actual data
     const daysPassed = today.getDate();
     
     const dailyAverage = mtdSales / daysPassed;

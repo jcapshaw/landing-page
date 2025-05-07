@@ -1,6 +1,8 @@
 /**
- * Authentication utility functions
+ * Authentication utility functions for Supabase
  */
+
+import { supabase } from './supabase';
 
 // User role types
 export type UserRole = 'admin' | 'manager' | 'salesperson';
@@ -8,12 +10,19 @@ export type UserRole = 'admin' | 'manager' | 'salesperson';
 // Get the authentication token from localStorage
 export function getAuthToken(): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('authToken');
+  
+  // Get the session from Supabase
+  const session = supabase.auth.getSession();
+  if (!session) return null;
+  
+  // Return the access token if available
+  return localStorage.getItem('sb-access-token');
 }
 
 // Set the authentication token in localStorage
 export function setAuthToken(token: string): void {
   if (typeof window === 'undefined') return;
+  // Note: Supabase handles token storage internally, but we'll keep this for compatibility
   localStorage.setItem('authToken', token);
 }
 
@@ -21,6 +30,8 @@ export function setAuthToken(token: string): void {
 export function clearAuthToken(): void {
   if (typeof window === 'undefined') return;
   localStorage.removeItem('authToken');
+  // Also sign out from Supabase
+  supabase.auth.signOut();
 }
 
 // Add the authentication token to fetch headers
@@ -30,10 +41,9 @@ export function addAuthHeaderToInit(init?: RequestInit): RequestInit {
   const newInit: RequestInit = init ? { ...init } : {};
   newInit.headers = newInit.headers || {};
   
-  
   // Convert headers to Headers object if it's not already
-  const headers = newInit.headers instanceof Headers 
-    ? newInit.headers 
+  const headers = newInit.headers instanceof Headers
+    ? newInit.headers
     : new Headers(newInit.headers as Record<string, string>);
   
   // Add Authorization header
@@ -70,7 +80,8 @@ export function resetFetchInterceptor(): void {
 
 // Role-based access control utility functions
 export function hasRole(user: any, role: UserRole): boolean {
-  return user?.role === role;
+  // In Supabase, we'll store user roles in user metadata
+  return user?.user_metadata?.role === role;
 }
 
 export function isAdmin(user: any): boolean {
@@ -103,4 +114,16 @@ export function hasWriteAccess(user: any): boolean {
 
 export function hasReadAccess(user: any): boolean {
   return !!user; // Any authenticated user has read access
+}
+
+// Get current user from Supabase
+export async function getCurrentUser() {
+  const { data: { user } } = await supabase.auth.getUser();
+  return user;
+}
+
+// Get current session from Supabase
+export async function getCurrentSession() {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session;
 }
