@@ -1,0 +1,1 @@
+- always use shadcn for components and styling
