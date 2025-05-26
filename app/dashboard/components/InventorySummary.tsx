@@ -89,23 +89,23 @@ export default function InventorySummary() {
             <div className="grid grid-cols-5 gap-4 text-sm">
               <div className="text-center">
                 <div className="dashboard-subtitle mb-1">Total</div>
-                <div className="font-medium text-sm">{summary.total}</div>
+                <div className="dashboard-title">{summary.total}</div>
               </div>
               <div className="text-center">
                 <div className="dashboard-subtitle mb-1">Available</div>
-                <div className="font-medium text-sm text-green-600">{summary.available}</div>
+                <div className="dashboard-title text-green-600">{summary.available}</div>
               </div>
               <div className="text-center">
                 <div className="dashboard-subtitle mb-1">Deposit</div>
-                <div className="font-medium text-sm text-yellow-600">{summary.deposit}</div>
+                <div className="dashboard-title text-yellow-600">{summary.deposit}</div>
               </div>
               <div className="text-center">
                 <div className="dashboard-subtitle mb-1">Sold</div>
-                <div className="font-medium text-sm text-blue-600">{summary.sold}</div>
+                <div className="dashboard-title text-blue-600">{summary.sold}</div>
               </div>
               <div className="text-center">
                 <div className="dashboard-subtitle mb-1">Pending Recon</div>
-                <div className="font-medium text-sm text-orange-600">{summary.pendingRecon}</div>
+                <div className="dashboard-title text-orange-600">{summary.pendingRecon}</div>
               </div>
             </div>
           </div>

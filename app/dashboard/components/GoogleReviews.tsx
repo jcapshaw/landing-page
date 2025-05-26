@@ -101,7 +101,7 @@ export default function GoogleReviews() {
               <div className="flex mr-2">
                 {renderStars(Math.round(averageRating))}
               </div>
-              <span className="text-lg font-bold">{averageRating}</span>
+              <span className="dashboard-title">{averageRating}</span>
               <span className="dashboard-subtitle ml-2">out of 5</span>
             </div>
             
@@ -109,13 +109,13 @@ export default function GoogleReviews() {
               {reviews.map((review) => (
                 <div key={review.id} className="border-b pb-4">
                   <div className="flex justify-between items-center mb-1">
-                    <div className="font-medium">{review.author}</div>
-                    <div className="text-sm text-gray-500">
+                    <div className="dashboard-title">{review.author}</div>
+                    <div className="dashboard-subtitle">
                       {new Date(review.date).toLocaleDateString()}
                     </div>
                   </div>
                   <div className="flex mb-2">{renderStars(review.rating)}</div>
-                  <p className="text-sm text-gray-700">{review.text}</p>
+                  <p className="dashboard-subtitle">{review.text}</p>
                 </div>
               ))}
             </div>
@@ -123,7 +123,7 @@ export default function GoogleReviews() {
             <div className="mt-4 text-center">
               <a 
                 href="#" 
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                className="text-blue-600 hover:text-blue-800 dashboard-subtitle font-medium"
                 onClick={(e) => {
                   e.preventDefault();
                   // TODO: Link to all reviews or Google Business page

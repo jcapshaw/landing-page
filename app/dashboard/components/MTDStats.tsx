@@ -31,15 +31,15 @@ export default function MTDStats() {
       <div className="space-y-4">
         <div>
           <p className="dashboard-subtitle">Total Sold</p>
-          <p className="text-xl font-bold">{stats.totalSales.toLocaleString()}</p>
+          <p className="dashboard-title">{stats.totalSales.toLocaleString()}</p>
         </div>
         <div>
           <p className="dashboard-subtitle">Total Leads</p>
-          <p className="text-xl font-bold">{stats.totalLeads}</p>
+          <p className="dashboard-title">{stats.totalLeads}</p>
         </div>
         <div>
           <p className="dashboard-subtitle">Conversion Rate</p>
-          <p className="text-xl font-bold">{stats.conversionRate}%</p>
+          <p className="dashboard-title">{stats.conversionRate}%</p>
         </div>
       </div>
     </div>

@@ -49,12 +49,12 @@ const HotProspects: FC = () => {
         ) : (
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Total Hot Prospects</span>
-              <span className="text-sm font-bold">{totalHotProspects}</span>
+              <span className="dashboard-subtitle">Total Hot Prospects</span>
+              <span className="dashboard-title">{totalHotProspects}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Added in Last 72 Hours</span>
-              <span className="text-sm font-bold">{addedLast72Hours}</span>
+              <span className="dashboard-subtitle">Added in Last 72 Hours</span>
+              <span className="dashboard-title">{addedLast72Hours}</span>
             </div>
           </div>
         )}
