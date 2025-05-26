@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import AuthPageClient from "./components/AuthPageClient";
+import AuthContent from "./components/AuthContent";
 
 export const metadata: Metadata = {
   title: 'Authentication - Lifted Trucks Employee Portal',
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function AuthPage() {
-  return <AuthPageClient />;
+  return <AuthContent />;
 }

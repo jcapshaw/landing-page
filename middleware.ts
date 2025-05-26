@@ -21,14 +21,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check for development bypass parameter
-  const url = new URL(request.url);
-  const bypassAuth = url.searchParams.get('bypassAuth') === 'true';
-  
-  if (bypassAuth) {
-    console.log('Bypassing authentication for development');
-    return NextResponse.next();
-  }
+  // Development bypass removed - using normal authentication
 
   // Define public paths that don't require authentication
   const isPublicPath = path === '/' || path === '/auth' || path.includes('/auth?');

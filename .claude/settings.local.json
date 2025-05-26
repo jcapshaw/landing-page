@@ -5,7 +5,11 @@
       "Bash(rm:*)",
       "Bash(npm uninstall:*)",
       "Bash(grep:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(echo:*)",
+      "Bash(pkill:*)",
+      "Bash(true)",
+      "Bash(cat:*)"
     ],
     "deny": []
   }

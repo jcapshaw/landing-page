@@ -20,8 +20,8 @@ const nextConfig = {
       bodySizeLimit: "2mb",
     },
     optimizePackageImports: ["react", "react-dom"],
-    pageLoadTimeout: 180, // Increase timeout for chunks
     externalMiddlewareRewritesResolve: true,
+    allowedDevOrigins: ["rnxj22-3001.csb.app", "rnxj22-3000.csb.app"],
   },
   async headers() {
     return [
@@ -43,8 +43,6 @@ const nextConfig = {
       },
     ];
   },
-  // 👇 ADD THIS BLOCK
-  allowedDevOrigins: ["https://rnxj22-3000.csb.app"],
   reactStrictMode: true,
   poweredByHeader: false,
 };
