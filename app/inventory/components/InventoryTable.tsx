@@ -14,7 +14,7 @@ import { Vehicle } from "../types"
 import { DepositModal } from "./DepositModal"
 import { SoldModal } from "./SoldModal"
 import { EditVehicleModal } from "./EditVehicleModal"
-import { useAuth } from "@/app/components/AuthProvider"
+import { useAuth } from "@/app/components/LazyAuthProvider"
 import { hasWriteAccess, isSalesPerson } from "@/lib/auth-utils"
 
 interface InventoryTableProps {

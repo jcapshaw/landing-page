@@ -12,7 +12,9 @@
       "Bash(cat:*)",
       "Bash(npm run build:*)",
       "Bash(sed:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(ls:*)",
+      "Bash(curl:*)"
     ],
     "deny": []
   }

@@ -1,24 +1,38 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "./components/AuthProvider";
+import { useAuth } from "./components/LazyAuthProvider";
 import HomeContent from "./components/HomeContent";
 
 export default function HomePage() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // If user is authenticated, redirect to dashboard
-    if (!loading && user) {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    // Only redirect after component is mounted and auth is not loading
+    if (mounted && !loading && user) {
       router.push("/dashboard");
     }
-  }, [user, loading, router]);
+  }, [mounted, user, loading, router]);
 
-  // Skip showing loading state
+  // Don't render anything until mounted (prevents hydration issues)
+  if (!mounted) {
+    return null;
+  }
+
+  // Show loading state while auth is initializing
   if (loading) {
-    return null; // Return empty instead of loading spinner
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
   }
 
   // If user is not authenticated, show home content

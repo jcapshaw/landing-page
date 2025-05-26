@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { useAuth } from '@/app/components/AuthProvider'
+import { useAuth } from '@/app/components/LazyAuthProvider'
 import DailyLogForm from './DailyLogForm'
 import { DailyLogTable } from './DailyLogTable'
 import { DailyLogEntry } from '../types'

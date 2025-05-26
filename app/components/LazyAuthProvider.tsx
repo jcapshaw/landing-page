@@ -32,6 +32,9 @@ export default function LazyAuthProvider({ children }: { children: ReactNode }) 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<AuthError | null>(null);
 
+  // Development bypass - check if we should skip auth
+  const isDevelopmentBypass = process.env.NEXT_PUBLIC_DEV_BYPASS_AUTH === 'true';
+
   useEffect(() => {
     // Setup Supabase auth state listener
     const setupAuth = async () => {

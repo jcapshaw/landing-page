@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/app/components/AuthProvider";
+import { useAuth } from "@/app/components/LazyAuthProvider";
 import DashboardContent from "@/app/dashboard/components/DashboardContent";
 
 export default function DashboardPage() {

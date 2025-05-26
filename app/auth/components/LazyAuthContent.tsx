@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/app/components/AuthProvider";
+import { useAuth } from "@/app/components/LazyAuthProvider";
 import AuthForm from "./AuthForm";
 
 export default function LazyAuthContent() {

@@ -1,33 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useAuth } from "./AuthProvider";
 
 export default function HomeContent() {
-  const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
-  const [pageLoading, setPageLoading] = useState(true);
-
-  useEffect(() => {
-    // Only handle navigation after auth state is determined
-    if (!authLoading) {
-      if (user) {
-        console.log('User authenticated, redirecting to dashboard');
-        router.push('/dashboard');
-      } else {
-        console.log('No authenticated user, showing landing page');
-        setPageLoading(false);
-      }
-    }
-  }, [user, authLoading, router]);
-
-  // Skip showing loading state
-  if (authLoading || pageLoading) {
-    return null; // Return empty instead of loading spinner
-  }
 
   return (
     <div className="landing-page">

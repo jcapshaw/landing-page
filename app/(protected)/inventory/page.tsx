@@ -16,7 +16,7 @@ import { LiftDetailsModal } from "@/app/inventory/components/forms/AddendumForm/
 import { InventoryTable } from "@/app/inventory/components/InventoryTable";
 import { Vehicle } from "@/app/inventory/types";
 import { addVehicle, updateVehicle, getAllVehicles } from "@/lib/vehicles";
-import { useAuth } from "@/app/components/AuthProvider";
+import { useAuth } from "@/app/components/LazyAuthProvider";
 
 export default function InventoryPage() {
   const { user } = useAuth();

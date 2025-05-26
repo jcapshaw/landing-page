@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../components/AuthProvider";
+import { useAuth } from "../components/LazyAuthProvider";
 import { HotProspects } from "../components/HotProspects";
 import { ProspectsTable } from "../components/ProspectsTable";
 import {

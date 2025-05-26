@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useAuth } from "./AuthProvider";
+import { useAuth } from "./LazyAuthProvider";
 import { supabase } from "@/lib/supabase";
 import { isAdmin } from "@/lib/auth-utils";
 import {
