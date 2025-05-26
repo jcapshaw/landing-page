@@ -2,10 +2,9 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./AuthProvider";
-import { auth } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { isAdmin } from "@/lib/auth-utils";
 import {
   Select,
@@ -22,10 +21,7 @@ const Navbar = () => {
 
   const handleSignOut = async () => {
     try {
-      if (!auth) {
-        throw new Error("Auth instance not initialized");
-      }
-      await signOut(auth);
+      await supabase.auth.signOut();
       router.push("/auth");
     } catch (error) {
       console.error("Error signing out:", error);

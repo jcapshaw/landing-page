@@ -4,7 +4,6 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import type { FC } from 'react';
 import { getActiveProspects, type Prospect } from '@/lib/prospects';
-import { Timestamp } from 'firebase/firestore';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 
 const HotProspects: FC = () => {
@@ -31,8 +30,9 @@ const HotProspects: FC = () => {
   const now = Date.now();
   const seventyTwoHoursMs = 72 * 60 * 60 * 1000;
   const addedLast72Hours = prospects.filter(p => {
-    if (!p.date || typeof p.date.toMillis !== 'function') return false;
-    return now - p.date.toMillis() <= seventyTwoHoursMs;
+    if (!p.date) return false;
+    const prospectDate = new Date(p.date).getTime();
+    return now - prospectDate <= seventyTwoHoursMs;
   }).length;
 
   return (

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { auth } from "@/lib/firebase";
+import { useAuth } from "../components/AuthProvider";
 import { HotProspects } from "../components/HotProspects";
 import { ProspectsTable } from "../components/ProspectsTable";
 import {
@@ -19,26 +19,17 @@ type NewProspectData = Omit<ProspectData, 'status' | 'updatedAt' | 'archivedAt'>
 
 export default function HotProspectsPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [prospects, setProspects] = useState<Prospect[]>([]);
   const [editingProspect, setEditingProspect] = useState<Prospect | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Check authentication
   useEffect(() => {
-    if (!auth) {
-      console.error("Auth instance not initialized");
+    if (!user) {
       router.push('/auth');
-      return;
     }
-
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (!user) {
-        router.push('/auth');
-      }
-    });
-
-    return () => unsubscribe();
-  }, [router]);
+  }, [user, router]);
 
   // Fetch active prospects
   useEffect(() => {
@@ -113,14 +104,10 @@ export default function HotProspectsPage() {
 
   const handleAddNote = async (id: string, text: string) => {
     try {
-      if (!auth) {
-        throw new Error('Auth instance not initialized');
-      }
-      const user = auth.currentUser;
       if (!user) {
         throw new Error('User must be authenticated to add notes');
       }
-      await addNote(id, text, user.displayName || user.email || 'Unknown User');
+      await addNote(id, text, user.email || 'Unknown User');
       // Refresh the prospects list
       const activeProspects = await getActiveProspects();
       setProspects(activeProspects);
@@ -149,7 +136,7 @@ export default function HotProspectsPage() {
             onEditClick={handleEditClick}
             onDispositionChange={handleDispositionChange}
             onAddNote={handleAddNote}
-            currentUser={auth?.currentUser?.displayName || auth?.currentUser?.email || 'Unknown User'}
+            currentUser={user?.email || 'Unknown User'}
           />
         </div>
       </div>

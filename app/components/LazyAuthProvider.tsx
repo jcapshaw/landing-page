@@ -69,17 +69,8 @@ export default function LazyAuthProvider({ children }: { children: ReactNode }) 
               // Reset fetch interceptor
               resetFetchInterceptor();
               
-              // Only clear the session cookie if we previously had a user
-              // This prevents the DELETE /api/auth/session loop
-              if (user) {
-                try {
-                  await fetch('/api/auth/session', {
-                    method: 'DELETE'
-                  });
-                } catch (error) {
-                  console.warn('Error clearing session cookie:', error);
-                }
-              }
+              // Session cleanup is handled by Supabase
+              console.log('Session cleared by Supabase');
               
               setUser(null);
               setLoading(false);
@@ -129,58 +120,20 @@ export default function LazyAuthProvider({ children }: { children: ReactNode }) 
         // Set up fetch interceptor
         setupFetchInterceptor();
         
-        // Also set the session cookie via API for server-side access
-        try {
-          const response = await fetch('/api/auth/session', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          });
-          
-          if (!response.ok) {
-            console.warn('Failed to set session cookie via API, but client-side auth is still working');
-          }
-        } catch (error) {
-          console.warn('Error setting session cookie:', error);
-        }
+        // Session is now handled entirely by Supabase
+        console.log('Session handled by Supabase');
         
         console.log('Auth token set and fetch interceptor configured');
         
         // Get user role from user metadata
         const role = session.user.user_metadata?.role as string;
         
-        // If no role in metadata, try to fetch from API
-        if (!role) {
-          try {
-            const response = await fetch('/api/auth/get-role', {
-              headers: {
-                'Authorization': `Bearer ${token}`
-              }
-            });
-            
-            if (response.ok) {
-              const data = await response.json();
-              const userWithRole = {
-                ...session.user,
-                role: data.role
-              };
-              setUser(userWithRole);
-            } else {
-              setUser(session.user);
-            }
-          } catch (apiError) {
-            console.warn('Failed to fetch role from API:', apiError);
-            setUser(session.user);
-          }
-        } else {
-          const userWithRole = {
-            ...session.user,
-            role
-          };
-          setUser(userWithRole);
-        }
+        // For now, just use the role from metadata
+        const userWithRole = {
+          ...session.user,
+          role: role || 'user' // Default to 'user' if no role
+        };
+        setUser(userWithRole);
       } catch (err) {
         console.error("Error handling session:", err);
         

@@ -20,8 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { db } from "@/lib/firebase"
-import { addDoc, collection, query, where, getDocs, orderBy } from "firebase/firestore"
+import { supabase } from "@/lib/supabase"
 
 // Interface for Board Deal data
 interface BoardDealData {
@@ -101,21 +100,18 @@ export default function SoldLogClientPage() {
   const fetchBoardDeals = async (id: string) => {
     setLoadingDeals(true)
     try {
-      const boardDealsQuery = query(
-        collection(db, 'boardDeals'),
-        where('entryId', '==', id),
-        orderBy('createdAt', 'desc')
-      )
+      const { data: deals, error } = await supabase
+        .from('board_deals')
+        .select('*')
+        .eq('entryId', id)
+        .order('createdAt', { ascending: false })
       
-      const querySnapshot = await getDocs(boardDealsQuery)
-      const deals: BoardDealData[] = []
-      
-      querySnapshot.forEach((doc) => {
-        deals.push(doc.data() as BoardDealData)
-      })
+      if (error) {
+        throw error
+      }
       
       console.log("Fetched board deals:", deals)
-      setBoardDeals(deals)
+      setBoardDeals(deals || [])
     } catch (err) {
       console.error("Error fetching board deals:", err)
     } finally {
@@ -304,8 +300,14 @@ export default function SoldLogClientPage() {
         createdAt: new Date().toISOString()
       }
       
-      // Save to Firestore
-      await addDoc(collection(db, 'boardDeals'), boardDeal)
+      // Save to Supabase
+      const { error } = await supabase
+        .from('board_deals')
+        .insert([boardDeal])
+      
+      if (error) {
+        throw error
+      }
       
       // Update the daily log entry status to SOLD! if not already
       if (entry && entry.status !== 'SOLD!') {

@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react';
 import type { FC } from 'react';
 import { ProspectsTable } from '@/app/components/ProspectsTable';
 import { getActiveProspects, updateProspect, addNote, type Prospect } from '@/lib/prospects';
-import { Timestamp } from 'firebase/firestore';
 
 const HotProspects: FC = () => {
   const [prospects, setProspects] = useState<Prospect[]>([]);

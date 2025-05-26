@@ -1,24 +1,7 @@
-import { db } from './firebase';
-import { 
-  collection, 
-  addDoc, 
-  updateDoc, 
-  doc, 
-  deleteDoc, 
-  getDocs, 
-  query, 
-  orderBy, 
-  serverTimestamp,
-  Firestore
-} from 'firebase/firestore';
+import { supabase } from './supabase';
 import { Vehicle } from '@/app/inventory/types';
 
-const COLLECTION_NAME = 'vehicles';
-
-function getDb(): Firestore {
-  if (!db) throw new Error('Firestore instance not initialized');
-  return db;
-}
+const TABLE_NAME = 'vehicles';
 
 export async function addVehicle(vehicleData: Omit<Vehicle, 'id'>) {
   try {
@@ -35,25 +18,31 @@ export async function addVehicle(vehicleData: Omit<Vehicle, 'id'>) {
 
     const docData = {
       ...vehicleData,
-      dateAdded: serverTimestamp(),
-      lastStatusUpdate: serverTimestamp(),
+      dateAdded: new Date().toISOString(),
+      lastStatusUpdate: new Date().toISOString(),
       metadata: {
         ...vehicleData.metadata,
-        createdAt: serverTimestamp(),
-        lastUpdated: serverTimestamp(),
+        createdAt: new Date().toISOString(),
+        lastUpdated: new Date().toISOString(),
       }
     };
 
     console.log('Attempting to add document with data:', JSON.stringify(docData, null, 2));
     
-    const docRef = await addDoc(collection(getDb(), COLLECTION_NAME), docData);
-    console.log('Vehicle added successfully with ID:', docRef.id);
-    return docRef.id;
+    const { data, error } = await supabase
+      .from(TABLE_NAME)
+      .insert(docData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    
+    console.log('Vehicle added successfully with ID:', data.id);
+    return data.id;
   } catch (error) {
     console.error('Error adding vehicle:', error);
     if (error instanceof Error) {
       console.error('Error details:', error.message);
-      console.error('Error stack:', error.stack);
     }
     throw error;
   }
@@ -61,102 +50,36 @@ export async function addVehicle(vehicleData: Omit<Vehicle, 'id'>) {
 
 export async function updateVehicle(id: string, vehicleData: Partial<Vehicle>) {
   try {
-    const vehicleRef = doc(getDb(), COLLECTION_NAME, id);
-    
-    // Create update object with proper field paths
-    const updateData: Record<string, any> = {};
-    
-    // Handle basic fields
-    Object.entries(vehicleData).forEach(([key, value]) => {
-      if (key !== 'statusData' && key !== 'metadata' && key !== 'additions') {
-        // Skip undefined values to prevent Firestore errors
-        if (value !== undefined) {
-          updateData[key] = value;
-        }
-      }
-    });
+    // Create update object
+    const updateData: Record<string, any> = {
+      ...vehicleData,
+      lastStatusUpdate: new Date().toISOString(),
+    };
 
     // Handle metadata updates
-    updateData['metadata.lastUpdated'] = serverTimestamp();
+    if (vehicleData.metadata) {
+      updateData.metadata = {
+        ...vehicleData.metadata,
+        lastUpdated: new Date().toISOString(),
+      };
+    } else {
+      updateData.metadata = { lastUpdated: new Date().toISOString() };
+    }
     
     // Handle status data updates
     if (vehicleData.statusData) {
-      Object.entries(vehicleData.statusData).forEach(([key, value]) => {
-        updateData[`statusData.${key}`] = value;
-      });
-      // Override timestamp fields with server timestamps
-      updateData['statusData.updatedAt'] = serverTimestamp();
+      updateData.statusData = {
+        ...vehicleData.statusData,
+        updatedAt: new Date().toISOString(),
+      };
     }
 
-    // Handle additions object - filter out undefined values
-    if (vehicleData.additions) {
-      // Handle totalPrice separately
-      if (vehicleData.additions.totalPrice !== undefined) {
-        updateData['additions.totalPrice'] = vehicleData.additions.totalPrice;
-      }
-      
-      // Handle lift
-      if (vehicleData.additions.lift !== undefined) {
-        if (vehicleData.additions.lift === null) {
-          // Use deleteField() to remove the field if it's explicitly set to null
-          updateData['additions.lift'] = null;
-        } else {
-          updateData['additions.lift'] = vehicleData.additions.lift;
-        }
-      }
-      
-      // Handle wheels
-      if (vehicleData.additions.wheels !== undefined) {
-        if (vehicleData.additions.wheels === null) {
-          updateData['additions.wheels'] = null;
-        } else {
-          updateData['additions.wheels'] = vehicleData.additions.wheels;
-        }
-      }
-      
-      // Handle tires
-      if (vehicleData.additions.tires !== undefined) {
-        if (vehicleData.additions.tires === null) {
-          updateData['additions.tires'] = null;
-        } else {
-          updateData['additions.tires'] = vehicleData.additions.tires;
-        }
-      }
-      
-      // Handle paintMatch
-      if (vehicleData.additions.paintMatch !== undefined) {
-        if (vehicleData.additions.paintMatch === null) {
-          updateData['additions.paintMatch'] = null;
-        } else {
-          updateData['additions.paintMatch'] = vehicleData.additions.paintMatch;
-        }
-      }
-      
-      // Handle leather
-      if (vehicleData.additions.leather !== undefined) {
-        if (vehicleData.additions.leather === null) {
-          updateData['additions.leather'] = null;
-        } else {
-          updateData['additions.leather'] = vehicleData.additions.leather;
-        }
-      }
-      
-      // Handle other
-      if (vehicleData.additions.other !== undefined) {
-        if (vehicleData.additions.other === null) {
-          updateData['additions.other'] = null;
-        } else {
-          updateData['additions.other'] = vehicleData.additions.other;
-        }
-      }
-    }
+    const { error } = await supabase
+      .from(TABLE_NAME)
+      .update(updateData)
+      .eq('id', id);
 
-    // Always update lastStatusUpdate with server timestamp if it's being modified
-    if ('lastStatusUpdate' in vehicleData) {
-      updateData.lastStatusUpdate = serverTimestamp();
-    }
-
-    await updateDoc(vehicleRef, updateData);
+    if (error) throw error;
   } catch (error) {
     console.error('Error updating vehicle:', error);
     throw error;
@@ -165,8 +88,12 @@ export async function updateVehicle(id: string, vehicleData: Partial<Vehicle>) {
 
 export async function deleteVehicle(id: string) {
   try {
-    const vehicleRef = doc(getDb(), COLLECTION_NAME, id);
-    await deleteDoc(vehicleRef);
+    const { error } = await supabase
+      .from(TABLE_NAME)
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
   } catch (error) {
     console.error('Error deleting vehicle:', error);
     throw error;
@@ -175,16 +102,13 @@ export async function deleteVehicle(id: string) {
 
 export async function getAllVehicles(): Promise<Vehicle[]> {
   try {
-    const vehiclesQuery = query(
-      collection(getDb(), COLLECTION_NAME),
-      orderBy('dateAdded', 'desc')
-    );
+    const { data, error } = await supabase
+      .from(TABLE_NAME)
+      .select('*')
+      .order('dateAdded', { ascending: false });
     
-    const querySnapshot = await getDocs(vehiclesQuery);
-    return querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    } as Vehicle));
+    if (error) throw error;
+    return data || [];
   } catch (error) {
     console.error('Error getting vehicles:', error);
     throw error;

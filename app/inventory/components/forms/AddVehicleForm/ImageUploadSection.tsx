@@ -5,8 +5,7 @@ import { UseFormReturn } from "react-hook-form"
 import { FormField, FormItem, FormLabel } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { storage } from "@/lib/firebase"
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
+import { supabase } from "@/lib/supabase"
 import { VehicleFormData } from "@/app/inventory/schemas/vehicle.schema"
 import { X } from "lucide-react"
 
@@ -98,34 +97,55 @@ export function ImageUploadSection({ form, onUploadStateChange }: ImageUploadSec
         const fileExtension = file.name.split('.').pop()
         const fileName = `vehicles/${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExtension}`
         
-        const storageRef = ref(storage, fileName)
-        
         try {
           // Compress the image before uploading
           const compressedImage = await compressImage(file);
           
           console.log(`Uploading compressed image to ${fileName}, original size: ${file.size}, compressed size: ${compressedImage.size}`);
           
-          // Upload the compressed file
-          await uploadBytes(storageRef, compressedImage)
-          console.log(`Successfully uploaded ${fileName} to Firebase Storage`);
+          // Upload the compressed file to Supabase Storage
+          const { data, error: uploadError } = await supabase.storage
+            .from('vehicle-images')
+            .upload(fileName, compressedImage, {
+              cacheControl: '3600',
+              upsert: false
+            });
+          
+          if (uploadError) {
+            throw uploadError;
+          }
+          
+          console.log(`Successfully uploaded ${fileName} to Supabase Storage`);
         } catch (compressionError) {
           console.error("Image compression failed, uploading original:", compressionError);
           
           try {
             // Fall back to uploading the original file if compression fails
             console.log(`Uploading original image to ${fileName}, size: ${file.size}`);
-            await uploadBytes(storageRef, file)
-            console.log(`Successfully uploaded original ${fileName} to Firebase Storage`);
+            const { data, error: uploadError } = await supabase.storage
+              .from('vehicle-images')
+              .upload(fileName, file, {
+                cacheControl: '3600',
+                upsert: false
+              });
+            
+            if (uploadError) {
+              throw uploadError;
+            }
+            
+            console.log(`Successfully uploaded original ${fileName} to Supabase Storage`);
           } catch (uploadError) {
             console.error("Error uploading original image:", uploadError);
             throw new Error(`Failed to upload image: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}`);
           }
         }
         
-        // Get the download URL
-        const downloadURL = await getDownloadURL(storageRef)
-        newImageUrls.push(downloadURL)
+        // Get the public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('vehicle-images')
+          .getPublicUrl(fileName);
+        
+        newImageUrls.push(publicUrl)
         
         // Update progress
         setUploadProgress(Math.round(((i + 1) / e.target.files.length) * 100))
@@ -141,88 +161,72 @@ export function ImageUploadSection({ form, onUploadStateChange }: ImageUploadSec
       
       if (error instanceof Error) {
         console.error("Error details:", error.message);
-        console.error("Error stack:", error.stack);
         errorMessage += error.message;
       } else {
         errorMessage += "Please check your network connection and try again.";
       }
       
-      // Check for storage permission errors
-      if (error instanceof Error &&
-          (error.message.includes("storage/unauthorized") ||
-           error.message.includes("permission-denied") ||
-           error.message.includes("not-authorized"))) {
-        errorMessage = "Storage permission denied. Please check your Firebase Storage rules and configuration.";
-      }
-      
-      alert(errorMessage);
+      alert(errorMessage)
     } finally {
       setUploading(false)
       onUploadStateChange?.(false)
       setUploadProgress(0)
-      // Clear the input
+      // Clear the file input
       e.target.value = ""
     }
   }
-  
-  const removeImage = (index: number) => {
-    const newImages = [...images]
-    newImages.splice(index, 1)
-    form.setValue("images", newImages)
+
+  const removeImage = (indexToRemove: number) => {
+    const updatedImages = images.filter((_, index) => index !== indexToRemove)
+    form.setValue("images", updatedImages)
   }
-  
+
   return (
     <div className="space-y-4">
       <FormField
         control={form.control}
         name="images"
-        render={() => (
+        render={({ field }) => (
           <FormItem>
             <FormLabel>Vehicle Images</FormLabel>
             <div className="space-y-2">
-              <Input 
-                type="file" 
-                accept="image/*" 
-                multiple 
+              <Input
+                type="file"
+                accept="image/*"
+                multiple
                 onChange={handleImageUpload}
                 disabled={uploading}
               />
               
               {uploading && (
-                <div className="mt-2 p-2 border border-blue-200 bg-blue-50 rounded">
-                  <div className="flex items-center gap-2 mb-1">
-                    <svg className="animate-spin h-4 w-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span className="font-medium text-sm text-blue-700">Uploading images...</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
-                    <div
-                      className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
-                      style={{ width: `${uploadProgress}%` }}
-                    ></div>
-                  </div>
-                  <p className="text-xs text-blue-600 mt-1 font-medium">Progress: {uploadProgress}%</p>
-                  <p className="text-xs text-gray-500 mt-1">Please wait for uploads to complete before submitting the form</p>
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div 
+                    className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+                    style={{ width: `${uploadProgress}%` }}
+                  ></div>
                 </div>
               )}
               
               {images.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
                   {images.map((url, index) => (
-                    <div key={index} className="relative group">
-                      <img 
-                        src={url} 
-                        alt={`Vehicle image ${index + 1}`} 
-                        className="h-24 w-full object-cover rounded-md"
+                    <div key={index} className="relative">
+                      <img
+                        src={url}
+                        alt={`Vehicle image ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg border"
+                        onError={(e) => {
+                          console.error(`Failed to load image: ${url}`);
+                          e.currentTarget.src = '/placeholder-image.png'; // Add a placeholder image
+                        }}
                       />
                       <button
                         type="button"
                         onClick={() => removeImage(index)}
-                        className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                        disabled={uploading}
                       >
-                        <X size={14} />
+                        <X size={16} />
                       </button>
                     </div>
                   ))}

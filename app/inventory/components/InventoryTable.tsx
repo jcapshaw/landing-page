@@ -44,7 +44,7 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
     dateSold: string
   }) => {
     if (selectedVehicle) {
-      const mockUser = { uid: "mock-user", name: "Mock User" } // Replace with actual user data
+      const mockUser = { uid: "mock-user", name: "Mock User" } // Replace with actual user data from Supabase
       const updatedVehicle: Vehicle = {
         ...selectedVehicle,
         status: "SOLD",
@@ -69,7 +69,7 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
     depositAmount: number
   }) => {
     if (selectedVehicle) {
-      const mockUser = { uid: "mock-user", name: "Mock User" } // Replace with actual user data
+      const mockUser = { uid: "mock-user", name: "Mock User" } // Replace with actual user data from Supabase
       const updatedVehicle: Vehicle = {
         ...selectedVehicle,
         status: "DEPOSIT",

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { auth } from '@/lib/firebase'
+import { useAuth } from '@/app/components/AuthProvider'
 import DailyLogForm from './DailyLogForm'
 import { DailyLogTable } from './DailyLogTable'
 import { DailyLogEntry } from '../types'

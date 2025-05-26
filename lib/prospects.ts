@@ -1,41 +1,8 @@
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-  query,
-  where,
-  getDocs,
-  Timestamp,
-  serverTimestamp,
-  FieldValue,
-  arrayUnion,
-} from 'firebase/firestore';
-import firebase_app, { auth } from './firebase';
-
-if (!firebase_app) {
-  throw new Error('Firebase app not initialized');
-}
-
-const db = getFirestore(firebase_app);
-const PROSPECTS_COLLECTION = 'prospects';
-
-// Helper function to check auth
-function checkAuth() {
-  if (!auth) {
-    throw new Error('Auth instance not initialized');
-  }
-  if (!auth.currentUser) {
-    throw new Error('User must be authenticated');
-  }
-  return auth.currentUser;
-}
+import { supabase } from './supabase';
 
 export interface Note {
   text: string;
-  timestamp: Timestamp;
+  timestamp: string;
   userName: string;
 }
 
@@ -44,33 +11,35 @@ export interface ProspectData {
   dealType: string;
   salesperson: string;
   deskManager: string;
-  date: Timestamp;
+  date: string;
   hasDeposit: boolean;
   depositAmount?: string;
   isOOS: boolean;
   disposition: string;
   status: 'active' | 'archived';
-  updatedAt: FieldValue | Timestamp;
-  archivedAt?: FieldValue | Timestamp;
+  updatedAt: string;
+  archivedAt?: string;
   notes?: Note[];
 }
 
-export interface Prospect extends Omit<ProspectData, 'updatedAt' | 'archivedAt'> {
+export interface Prospect extends ProspectData {
   id: string;
-  updatedAt: Timestamp;
-  archivedAt?: Timestamp;
 }
 
 export async function addProspect(prospectData: Omit<ProspectData, 'status' | 'updatedAt' | 'archivedAt'>) {
   try {
-    checkAuth();
-    const docRef = await addDoc(collection(db, PROSPECTS_COLLECTION), {
-      ...prospectData,
-      date: prospectData.date,
-      status: 'active',
-      updatedAt: serverTimestamp(),
-    });
-    return docRef.id;
+    const { data, error } = await supabase
+      .from('prospects')
+      .insert({
+        ...prospectData,
+        status: 'active',
+        updatedAt: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data.id;
   } catch (error) {
     console.error('Error adding prospect:', error);
     throw error;
@@ -79,18 +48,32 @@ export async function addProspect(prospectData: Omit<ProspectData, 'status' | 'u
 
 export async function addNote(id: string, text: string, userName: string) {
   try {
-    checkAuth();
-    const docRef = doc(db, PROSPECTS_COLLECTION, id);
+    // First get the current prospect to append to notes array
+    const { data: prospect, error: fetchError } = await supabase
+      .from('prospects')
+      .select('notes')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) throw fetchError;
+
     const note: Note = {
       text,
-      timestamp: Timestamp.fromDate(new Date()),
+      timestamp: new Date().toISOString(),
       userName
     };
 
-    await updateDoc(docRef, {
-      notes: arrayUnion(note),
-      updatedAt: serverTimestamp(),
-    });
+    const updatedNotes = [...(prospect.notes || []), note];
+
+    const { error } = await supabase
+      .from('prospects')
+      .update({
+        notes: updatedNotes,
+        updatedAt: new Date().toISOString(),
+      })
+      .eq('id', id);
+
+    if (error) throw error;
   } catch (error) {
     console.error('Error adding note:', error);
     throw error;
@@ -99,24 +82,22 @@ export async function addNote(id: string, text: string, userName: string) {
 
 export async function updateProspect(id: string, prospectData: Partial<ProspectData>) {
   try {
-    checkAuth();
-    const docRef = doc(db, PROSPECTS_COLLECTION, id);
-    const updateData: Partial<ProspectData> & { updatedAt: FieldValue } = {
+    const updateData: Partial<ProspectData> & { updatedAt: string } = {
       ...prospectData,
-      updatedAt: serverTimestamp(),
+      updatedAt: new Date().toISOString(),
     };
-
-    // Convert date to Timestamp if it exists in the update data
-    if (prospectData.date) {
-      updateData.date = prospectData.date;
-    }
 
     // If disposition is changed to SOLD or LOST, set archivedAt timestamp
     if (prospectData.disposition && ['SOLD', 'LOST'].includes(prospectData.disposition)) {
-      updateData.archivedAt = serverTimestamp();
+      updateData.archivedAt = new Date().toISOString();
     }
 
-    await updateDoc(docRef, updateData);
+    const { error } = await supabase
+      .from('prospects')
+      .update(updateData)
+      .eq('id', id);
+
+    if (error) throw error;
   } catch (error) {
     console.error('Error updating prospect:', error);
     throw error;
@@ -125,16 +106,13 @@ export async function updateProspect(id: string, prospectData: Partial<ProspectD
 
 export async function getActiveProspects(): Promise<Prospect[]> {
   try {
-    checkAuth();
-    const q = query(
-      collection(db, PROSPECTS_COLLECTION),
-      where('status', '==', 'active')
-    );
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data() as Omit<ProspectData, 'id'>,
-    })) as Prospect[];
+    const { data, error } = await supabase
+      .from('prospects')
+      .select('*')
+      .eq('status', 'active');
+
+    if (error) throw error;
+    return data || [];
   } catch (error) {
     console.error('Error getting active prospects:', error);
     throw error;
@@ -143,11 +121,15 @@ export async function getActiveProspects(): Promise<Prospect[]> {
 
 export async function archiveProspect(id: string): Promise<void> {
   try {
-    const docRef = doc(db, PROSPECTS_COLLECTION, id);
-    await updateDoc(docRef, {
-      status: 'archived',
-      archivedAt: serverTimestamp(),
-    });
+    const { error } = await supabase
+      .from('prospects')
+      .update({
+        status: 'archived',
+        archivedAt: new Date().toISOString(),
+      })
+      .eq('id', id);
+
+    if (error) throw error;
   } catch (error) {
     console.error('Error archiving prospect:', error);
     throw error;
@@ -160,29 +142,19 @@ export async function checkAndArchiveProspects(): Promise<void> {
     const oneHourAgo = new Date();
     oneHourAgo.setHours(oneHourAgo.getHours() - 1);
 
-    // First get all active prospects
-    const q = query(
-      collection(db, PROSPECTS_COLLECTION),
-      where('status', '==', 'active')
-    );
+    // Get all active prospects that should be archived
+    const { data: prospects, error } = await supabase
+      .from('prospects')
+      .select('*')
+      .eq('status', 'active')
+      .in('disposition', ['SOLD', 'LOST'])
+      .not('archivedAt', 'is', null)
+      .lt('archivedAt', oneHourAgo.toISOString());
 
-    const querySnapshot = await getDocs(q);
-    const archivePromises: Promise<void>[] = [];
-    const oneHourAgoTimestamp = Timestamp.fromDate(oneHourAgo);
+    if (error) throw error;
 
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      // Check if the prospect should be archived
-      if (
-        ['SOLD', 'LOST'].includes(data.disposition) &&
-        data.archivedAt &&
-        data.archivedAt <= oneHourAgoTimestamp
-      ) {
-        archivePromises.push(archiveProspect(doc.id));
-      }
-    });
-
-    if (archivePromises.length > 0) {
+    if (prospects && prospects.length > 0) {
+      const archivePromises = prospects.map(prospect => archiveProspect(prospect.id));
       await Promise.all(archivePromises);
     }
   } catch (error) {

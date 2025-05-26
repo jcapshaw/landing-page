@@ -20,8 +20,8 @@ export interface Vehicle {
   // Status Information
   status: "AVAILABLE" | "DEPOSIT" | "SOLD" | "PENDING_RECON" // UI enum
   statusData: {
-    current: "Available" | "Pending Recon" | "Deposit" | "Sold" // Firebase enum
-    updatedAt: { seconds: number; nanoseconds: number } | string
+    current: "Available" | "Pending Recon" | "Deposit" | "Sold"
+    updatedAt: string
     updatedBy: {
       uid: string
       name: string

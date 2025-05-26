@@ -3,8 +3,7 @@
 import React, { useState, useRef } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { storage } from '@/lib/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { supabase } from '@/lib/supabase';
 import {
   Select,
   SelectContent,
@@ -125,16 +124,26 @@ const ServiceRequestForm = () => {
 
     try {
       const uploadPromises = Array.from(files).map(async (file) => {
-        // Create a reference to the file in Firebase Storage
-        const storageRef = ref(storage, `service-requests/${formData.stockNumber}/${file.name}`);
+        const fileName = `service-requests/${formData.stockNumber}/${Date.now()}-${file.name}`;
         
-        // Upload the file
-        await uploadBytes(storageRef, file);
+        // Upload the file to Supabase Storage
+        const { data, error: uploadError } = await supabase.storage
+          .from('service-request-attachments')
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
         
-        // Get the download URL
-        const url = await getDownloadURL(storageRef);
+        if (uploadError) {
+          throw uploadError;
+        }
         
-        return { name: file.name, url };
+        // Get the public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('service-request-attachments')
+          .getPublicUrl(fileName);
+        
+        return { name: file.name, url: publicUrl };
       });
 
       const newAttachments = await Promise.all(uploadPromises);
