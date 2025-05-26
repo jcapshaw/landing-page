@@ -82,7 +82,7 @@ export function HotProspects({ onSubmit, initialData, onCancel, mode = 'add' }: 
         customerName: initialData.customerName,
         salesperson: initialData.salesperson,
         deskManager: initialData.deskManager,
-        date: initialData.date?.toDate() || new Date(),
+        date: initialData.date ? new Date(initialData.date) : new Date(),
         hasDeposit: initialData.hasDeposit,
         depositAmount: initialData.depositAmount,
         isOOS: initialData.isOOS,
@@ -95,7 +95,7 @@ export function HotProspects({ onSubmit, initialData, onCancel, mode = 'add' }: 
   function handleSubmit(formValues: FormValues) {
     const values: NewProspectData = {
       ...formValues,
-      date: Timestamp.fromDate(formValues.date),
+      date: formValues.date.toISOString(),
     };
 
     if (mode === 'edit' && initialData) {

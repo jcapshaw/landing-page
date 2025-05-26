@@ -24,7 +24,8 @@ export const addDailyLogEntry = async (entry: Omit<DailyLogEntry, 'id' | 'create
     
     const newEntry = {
       id: data.id,
-      ...entryWithTimestamp,
+      ...entry,
+      createdAt: entryWithTimestamp.created_at,
     };
     console.log('Returning new entry:', newEntry);
     return newEntry;

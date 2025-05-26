@@ -190,7 +190,7 @@ export function InventoryTable({ vehicles, onVehicleUpdate, onLiftEdit }: Invent
                           setSelectedVehicle(vehicle)
                           setShowSoldModal(true)
                         } else {
-                          const mockUser = { uid: user?.uid || "mock-user", name: user?.displayName || "Mock User" }
+                          const mockUser = { uid: user?.id || "mock-user", name: user?.user_metadata?.full_name || user?.email || "Mock User" }
                           const updatedVehicle: Vehicle = {
                             ...vehicle,
                             status: value,

@@ -21,8 +21,8 @@ const nextConfig = {
     },
     optimizePackageImports: ["react", "react-dom"],
     externalMiddlewareRewritesResolve: true,
-    allowedDevOrigins: ["rnxj22-3001.csb.app", "rnxj22-3000.csb.app"],
   },
+  allowedDevOrigins: ["rnxj22-3001.csb.app", "rnxj22-3000.csb.app"],
   async headers() {
     return [
       {

@@ -14,6 +14,7 @@ import {
 import { addDailyLogEntry, getDailyLogEntries, updateDailyLogEntry } from '../services/dailyLogService'
 
 export default function DailyLogContent() {
+  const { user } = useAuth()
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [editingEntry, setEditingEntry] = useState<DailyLogEntry | null>(null)
   const [entries, setEntries] = useState<DailyLogEntry[]>([])
@@ -55,13 +56,13 @@ export default function DailyLogContent() {
   const handleNewEntry = async (formData: Omit<DailyLogEntry, 'id' | 'createdAt'>) => {
     console.log('handleNewEntry called with formData:', formData);
     
-    if (!auth.currentUser) {
+    if (!user) {
       console.error('User is not authenticated');
       return;
     }
 
     try {
-      console.log('Current user:', auth.currentUser.uid);
+      console.log('Current user:', user.id);
       console.log('Attempting to add entry to Firestore...');
       const newEntry = await addDailyLogEntry(formData);
       console.log('Successfully added entry:', newEntry);

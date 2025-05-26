@@ -16,7 +16,7 @@ const HotProspects: FC = () => {
         const allProspects = await getActiveProspects();
         // Sort by date (newest first) and take top 5
         const sortedProspects = allProspects
-          .sort((a, b) => b.date.toMillis() - a.date.toMillis())
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
           .slice(0, 5);
         setProspects(sortedProspects);
       } catch (error) {
@@ -38,7 +38,7 @@ const HotProspects: FC = () => {
       // Refresh prospects after update
       const allProspects = await getActiveProspects();
       const sortedProspects = allProspects
-        .sort((a, b) => b.date.toMillis() - a.date.toMillis())
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
         .slice(0, 5);
       setProspects(sortedProspects);
     } catch (error) {
@@ -52,7 +52,7 @@ const HotProspects: FC = () => {
       // Refresh prospects after adding note
       const allProspects = await getActiveProspects();
       const sortedProspects = allProspects
-        .sort((a, b) => b.date.toMillis() - a.date.toMillis())
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
         .slice(0, 5);
       setProspects(sortedProspects);
     } catch (error) {

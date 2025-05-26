@@ -100,7 +100,7 @@ export default function InventoryPage() {
         metadata: {
           ...vehicle.metadata,
           lastUpdated: new Date().toISOString(),
-          lastUpdatedBy: { uid: user.uid, name: user.displayName || 'Unknown' }
+          lastUpdatedBy: { uid: user.id, name: user.user_metadata?.full_name || user.email || 'Unknown' }
         }
       };
 
@@ -128,12 +128,12 @@ export default function InventoryPage() {
         statusData: {
           ...updatedVehicle.statusData,
           updatedAt: new Date().toISOString(),
-          updatedBy: { uid: user.uid, name: user.displayName || 'Unknown' }
+          updatedBy: { uid: user.id, name: user.user_metadata?.full_name || user.email || 'Unknown' }
         },
         metadata: {
           ...updatedVehicle.metadata,
           lastUpdated: new Date().toISOString(),
-          lastUpdatedBy: { uid: user.uid, name: user.displayName || 'Unknown' }
+          lastUpdatedBy: { uid: user.id, name: user.user_metadata?.full_name || user.email || 'Unknown' }
         },
         lastStatusUpdate: new Date().toISOString()
       };
@@ -214,7 +214,7 @@ export default function InventoryPage() {
                     current: "Available" as const,
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString(),
-                    updatedBy: { uid: user.uid, name: user.displayName || 'Unknown' }
+                    updatedBy: { uid: user.id, name: user.user_metadata?.full_name || user.email || 'Unknown' }
                   },
                   // Create search index for filtering and searching
                   searchIndex: {
@@ -226,9 +226,9 @@ export default function InventoryPage() {
                   dateAdded: new Date().toISOString(),
                   metadata: {
                     createdAt: new Date().toISOString(),
-                    createdBy: { uid: user.uid, name: user.displayName || 'Unknown' },
+                    createdBy: { uid: user.id, name: user.user_metadata?.full_name || user.email || 'Unknown' },
                     lastUpdated: new Date().toISOString(),
-                    lastUpdatedBy: { uid: user.uid, name: user.displayName || 'Unknown' }
+                    lastUpdatedBy: { uid: user.id, name: user.user_metadata?.full_name || user.email || 'Unknown' }
                   },
                   lastStatusUpdate: new Date().toISOString()
                 };
